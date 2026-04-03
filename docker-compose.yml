@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: way2home_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: way2home_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: way2home_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - way2home_db_data:/var/lib/mysql
+
+volumes:
+  way2home_db_data:

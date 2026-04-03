@@ -1,0 +1,10 @@
+.git
+.env
+/vendor
+/node_modules
+/storage/*.key
+/public/storage
+/bootstrap/cache/*
+docker-compose.yml
+Dockerfile
+.dockerignore
