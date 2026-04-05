@@ -16,7 +16,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'phone_number' => 'required',
+            // 'phone_number' => 'required',
         ]);
 
         $user = User::create([
@@ -24,7 +24,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'customer',
-            'phone_number' => $request->phone_number,
+            // 'phone_number' => $request->phone_number,
             'email_verified_at' => now(), 
         ]);
 

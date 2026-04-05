@@ -1,0 +1,159 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+}
+
+/* CONTAINER */
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* LEFT (65%) */
+.left {
+    width: 65%;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* RIGHT (35%) */
+.right {
+    width: 35%;
+    background-color: #2B3361;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+}
+
+/* FORM BOX */
+.form-box {
+    width: 400px;
+    padding: 25px 40px;
+    background: rgba(235, 250, 255, 0.75);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    /* safari support */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.form-box h2 {
+    margin-bottom: 2px;
+    color: #2B3361;
+}
+
+.form-box p {
+    margin-bottom: 20px;
+    color: #647ca9;
+}
+
+/* INPUT */
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #2B3361;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #045ec2;
+}
+
+/* OPTIONS */
+.options {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.options a {
+    text-decoration: none;
+    color: #045ec2;
+}
+
+/* BUTTON */
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #fbab04;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-login:hover {
+    background-color: #e89c00;
+}
+
+/* REGISTER */
+.register {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.register a {
+    color: #045ec2;
+    text-decoration: none;
+}
+
+/* RIGHT SIDE CONTENT */
+.branding h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.branding p {
+    font-size: 16px;
+    color: #fcd47c;
+}
+
+.branding img {
+    width: 120px;
+    filter: brightness(0) invert(1);
+}
+
+.error-text {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.success-text {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    text-align: center;
+    border: 1px solid #c3e6cb;
+}
