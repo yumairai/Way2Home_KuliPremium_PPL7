@@ -4,15 +4,13 @@ use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// --- GRUP AUTH (PUBLIC) ---
-// Route ini bisa diakses tanpa login (untuk daftar dan masuk)
+// public routes
 Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']); // F002
-    Route::post('/login', [AuthController::class, 'login']);       // F001
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
-// --- GRUP PROTECTED (HARUS LOGIN) ---
-// Route di bawah ini hanya bisa diakses jika membawa "Token" (Sanctum)
+// Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     
     // F003: Logout
@@ -25,6 +23,4 @@ Route::middleware('auth:sanctum')->group(function () {
             'data' => $request->user()
         ]);
     });
-
-    // Nanti F005, F007, F008 dst ditaruh di sini...
 });
