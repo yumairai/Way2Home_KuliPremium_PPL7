@@ -46,6 +46,20 @@ body {
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    z-index: 10;
+}
+
+.card.active {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+    z-index: 10;
 }
 
 .card img {
@@ -150,4 +164,25 @@ body {
     border-radius: 50%;
     cursor: pointer;
     margin-left: 15px;
+}
+
+/* BUTTON PILIH DESAIN */
+.container button {
+    margin-top: 40px;
+    padding: 15px 30px;
+    background-color: #2B3361;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.container button:hover {
+    background-color: #1a1f3a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }

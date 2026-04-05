@@ -15,3 +15,8 @@ Route::get('/rekomendasi/input', function () {
 Route::get('/rekomendasi/hasil', function () {
     return view('rekomendasi_rumah');
 });
+
+// otw ke form pembangunan rumah
+Route::get('/pembangunan', function () {
+    return view('form_pembangunan_rumah');
+});

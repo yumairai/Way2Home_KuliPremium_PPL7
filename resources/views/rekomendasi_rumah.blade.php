@@ -69,6 +69,7 @@
                 </div>
             </div>
         </div>
+        <button>Pilih Desain</button>
     </div>
     <script src="{{ asset('js/recom_script.js') }}"></script>
 </body>

@@ -102,7 +102,7 @@
             <button class="btn-submit" id="submitBtn">Buat Rekomendasi</button>
         </div>
     </div>
-    <script src="{{ asset('js/recom_script.js') }}"></script>
+    <script src="{{ asset('js/input_script.js') }}"></script>
 </body>
 
 </html>
