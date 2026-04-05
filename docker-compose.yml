@@ -22,6 +22,19 @@ services:
       - "3307:3306"
     volumes:
       - way2home_db_data:/var/lib/mysql
+    
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: way2home_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    depends_on:
+      - db
 
 volumes:
   way2home_db_data:
