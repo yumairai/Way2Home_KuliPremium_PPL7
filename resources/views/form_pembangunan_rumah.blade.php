@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Pembangunan Rumah</title>
-    <link rel="stylesheet" href="{{ asset('css/rekomendasi_rumah.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/form_pembangunan_rumah.css') }}">
     <link href="{{ asset('images/aset/logo-w2h.png') }}" type="image" rel="icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,11 +32,200 @@
             </div>
         </div>
     </nav>
-    <div class="container">
-        <h1>PEMBANGUNAN RUMAH</h1>
+    <div class="form-wrapper">
+        <!-- judul -->
+        <div class="page-title">
+            <h1>Form Pembangunan Rumah</h1>
+            <p>Lengkapi detail proyek Anda untuk memulai proses pembangunan profesional bersama Way2Home.</p>
+        </div>
 
+        <!-- desain dipilih oleh user -->
+        <section class="form-section">
+            <div class="design-card">
+                <div class="design-card-image">
+                    <img alt="Rekomendasi Rumah" src="{{ asset('images/rekomendasi/rekom1.jpg') }}" />
+                    <div class="design-badge">Desain Dipilih</div>
+                </div>
+                <div class="design-card-details">
+                    <div class="detail-item">
+                        <span class="detail-label">Desain 1</span>
+                        <span class="detail-value">Modern Minimalist</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estimasi Biaya</span>
+                        <span class="detail-value">Rp 400.000.000</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Area</span>
+                        <span class="detail-value">50m²</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Estimasi Waktu</span>
+                        <span class="detail-value">6 Bulan</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- estimasi kebutuhan material -->
+        <section class="form-section-large">
+            <div class="section-header">
+                <h2>Estimasi Kebutuhan Material</h2>
+                <div class="section-header-divider"></div>
+            </div>
+            <div class="material-grid">
+                <div class="material-card">
+                    <div class="material-info">
+                        <p>Semen Portland</p>
+                        <p>250 Sak</p>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="material-info">
+                        <p>Beton Ready Mix</p>
+                        <p>45 m³</p>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="material-info">
+                        <p>Pasir Pasang</p>
+                        <p>30 m³</p>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="material-info">
+                        <p>Batu Belah</p>
+                        <p>20 m³</p>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="material-info">
+                        <p>Kaca Polos 5mm</p>
+                        <p>15 Lembar</p>
+                    </div>
+                </div>
+                <div class="material-card">
+                    <div class="material-info">
+                        <p>Besi Beton (8/10mm)</p>
+                        <p>120 Lonjor</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- form pembangunan -->
+        <form>
+            <!-- Address Input -->
+            <div class="form-group">
+                <label class="form-label">Alamat Lengkap Proyek</label>
+                <textarea id="alamatProyek" placeholder="Masukkan alamat lengkap di wilayah Jawa Barat" rows="3"></textarea>
+            </div>
+
+            <!-- dokumen kebutuhan pembangunan rumah -->
+            <div class="form-group">
+                <label class="form-label">Dokumen Pendukung</label>
+                <div class="upload-grid">
+                    <!-- dokumen sertif tanah -->
+                    <label class="upload-item" for="sertifikat_tanah" id="drop-zone-sertifikat">
+                        <input type="file" id="sertifikat_tanah" name="sertifikat_tanah"
+                            accept=".jpg,.jpeg,.png,.pdf" class="file-input-hidden">
+
+                        <!-- Preview -->
+                        <div class="preview-container" style="display: none;">
+                            <img src="" class="img-preview"
+                                style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
+                        </div>
+
+                        <p class="upload-title">Sertifikat Tanah (SHM/HGB)</p>
+                        <p class="upload-subtitle">Pilih file atau drag & drop</p>
+                    </label>
+
+                    <!-- dokumen ktp -->
+                    <label class="upload-item" for="ktp_pemilik" id="drop-zone-ktp">
+                        <input type="file" id="ktp_pemilik" name="ktp_pemilik" accept=".jpg,.jpeg,.png,.pdf"
+                            class="file-input-hidden">
+                        <!-- Preview -->
+                        <div class="preview-container" style="display: none;">
+                            <img src="" class="img-preview"
+                                style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
+                        </div>
+                        <p class="upload-title">KTP Pemilik</p>
+                        <p class="upload-subtitle" id="label-ktp">Pilih file atau drag &amp; drop</p>
+                    </label>
+
+                    <!-- dokumen imb/pbg -->
+                    <label class="upload-item" for="imb_pbg" id="drop-zone-imb-pbg">
+                        <input type="file" id="imb_pbg" name="imb_pbg" accept=".jpg,.jpeg,.png,.pdf"
+                            class="file-input-hidden">
+                        <!-- Preview -->
+                        <div class="preview-container" style="display: none;">
+                            <img src="" class="img-preview"
+                                style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
+                        </div>
+                        <p class="upload-title">IMB/PBG</p>
+                        <p class="upload-subtitle">Pilih file atau drag &amp; drop</p>
+                    </label>
+
+                    <!-- dokumen surat kuasa -->
+                    <label class="upload-item" for="surat_kuasa" id="drop-zone-surat-kuasa">
+                        <input type="file" id="surat_kuasa" name="surat_kuasa" accept=".jpg,.jpeg,.png,.pdf"
+                            class="file-input-hidden">
+                        <!-- Preview -->
+                        <div class="preview-container" style="display: none;">
+                            <img src="" class="img-preview"
+                                style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
+                        </div>
+                        <p class="upload-title">Surat Kuasa (Jika Ada)</p>
+                        <p class="upload-subtitle">Pilih file atau drag &amp; drop</p>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <p class="info-text">
+                    <strong>Penting:</strong>
+                    Platform Way2Home hanya melayani jasa konstruksi dan material. Segala bentuk pengurusan perizinan
+                    (IMB/PBG) tidak termasuk dalam cakupan layanan platform.
+                </p>
+            </div>
+
+            <!-- Choice of Package -->
+            <div class="form-group">
+                <label class="radio-group-title">Pilihan Paket Pembangunan</label>
+                <div class="radio-options">
+                    <label class="radio-label">
+                        <input checked="" name="package" value="paket-komplit" type="radio" />
+                        <div class="radio-check-indicator"></div>
+                        <div class="radio-content">
+                            <span>Material + Jasa</span>
+                            <span>Solusi lengkap &amp; terima kunci</span>
+                        </div>
+                    </label>
+
+                    <label class="radio-label">
+                        <input name="package" value="material-only" type="radio" />
+                        <div class="radio-check-indicator"></div>
+                        <div class="radio-content">
+                            <span>Material Saja</span>
+                            <span>Pengadaan bahan bangunan premium</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button type="button" class="submit-button" id="mainSubmitBtn">
+                    <span id="submitBtnText">Ajukan Pembangunan</span>
+                </button>
+                <p class="submit-message" id="submitMsgText">Tim spesialis kami akan menghubungi Anda dalam 1x24 jam
+                    setelah verifikasi
+                    dokumen.</p>
+            </div>
+        </form>
     </div>
-    <script src="{{ asset('js/recom_script.js') }}"></script>
+    <script src="{{ asset('js/form_pembangunan_script.js') }}"></script>
 </body>
 
 </html>

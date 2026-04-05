@@ -20,3 +20,13 @@ Route::get('/rekomendasi/hasil', function () {
 Route::get('/pembangunan', function () {
     return view('form_pembangunan_rumah');
 });
+
+// otw ke material marketplace abis klik tombol beli material di form pembangunan rumah
+Route::get('/material-only', function () {
+    return view('material_marketplace');
+});
+
+// otw ke progress track user abis klik tombol lihat progress pembangunan rumah di form pembangunan rumah 
+Route::get('/progress-track-user', function () {
+    return view('material_marketplace'); // sementara ke sini dulu yah hehe
+});
