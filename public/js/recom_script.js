@@ -18,7 +18,7 @@ document.addEventListener("click", () => {
 const pilihDesainBtn = document.querySelector(".container button");
 
 pilihDesainBtn.addEventListener("click", (event) => {
-    event.stopPropagation(); // Mencegah event bubbling
+    event.stopPropagation(); // mencegah event bubbling
     const activeCard = document.querySelector(".card.active");
     if (!activeCard) {
         alert("Pilih desain terlebih dahulu!");

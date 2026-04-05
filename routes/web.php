@@ -16,7 +16,7 @@ Route::get('/rekomendasi/hasil', function () {
     return view('rekomendasi_rumah');
 });
 
-// otw ke form pembangunan rumah
+// otw ke form pembangunan rumah abis klik tombol pilih desain 
 Route::get('/pembangunan', function () {
     return view('form_pembangunan_rumah');
 });
