@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('material_desains', function (Blueprint $table) 
+        Schema::create('material_desain', function (Blueprint $table) 
         {
             $table->id();
             $table->foreignId('material_id')->constrained('materials')->cascadeOnDelete();
-            $table->foreignId('desain_rumah_id')->constrained('desain_rumahs')->cascadeOnDelete();
+            $table->foreignId('desain_rumah_id')->constrained('desain_rumah')->cascadeOnDelete();
             $table->integer('jumlah');
-            $table->string('satuan')->nullable(); // Contoh: 'sak', 'm3', 'lembar'
+            $table->string('satuan')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('material_desains');
+        Schema::dropIfExists('material_desain');
     }
 };

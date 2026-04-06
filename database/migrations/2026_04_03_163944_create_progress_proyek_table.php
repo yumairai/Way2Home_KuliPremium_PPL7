@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('progress_proyeks', function (Blueprint $table) 
+        Schema::create('progress_proyek', function (Blueprint $table) 
         {
             $table->id();
-            $table->foreignId('proyek_id')->constrained('proyeks')->cascadeOnDelete();
+            $table->foreignId('proyek_id')->constrained('proyek')->cascadeOnDelete();
             $table->string('tahap_proyek'); // Contoh: Pondasi, Dinding, Atap
             $table->integer('persentase'); // 0-100%
             $table->text('catatan')->nullable();
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('progress_proyeks');
+        Schema::dropIfExists('progress_proyek');
     }
 };

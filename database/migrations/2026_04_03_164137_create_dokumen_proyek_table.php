@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dokumen_proyeks', function (Blueprint $table) 
+        Schema::create('dokumen_proyek', function (Blueprint $table) 
         {
             $table->id();            
             $table->foreignId('detail_bangun_id')
-                  ->constrained('detail_proyek_banguns')
+                  ->constrained('detail_proyek_bangun')
                   ->cascadeOnDelete();
             $table->string('jenis_dokumen');
             $table->string('file_path');            
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('dokumen_proyeks');
+        Schema::dropIfExists('dokumen_proyek');
     }
 };

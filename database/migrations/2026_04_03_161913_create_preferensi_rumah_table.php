@@ -11,16 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('preferensi_rumahs', function (Blueprint $table) 
-        {
+        Schema::create('preferensi_rumah', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
-            $table->bigInteger('budget');
+            $table->foreignId('customer_id')->constrained('customers')->onDelete('cascade');
             $table->string('lokasi');
-            $table->integer('jumlah_kamar_tidur');
-            $table->integer('jumlah_kamar_mandi');
-            $table->integer('luas_tanah')->nullable();
-            $table->text('preferensi_tambahan')->nullable();
+            $table->string('gaya_arsitektur');
+            $table->integer('luas_area');
+            $table->integer('jumlah_kamar');
+            $table->bigInteger('budget');
+            $table->string('prioritas');
             $table->timestamps();
         });
     }
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('preferensi_rumahs');
+        Schema::dropIfExists('preferensi_rumah');
     }
 };

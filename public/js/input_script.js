@@ -36,6 +36,45 @@ boxes.forEach(box => {
 
 const submitBtn = document.getElementById("submitBtn");
 
-submitBtn.addEventListener("click", () => {
-    window.location.href = "/rekomendasi/hasil";
+submitBtn.addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+        lokasi: document.getElementById('lokasi').value,
+        gaya_arsitektur: document.getElementById('gaya_arsitektur').value,
+        luas_area: document.getElementById('areaRange').value,
+        jumlah_kamar: document.getElementById('jumlah_kamar').value,
+        budget: document.getElementById('budgetRange').value,
+        prioritas: document.querySelector('.box.active')?.dataset.value || 'biaya'
+    };
+
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+        alert("Silakan login dulu!");
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/preferensi/simpan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            window.location.href = "/rekomendasi/hasil";
+        } else {
+            alert("Gagal simpan data: " + result.message);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Terjadi kesalahan koneksi.");
+    }
 });

@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('penawaran_renovasis', function (Blueprint $table) 
+        Schema::create('penawaran_renovasi', function (Blueprint $table) 
         {
             $table->id();
-            $table->foreignId('request_renovasi_id')->constrained('request_renovasis')->cascadeOnDelete();
+            $table->foreignId('request_renovasi_id')->constrained('request_renovasi')->cascadeOnDelete();
             $table->foreignId('mandor_id')->constrained('mandors')->cascadeOnDelete();
             $table->text('analisis_dari_mandor');
             $table->bigInteger('estimasi_biaya');
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('penawaran_renovasis');
+        Schema::dropIfExists('penawaran_renovasi');
     }
 };

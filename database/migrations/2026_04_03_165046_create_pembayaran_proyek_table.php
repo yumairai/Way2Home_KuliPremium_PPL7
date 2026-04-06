@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pembayaran_proyeks', function (Blueprint $table) 
+        Schema::create('pembayaran_proyek', function (Blueprint $table) 
         {
             $table->id();
-            $table->foreignId('proyek_id')->constrained('proyeks')->cascadeOnDelete();
+            $table->foreignId('proyek_id')->constrained('proyek')->cascadeOnDelete();
             $table->bigInteger('jumlah_bayar');
             $table->string('tipe_pembayaran'); // Contoh: 'DP', 'Termin 1', 'Pelunasan'
             $table->string('metode_pembayaran'); // Contoh: 'Transfer Bank', 'Midtrans', 'E-Wallet'
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pembayaran_proyeks');
+        Schema::dropIfExists('pembayaran_proyek');
     }
 };

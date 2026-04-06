@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('material_renovasis', function (Blueprint $table) 
+        Schema::create('material_renovasi', function (Blueprint $table) 
         {
             $table->id();
             $table->foreignId('material_id')->constrained('materials')->cascadeOnDelete();
-            $table->foreignId('penawaran_renovasi_id')->constrained('penawaran_renovasis')->cascadeOnDelete();
+            $table->foreignId('penawaran_renovasi_id')->constrained('penawaran_renovasi')->cascadeOnDelete();
             $table->integer('jumlah');
             $table->string('satuan')->nullable();
             $table->timestamps();
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('material_renovasis');
+        Schema::dropIfExists('material_renovasi');
     }
 };
