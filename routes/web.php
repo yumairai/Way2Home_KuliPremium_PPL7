@@ -6,6 +6,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/home', function () {
+    return view('home');
+});
+
+Route::get('/login', function () {
+    return view('login');
+})->name('login');
+
+Route::get('/register', function () {
+    return view('register');
+})->name('register');
+
 // inputnya
 Route::get('/rekomendasi/input', function () {
     return view('input_preferensi_ai');

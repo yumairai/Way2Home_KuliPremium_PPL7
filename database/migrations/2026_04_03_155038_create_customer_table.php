@@ -15,7 +15,7 @@ return new class extends Migration
         {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('no_hp', 20);
+            $table->string('no_hp', 20)->nullable();
             $table->string('path_file_foto_ktp')->nullable();
             $table->timestamps();
         });
