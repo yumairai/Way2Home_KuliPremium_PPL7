@@ -1,19 +1,16 @@
-document.querySelectorAll('.file-input-hidden').forEach(input => {
-    input.addEventListener('change', function () {
-        const fileName = this.files[0] ? this.files[0].name : "Pilih file atau drag & drop";
-        const subtitle = this.parentElement.querySelector('.upload-subtitle');
-        subtitle.innerText = fileName;
-        subtitle.style.color = "#ffcc00";
-    });
-});
+/**
+ * Way2Home - Form Pembangunan Script
+ * Menggabungkan Drag & Drop, Preview, dan API Submission
+ */
 
+// 1. Inisialisasi Preview & Drag and Drop Dokumen
 document.querySelectorAll('.upload-item').forEach(dropZone => {
     const input = dropZone.querySelector('.file-input-hidden');
     const previewContainer = dropZone.querySelector('.preview-container');
     const imgPreview = dropZone.querySelector('.img-preview');
     const subtitle = dropZone.querySelector('.upload-subtitle');
 
-    // efek saat drag file
+    // Mencegah perilaku default browser saat drag-and-drop
     ['dragover', 'dragleave', 'drop'].forEach(eventName => {
         dropZone.addEventListener(eventName, e => {
             e.preventDefault();
@@ -21,20 +18,21 @@ document.querySelectorAll('.upload-item').forEach(dropZone => {
         });
     });
 
+    // Efek visual saat file ditarik ke atas drop zone
     dropZone.addEventListener('dragover', () => dropZone.style.borderColor = '#ffcc00');
     dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#ccc');
 
-    // tangkap file yang di drop
+    // Tangkap file yang di-drop
     dropZone.addEventListener('drop', e => {
         dropZone.style.borderColor = '#ccc';
         const files = e.dataTransfer.files;
         if (files.length) {
-            input.files = files; // Masukkan file ke input hidden
+            input.files = files; // Sinkronkan ke input hidden
             handlePreview(files[0], previewContainer, imgPreview, subtitle);
         }
     });
 
-    // tangkap file yang dipilih lewat klik
+    // Tangkap file yang dipilih lewat klik manual
     input.addEventListener('change', () => {
         if (input.files.length) {
             handlePreview(input.files[0], previewContainer, imgPreview, subtitle);
@@ -42,11 +40,11 @@ document.querySelectorAll('.upload-item').forEach(dropZone => {
     });
 });
 
-// preview file 
+// Fungsi untuk menangani tampilan preview (Gambar atau Nama File PDF)
 function handlePreview(file, container, img, textElement) {
     textElement.innerText = file.name;
+    textElement.style.color = "#ffcc00";
 
-    // jika file gambar, tampilkan preview gambarnya
     if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -55,12 +53,12 @@ function handlePreview(file, container, img, textElement) {
         };
         reader.readAsDataURL(file);
     } else {
-        // untuk pdf agar bisa muncul nama filenya
         container.style.display = 'none';
         textElement.innerHTML = `📄 ${file.name}`;
     }
 }
 
+// 2. Logika Pemilihan Paket (Ganti Text Button & Pesan)
 const packageRadios = document.querySelectorAll('input[name="package"]');
 const submitBtnText = document.getElementById('submitBtnText');
 const submitMsgText = document.getElementById('submitMsgText');
@@ -69,7 +67,7 @@ if (packageRadios.length > 0 && submitBtnText) {
     packageRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
             if (e.target.value === 'material-only') {
-                submitBtnText.innerText = "Pesan Material";
+                submitBtnText.innerText = "Pesan Material Saja";
                 submitMsgText.innerText = "Tim logistik kami akan mengirimkan invoice material dalam 1x24 jam.";
             } else {
                 submitBtnText.innerText = "Ajukan Pembangunan";
@@ -79,41 +77,91 @@ if (packageRadios.length > 0 && submitBtnText) {
     });
 }
 
+// 3. Logika Submit Form ke API Laravel
 const mainSubmitBtn = document.getElementById('mainSubmitBtn');
 
 if (mainSubmitBtn) {
-    mainSubmitBtn.addEventListener('click', () => {
+    mainSubmitBtn.addEventListener('click', async () => {
         const alamat = document.getElementById('alamatProyek');
         const selectedRadio = document.querySelector('input[name="package"]:checked');
         const selectedPackage = selectedRadio ? selectedRadio.value : '';
-
+        
         let errors = [];
 
-        // validasi alamat proyek
+        // --- VALIDASI FRONTEND ---
         if (!alamat || !alamat.value.trim()) {
             errors.push("Alamat lengkap proyek belum diisi.");
         }
 
-        // validasi dokumen untuk paket lengkap
+        // Jika pilih Paket Komplit (Jasa + Material), dokumen wajib ada
         if (selectedPackage === 'paket-komplit') {
-            const sertifikat = document.getElementById('sertifikat_tanah');
+            const cert = document.getElementById('sertifikat_tanah');
             const ktp = document.getElementById('ktp_pemilik');
-            const imb = document.getElementById('imb_pbg');
-
-            if (!sertifikat || sertifikat.files.length === 0) errors.push("Sertifikat Tanah wajib ada.");
-            if (!ktp || ktp.files.length === 0) errors.push("KTP Pemilik wajib ada.");
-            if (!imb || imb.files.length === 0) errors.push("IMB/PBG wajib ada.");
+            
+            if (!cert || cert.files.length === 0) errors.push("Sertifikat Tanah wajib diunggah.");
+            if (!ktp || ktp.files.length === 0) errors.push("KTP Pemilik wajib diunggah.");
         }
 
-        // otw ke halaman sesuai pilihan paket jika tidak ada error
         if (errors.length > 0) {
             alert("Mohon lengkapi data:\n- " + errors.join("\n- "));
-        } else {
-            if (selectedPackage === 'material-only') {
-                window.location.href = "/material-only";
-            } else {
-                window.location.href = "/progress-track-user";
+            return; // Berhenti di sini jika ada error
+        }
+
+        // --- PROSES KIRIM DATA (AJAX) ---
+        
+        // Ubah tampilan tombol jadi loading
+        const originalText = submitBtnText.innerText;
+        mainSubmitBtn.disabled = true;
+        submitBtnText.innerText = "Sedang Mengirim...";
+
+        const formData = new FormData();
+        formData.append('alamat_proyek', alamat.value);
+        formData.append('desain_id', 1); // Pastikan ID desain valid (biasanya diambil dari URL atau hidden input)
+
+        // Masukkan semua file yang ada ke dalam FormData
+        const fileInputs = ['sertifikat_tanah', 'ktp_pemilik', 'imb_pbg', 'surat_kuasa'];
+        fileInputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el.files[0]) {
+                formData.append(id, el.files[0]);
             }
+        });
+
+        try {
+            const response = await fetch('/api/proyek/ajukan', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status === 'success') {
+                alert("Berhasil! " + data.message);
+                
+                // PINDAH HALAMAN HANYA JIKA SUDAH SUKSES SIMPAN
+                if (selectedPackage === 'material-only') {
+                    window.location.href = "/material-only";
+                } else {
+                    window.location.href = "/progress-track-user";
+                }
+            } else {
+                // Jika Laravel mengembalikan error (misal file kegedean/validasi gagal)
+                alert("Gagal: " + (data.message || "Terjadi kesalahan pada server"));
+                resetButton(originalText);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert("Koneksi terputus atau server bermasalah.");
+            resetButton(originalText);
         }
     });
+}
+
+function resetButton(text) {
+    mainSubmitBtn.disabled = false;
+    document.getElementById('submitBtnText').innerText = text;
 }

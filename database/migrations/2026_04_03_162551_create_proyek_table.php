@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('mandor_id')->nullable()->constrained('mandors')->nullOnDelete();
             $table->string('jenis_proyek');
             $table->text('alamat_proyek');
-            $table->date('tanggal_mulai');
+            $table->date('tanggal_mulai')->nullable();
             $table->enum('status_proyek', ['perencanaan', 'berjalan', 'selesai', 'dibatalkan'])->default('perencanaan');
             $table->integer('jumlah_cicilan')->default(0);
             $table->timestamps();

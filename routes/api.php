@@ -26,4 +26,5 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::post('/preferensi/simpan', [PreferensiController::class, 'store']);
+    Route::post('/proyek/ajukan', [\App\Http\Controllers\Api\ProyekController::class, 'store']);
 });
