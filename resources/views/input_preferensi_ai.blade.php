@@ -40,7 +40,7 @@
             <div class="row">
                 <div class="input-group">
                     <label>PREFERENSI LOKASI</label>
-                    <select>
+                    <select id="lokasi">
                         <option>Bandung Barat</option>
                         <option>Bandung Timur</option>
                     </select>
@@ -48,7 +48,7 @@
 
                 <div class="input-group">
                     <label>GAYA ARSITEKTUR</label>
-                    <select>
+                    <select id="gaya_arsitektur">
                         <option>Minimalist</option>
                         <option>Modern</option>
                         <option>Mewah</option>
@@ -71,7 +71,7 @@
 
                 <div class="input-group">
                     <label>JUMLAH KAMAR</label>
-                    <input type="number" min="1" max="10" placeholder="1 - 10">
+                    <input type="number" id="jumlah_kamar" min="1" max="10" placeholder="1 - 10">
                 </div>
             </div>
 
