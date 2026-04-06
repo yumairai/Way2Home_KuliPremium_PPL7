@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('request_renovasis', function (Blueprint $table) 
+        Schema::create('request_renovasi', function (Blueprint $table) 
         {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('request_renovasis');
+        Schema::dropIfExists('request_renovasi');
     }
 };
