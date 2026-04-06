@@ -32,4 +32,9 @@ class User extends Authenticatable
             'is_first_login' => 'boolean',
         ];
     }
+
+    public function customer()
+    {
+        return $this->hasOne(Customer::class, 'user_id');
+    }
 }
