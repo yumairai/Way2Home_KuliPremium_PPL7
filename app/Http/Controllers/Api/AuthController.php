@@ -4,19 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 // use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // F002: Register
-    public function register(Request $request) {
+    // Register
+    public function register(Request $request)
+    {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
+            'email' => 'required|string|email:rfc,dns|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'phone_number' => 'required',
+            // 'phone_number' => 'required',
         ]);
 
         $user = User::create([
@@ -24,8 +26,12 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'customer',
-            'phone_number' => $request->phone_number,
-            'email_verified_at' => now(), 
+            // 'phone_number' => $request->phone_number,
+            // 'email_verified_at' => now(),
+        ]);
+
+        Customer::create([
+            'user_id' => $user->id,
         ]);
 
         return response()->json([
@@ -35,8 +41,9 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // F001: Login
-    public function login(Request $request) {
+    // Login
+    public function login(Request $request)
+    {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
