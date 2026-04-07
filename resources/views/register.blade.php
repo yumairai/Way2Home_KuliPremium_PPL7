@@ -38,6 +38,14 @@
                         <span id="error-email" class="error-text"></span>
                     </div>
 
+                    <!-- Input Nomor HP -->
+                    <div class="input-group">
+                        <label>Nomor HP</label>
+                        <input type="tel" id="phone" placeholder="Contoh: 081234567xxx" required
+                            pattern="[0-9]{10,14}" title="Masukkan 10-14 digit angka">
+                        <span id="error-phone" class="error-text"></span>
+                    </div>
+
                     <!-- Input Password -->
                     <div class="input-group">
                         <label>Password</label>
@@ -54,7 +62,8 @@
 
                     <!-- Checkbox Syarat & Ketentuan -->
                     <div class="options">
-                        <label><input type="checkbox" id="terms" required> Saya setuju dengan Syarat & Ketentuan</label>
+                        <label><input type="checkbox" id="terms" required> Saya setuju dengan Syarat &
+                            Ketentuan</label>
                     </div>
 
                     <button type="submit" class="btn-login">Daftar Sekarang</button>
@@ -81,14 +90,20 @@
                     });
 
                     document.getElementById('password').addEventListener('input', function() {
-                        this.value.length < 8 ? showError('password', 'Kata sandi minimal harus terdiri dari 8 karakter.') : clearError('password');
+                        this.value.length < 8 ? showError('password', 'Kata sandi minimal harus terdiri dari 8 karakter.') :
+                            clearError('password');
                     });
 
                     document.getElementById('password_confirmation').addEventListener('input', function() {
                         const pass = document.getElementById('password').value;
-                        this.value !== pass ? showError('password_confirmation', 'Konfirmasi kata sandi tidak sesuai.') : clearError('password_confirmation');
+                        this.value !== pass ? showError('password_confirmation', 'Konfirmasi kata sandi tidak sesuai.') :
+                            clearError('password_confirmation');
                     });
 
+                    document.getElementById('phone').addEventListener('input', function() {
+                        const regex = /^[0-9]{10,14}$/;
+                        !regex.test(this.value) ? showError('phone', 'Format nomor HP tidak valid.') : clearError('phone');
+                    });
 
                     // --- PROSES SUBMIT FORM ---
                     document.getElementById('registerForm').addEventListener('submit', async (e) => {
@@ -96,6 +111,7 @@
 
                         const name = document.getElementById('name').value;
                         const email = document.getElementById('email').value;
+                        const phone = document.getElementById('phone').value;
                         const password = document.getElementById('password').value;
                         const password_confirmation = document.getElementById('password_confirmation').value;
 
@@ -116,6 +132,7 @@
                                 body: JSON.stringify({
                                     name,
                                     email,
+                                    phone_number: phone,
                                     password,
                                     password_confirmation
                                 })

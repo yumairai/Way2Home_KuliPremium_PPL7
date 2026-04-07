@@ -111,7 +111,7 @@
                                     localStorage.removeItem('remembered_email');
                                 }
 
-                                window.location.href = '/rekomendasi/input';
+                                window.location.href = '/home';
                             } else {
                                 errorDiv.innerText = data.message || 'Kredensial yang Anda masukkan salah.';
                             }

@@ -32,16 +32,9 @@
                 <a href="#">Material</a>
                 <a href="#">Renovasi</a>
             </div>
-            <!-- Aksi buat user blm login/masuk -->
+            <!-- user bisa logout -->
             <div class="nav-actions">
-                @auth
-                    <!-- user sudah login -->
-                    <a href="/dashboard" class="btn-nav primary">Dashboard</a>
-                @else
-                    <!-- user belum login -->
-                    <a href="{{ route('login') }}" class="btn-nav secondary">Login</a>
-                    <a href="{{ route('register') }}" class="btn-nav primary">Daftar</a>
-                @endauth
+                <button onclick="logout()" class="btn-nav primary">Logout</button>
             </div>
         </div>
     </nav>
@@ -66,18 +59,18 @@
                 </p>
                 <!-- Action Hub -->
                 <div class="action-buttons">
-                    <button class="btn-action primary">
+                    <a href="/material-only" class="btn-action primary">
                         Mulai Belanja
                         <img src="{{ asset('images/icon/shopping-cart.png') }}" alt="Shopping Cart">
-                    </button>
-                    <button class="btn-action secondary">
+                    </a>
+                    <a href="/rekomendasi/input" class="btn-action secondary">
                         Rekomendasi Desain
                         <img src="{{ asset('images/icon/house.png') }}" alt="Rekomendasi Desain">
-                    </button>
-                    <button class="btn-action outlined">
+                    </a>
+                    <a href="/material-only" class="btn-action outlined">
                         Renovasi
                         <img src="{{ asset('images/icon/renovation.png') }}" alt="Renovasi">
-                    </button>
+                    </a>
                 </div>
             </div>
             <!-- Gambar Kanan -->
@@ -155,6 +148,22 @@
             </div>
         </div>
     </footer>
+    <script>
+        // Cek apakah ada token di localStorage
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('Kamu belum login! Balik ke halaman login ya.');
+            window.location.href = '/login';
+        } else {
+            document.getElementById('tokenDisplay').innerText = token;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
 </body>
 
 </html>

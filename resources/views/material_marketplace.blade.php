@@ -16,26 +16,46 @@
 
 <body>
     <div class="bg-ellipse"></div>
-    <nav class="navbar">
-        <div class="nav-left">
-            <img src="{{ asset('images/aset/logo-w2h.png') }}" alt="Logo">
-            <span class="brand">Way2Home</span>
-        </div>
-
-        <div class="nav-right">
-            <a href="#">Beranda</a>
-            <a href="#">Desain</a>
-            <a href="#">Material</a>
-            <a href="#">Renovasi</a>
-
-            <div class="profile">
-                <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="profile">
+    <!-- NAVBAR -->
+    <nav class="glass-nav">
+        <div class="nav-container">
+            <!-- Brand -->
+            <div class="brand">
+                <img src="{{ asset('images/aset/logo-w2h.png') }}" alt="Logo Way2Home">
+                <span class="brand-text">Way2Home</span>
+            </div>
+            <!-- link -->
+            <div class="nav-links">
+                <a class="active" href="#">Beranda</a>
+                <a href="#">Desain</a>
+                <a href="#">Material</a>
+                <a href="#">Renovasi</a>
+            </div>
+            <!-- user bisa logout -->
+            <div class="nav-actions">
+                <button onclick="logout()" class="btn-nav primary">Logout</button>
             </div>
         </div>
     </nav>
     <div class="container">
         <h1>PAGE MATERIAL MARKETPLACE DAN PROGRESS TRACKING COMING SOON!</h1>
     </div>
+    <script>
+        // Cek apakah ada token di localStorage
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            alert('Kamu belum login! Balik ke halaman login ya.');
+            window.location.href = '/login';
+        } else {
+            document.getElementById('tokenDisplay').innerText = token;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login';
+        }
+    </script>
     <script src="{{ asset('js/material_marketplace_script.js') }}"></script>
 </body>
 

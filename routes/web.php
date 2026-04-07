@@ -7,7 +7,7 @@ Route::get('/', function () {
 });
 
 Route::get('/home', function () {
-    return view('home');
+    return view('dashboard');
 });
 
 Route::get('/login', function () {
