@@ -332,6 +332,31 @@ nav .nav-container {
     margin-bottom: 12px;
 }
 
+/* anim section dokumen */
+#sectionDokumen {
+    overflow: hidden;
+    opacity: 0;
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    transform: translateY(-10px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+#sectionDokumen.show {
+    visibility: visible;
+    opacity: 1;
+    max-height: 1000px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
 textarea {
     width: 100%;
     background-color: #fff;
@@ -425,7 +450,7 @@ textarea::placeholder {
     gap: 16px;
     border-left: 4px solid #388e3c;
     align-items: flex-start;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 .info-icon {
@@ -524,12 +549,21 @@ textarea::placeholder {
     color: #999;
 }
 
-/* SUBMIT BUTTON */
-.submit-section {
-    padding-top: 24px;
-    margin-top: 40px;
+.radio-label input:checked+.radio-check-indicator+.radio-content {
+    transform: scale(1.02);
+    transition: transform 0.2s ease;
 }
 
+#package-info {
+    margin-top: 15px;
+    font-size: 0.9em;
+    color: #555;
+    padding: 10px;
+    border-left: 3px solid #FCD47C;
+    background: #f9f9f9;
+}
+
+/* SUBMIT BUTTON */
 .submit-button {
     width: 100%;
     background-color: #FCD47C;

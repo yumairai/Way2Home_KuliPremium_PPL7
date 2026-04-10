@@ -62,6 +62,8 @@ function handlePreview(file, container, img, textElement) {
 const packageRadios = document.querySelectorAll('input[name="package"]');
 const submitBtnText = document.getElementById('submitBtnText');
 const submitMsgText = document.getElementById('submitMsgText');
+const packageInfo = document.getElementById('package-info');
+const labelAlamat = document.getElementById('label-alamat');
 
 if (packageRadios.length > 0 && submitBtnText) {
     packageRadios.forEach(radio => {
@@ -69,9 +71,13 @@ if (packageRadios.length > 0 && submitBtnText) {
             if (e.target.value === 'material-only') {
                 submitBtnText.innerText = "Pesan Material Saja";
                 submitMsgText.innerText = "Tim logistik kami akan mengirimkan invoice material dalam 1x24 jam.";
+                packageInfo.innerHTML = "<strong>Info:</strong> Anda hanya perlu mengunggah alamat tujuan pengiriman.";
+                labelAlamat.innerText = "Alamat Lengkap Pengiriman";
             } else {
                 submitBtnText.innerText = "Ajukan Pembangunan";
                 submitMsgText.innerText = "Tim spesialis kami akan menghubungi Anda dalam 1x24 jam setelah verifikasi.";
+                packageInfo.innerHTML = "<strong>Info:</strong> Anda perlu mengunggah alamat lengkap dan dokumen pendukung.";
+                labelAlamat.innerText = "Alamat Lengkap Proyek";
             }
         });
     });
@@ -85,7 +91,7 @@ if (mainSubmitBtn) {
         const alamat = document.getElementById('alamatProyek');
         const selectedRadio = document.querySelector('input[name="package"]:checked');
         const selectedPackage = selectedRadio ? selectedRadio.value : '';
-        
+
         let errors = [];
 
         // --- VALIDASI FRONTEND ---
@@ -97,7 +103,7 @@ if (mainSubmitBtn) {
         if (selectedPackage === 'paket-komplit') {
             const cert = document.getElementById('sertifikat_tanah');
             const ktp = document.getElementById('ktp_pemilik');
-            
+
             if (!cert || cert.files.length === 0) errors.push("Sertifikat Tanah wajib diunggah.");
             if (!ktp || ktp.files.length === 0) errors.push("KTP Pemilik wajib diunggah.");
         }
@@ -108,7 +114,7 @@ if (mainSubmitBtn) {
         }
 
         // --- PROSES KIRIM DATA (AJAX) ---
-        
+
         // Ubah tampilan tombol jadi loading
         const originalText = submitBtnText.innerText;
         mainSubmitBtn.disabled = true;
@@ -141,7 +147,7 @@ if (mainSubmitBtn) {
 
             if (response.ok && data.status === 'success') {
                 alert("Berhasil! " + data.message);
-                
+
                 // PINDAH HALAMAN HANYA JIKA SUDAH SUKSES SIMPAN
                 if (selectedPackage === 'material-only') {
                     window.location.href = "/material-only";
@@ -165,3 +171,25 @@ function resetButton(text) {
     mainSubmitBtn.disabled = false;
     document.getElementById('submitBtnText').innerText = text;
 }
+
+const sectionDokumen = document.getElementById('sectionDokumen');
+const radioPackages = document.querySelectorAll('input[name="package"]');
+
+function toggleDokumenVisibility() {
+    // Ambil value dari radio yang sedang terpilih
+    const selectedValue = document.querySelector('input[name="package"]:checked').value;
+
+    if (selectedValue === 'paket-komplit') {
+        sectionDokumen.classList.add('show');
+    } else {
+        sectionDokumen.classList.remove('show');
+    }
+}
+
+// Pasang listener untuk setiap perubahan radio
+radioPackages.forEach(radio => {
+    radio.addEventListener('change', toggleDokumenVisibility);
+});
+
+// Jalankan saat halaman load pertama kali
+document.addEventListener('DOMContentLoaded', toggleDokumenVisibility);

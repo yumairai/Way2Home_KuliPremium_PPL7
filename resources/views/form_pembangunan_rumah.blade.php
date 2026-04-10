@@ -118,18 +118,44 @@
             </div>
         </section>
 
+        <!-- Choice of Package -->
+        <div class="form-group">
+            <label class="radio-group-title">Pilihan Paket Pembangunan</label>
+            <div class="radio-options">
+                <label class="radio-label">
+                    <input checked="" name="package" value="paket-komplit" type="radio" />
+                    <div class="radio-check-indicator"></div>
+                    <div class="radio-content">
+                        <span>Material + Jasa</span>
+                        <span>Solusi lengkap &amp; terima kunci</span>
+                    </div>
+                </label>
+
+                <label class="radio-label">
+                    <input name="package" value="material-only" type="radio" />
+                    <div class="radio-check-indicator"></div>
+                    <div class="radio-content">
+                        <span>Material Saja</span>
+                        <span>Pengadaan bahan bangunan premium</span>
+                    </div>
+                </label>
+            </div>
+            <div id="package-info">
+                <strong>Info:</strong> Anda perlu mengunggah dokumen pendukung dan alamat lengkap.
+            </div>
+        </div>
+
         <!-- form pembangunan -->
         <form>
             <input type="hidden" id="desain_id" value="1">
 
             <!-- Address Input -->
             <div class="form-group">
-                <label class="form-label">Alamat Lengkap Proyek</label>
+                <label class="form-label" id="label-alamat">Alamat Lengkap Proyek</label>
                 <textarea id="alamatProyek" placeholder="Masukkan alamat lengkap di wilayah Jawa Barat" rows="3"></textarea>
             </div>
-
             <!-- dokumen kebutuhan pembangunan rumah -->
-            <div class="form-group">
+            <div class="form-group" id="sectionDokumen">
                 <label class="form-label">Dokumen Pendukung</label>
                 <div class="upload-grid">
                     <!-- dokumen sertif tanah -->
@@ -197,29 +223,7 @@
                 </p>
             </div>
 
-            <!-- Choice of Package -->
-            <div class="form-group">
-                <label class="radio-group-title">Pilihan Paket Pembangunan</label>
-                <div class="radio-options">
-                    <label class="radio-label">
-                        <input checked="" name="package" value="paket-komplit" type="radio" />
-                        <div class="radio-check-indicator"></div>
-                        <div class="radio-content">
-                            <span>Material + Jasa</span>
-                            <span>Solusi lengkap &amp; terima kunci</span>
-                        </div>
-                    </label>
 
-                    <label class="radio-label">
-                        <input name="package" value="material-only" type="radio" />
-                        <div class="radio-check-indicator"></div>
-                        <div class="radio-content">
-                            <span>Material Saja</span>
-                            <span>Pengadaan bahan bangunan premium</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
 
             <!-- Submit Button -->
             <div class="submit-section">
