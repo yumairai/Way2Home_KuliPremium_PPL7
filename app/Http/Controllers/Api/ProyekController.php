@@ -18,9 +18,9 @@ class ProyekController extends Controller
         $request->validate([
             'alamat_proyek'    => 'required|string',
             'desain_id'        => 'required|exists:desain_rumah,id',
-            'sertifikat_tanah' => 'required|file|mimes:pdf,jpg,png|max:2048',
-            'ktp_pemilik'      => 'required|file|mimes:pdf,jpg,png|max:2048',
-            'imb_pbg'          => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'sertifikat_tanah' => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
+            'ktp_pemilik'      => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
+            'imb_pbg'          => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
             'surat_kuasa'      => 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ]);
 
@@ -65,7 +65,8 @@ class ProyekController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Pengajuan pembangunan berhasil dikirim!',
+                'message_1' => 'Pengajuan pembangunan berhasil dikirim!',
+                'message_2' => 'Pengajuan pemesanan material berhasil dikirim!',
                 'data' => $proyek
             ], 201);
         } catch (\Exception $e) {

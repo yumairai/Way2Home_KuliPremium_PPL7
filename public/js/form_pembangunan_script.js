@@ -123,6 +123,7 @@ if (mainSubmitBtn) {
         const formData = new FormData();
         formData.append('alamat_proyek', alamat.value);
         formData.append('desain_id', 1); // Pastikan ID desain valid (biasanya diambil dari URL atau hidden input)
+        formData.append('package', selectedPackage);
 
         // Masukkan semua file yang ada ke dalam FormData
         const fileInputs = ['sertifikat_tanah', 'ktp_pemilik', 'imb_pbg', 'surat_kuasa'];
@@ -146,12 +147,12 @@ if (mainSubmitBtn) {
             const data = await response.json();
 
             if (response.ok && data.status === 'success') {
-                alert("Berhasil! " + data.message);
-
-                // PINDAH HALAMAN HANYA JIKA SUDAH SUKSES SIMPAN
+                // pergi ke halaman sesuai paket
                 if (selectedPackage === 'material-only') {
+                    alert("Berhasil! " + data.message_2);
                     window.location.href = "/material-only";
                 } else {
+                    alert("Berhasil! " + data.message_1);
                     window.location.href = "/progress-track-user";
                 }
             } else {
