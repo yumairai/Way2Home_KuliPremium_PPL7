@@ -25,7 +25,7 @@ Route::get('/rekomendasi/input', function () {
 
 // hasil inputnya
 Route::get('/rekomendasi/hasil', function () {
-    return view('rekomendasi_rumah');
+    return view('customer.rekomendasi_rumah');
 });
 
 // otw ke form pembangunan rumah abis klik tombol pilih desain 
