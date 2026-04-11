@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Material Marketplace | Cart</title>
-    <link rel="stylesheet" href="{{ asset('css/cart.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer/cart.css') }}">
     <link href="{{ asset('images/aset/logo-w2h.png') }}" type="image" rel="icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -267,7 +267,7 @@
                 </div>
             </div>
         </footer>
-        <script src="{{ asset('js/material_marketplace.js') }}"></script>
+        <script src="{{ asset('js/customer/material_marketplace.js') }}"></script>
 </body>
 
 </html>

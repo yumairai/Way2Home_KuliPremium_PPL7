@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+// guest
 Route::get('/', function () {
     return view('welcome');
 });
@@ -49,4 +50,9 @@ Route::get('/material', function () {
 
 Route::get('/material/cart', function () {
     return view('customer.cart');
+}); 
+
+// admin
+Route::get('/admin', function () {
+    return view('admin.admin_page');
 });

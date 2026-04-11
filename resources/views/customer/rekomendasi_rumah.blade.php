@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekomendasi Rumah</title>
-    <link rel="stylesheet" href="{{ asset('css/rekomendasi_rumah.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer/rekomendasi_rumah.css') }}">
     <link href="{{ asset('images/aset/logo-w2h.png') }}" type="image" rel="icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -116,7 +116,7 @@
             window.location.href = '/login';
         }
     </script>
-    <script src="{{ asset('js/recom_script.js') }}"></script>
+    <script src="{{ asset('js/customer/recom_script.js') }}"></script>
 </body>
 
 </html>
