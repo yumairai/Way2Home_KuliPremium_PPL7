@@ -28,9 +28,9 @@
             <!-- link -->
             <div class="nav-links">
                 <a class="active" href="#">Beranda</a>
-                <a href="#">Desain</a>
-                <a href="#">Material</a>
-                <a href="#">Renovasi</a>
+                <a href="/rekomendasi/input">Desain</a>
+                <a href="/material">Material</a>
+                <a href="/renovasi">Renovasi</a>
             </div>
             <!-- user bisa logout -->
             <div class="nav-actions">
@@ -59,7 +59,7 @@
                 </p>
                 <!-- Action Hub -->
                 <div class="action-buttons">
-                    <a href="/material-only" class="btn-action primary">
+                    <a href="/material" class="btn-action primary">
                         Mulai Belanja
                         <img src="{{ asset('images/icon/shopping-cart.png') }}" alt="Shopping Cart">
                     </a>
@@ -67,7 +67,7 @@
                         Rekomendasi Desain
                         <img src="{{ asset('images/icon/house.png') }}" alt="Rekomendasi Desain">
                     </a>
-                    <a href="/material-only" class="btn-action outlined">
+                    <a href="/material" class="btn-action outlined">
                         Renovasi
                         <img src="{{ asset('images/icon/renovation.png') }}" alt="Renovasi">
                     </a>

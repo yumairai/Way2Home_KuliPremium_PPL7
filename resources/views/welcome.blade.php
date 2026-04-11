@@ -28,9 +28,9 @@
             <!-- link -->
             <div class="nav-links">
                 <a class="active" href="#">Beranda</a>
-                <a href="#">Desain</a>
-                <a href="#">Material</a>
-                <a href="#">Renovasi</a>
+                <a href="/rekomendasi/input">Desain</a>
+                <a href="/material">Material</a>
+                <a href="/renovasi">Renovasi</a>
             </div>
             <!-- Aksi buat user blm login/masuk -->
             <div class="nav-actions">

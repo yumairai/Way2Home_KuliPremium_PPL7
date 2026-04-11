@@ -42,3 +42,11 @@ Route::get('/material-only', function () {
 Route::get('/progress-track-user', function () {
     return view('material_marketplace'); // sementara ke sini dulu yah hehe
 });
+
+Route::get('/material', function () {
+    return view('material_marketplace');
+});
+
+Route::get('/material/cart', function () {
+    return view('cart');
+});
