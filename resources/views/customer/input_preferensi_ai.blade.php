@@ -146,6 +146,7 @@
             window.location.href = '/login';
         }
     </script>
+    <script src="{{ asset('js/dropdown.js') }}"></script>
     <script src="{{ asset('js/customer/input_script.js') }}"></script>
 </body>
 

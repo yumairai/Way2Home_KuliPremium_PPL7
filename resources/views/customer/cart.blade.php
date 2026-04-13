@@ -267,6 +267,7 @@
                 </div>
             </div>
         </footer>
+        <script src="{{ asset('js/dropdown.js') }}"></script>
         <script src="{{ asset('js/customer/material_marketplace.js') }}"></script>
 </body>
 

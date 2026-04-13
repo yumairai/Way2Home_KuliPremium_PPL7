@@ -116,6 +116,7 @@
             window.location.href = '/login';
         }
     </script>
+    <script src="{{ asset('js/dropdown.js') }}"></script>
     <script src="{{ asset('js/customer/recom_script.js') }}"></script>
 </body>
 

@@ -264,7 +264,6 @@ nav.dark {
     height: 3rem;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid var(--surface-container-high);
     scale: 0.95;
     transition: scale 0.3s ease;
     cursor: pointer;

@@ -13,7 +13,9 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
-
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
 </head>
 
 <body>
@@ -32,9 +34,54 @@
                 <a href="/material">Material</a>
                 <a href="/renovasi">Renovasi</a>
             </div>
-            <!-- user bisa logout -->
+            <!-- user bisa klik dropdown -->
             <div class="nav-actions">
-                <button onclick="logout()" class="btn-nav primary">Logout</button>
+                <img alt="User profile avatar" class="profile-avatar" src="{{ asset('images/aset/user-dummy.jpg') }}" />
+                <!-- DROPDOWN PROFILE !-->
+                <div class="profile-dropdown">
+                    <!-- Header dengan Background Foto (Sesuai request sebelumnya) -->
+                    <div class="dropdown-header">
+                        <div class="header-background">
+                            <img alt="Background" src="{{ asset('images/aset/construction.jpg') }}" />
+                        </div>
+                        <div class="header-content">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <img alt="avatar" src="{{ asset('images/aset/user-dummy.jpg') }}" />
+                                </div>
+                                <div class="user-details">
+                                    <h3>Robby Azwan</h3>
+                                    <p>Customer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Navigation Links -->
+                    <div class="dropdown-body">
+                        <a href="/user/orders" class="nav-link">
+                            <span class="material-symbols-outlined">shopping_cart</span>
+                            <span>Pesanan Saya</span>
+                        </a>
+                        <a href="/user/projects" class="nav-link">
+                            <span class="material-symbols-outlined">construction</span>
+                            <span>Proyek Saya</span>
+                        </a>
+                        <a href="/user/profile" class="nav-link">
+                            <span class="material-symbols-outlined">person_edit</span>
+                            <span>Edit Profile</span>
+                        </a>
+                    </div>
+
+                    <div class="separator"></div>
+
+                    <!-- Footer / Logout -->
+                    <div class="dropdown-footer">
+                        <button class="dropdown-logout-btn" onclick="logout()">
+                            <span class="material-symbols-outlined">logout</span>
+                            Logout
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -148,6 +195,7 @@
             </div>
         </div>
     </footer>
+    <script src="{{ asset('js/dropdown.js') }}"></script>
     <script>
         // Cek apakah ada token di localStorage
         const token = localStorage.getItem('token');

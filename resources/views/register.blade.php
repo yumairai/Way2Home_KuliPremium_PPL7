@@ -19,6 +19,9 @@
 
         <!-- LEFT SIDE -->
         <div class="left">
+            <div class="left-background">
+                <img alt="Background" src="{{ asset('images/aset/construction2.jpg') }}" />
+            </div>
             <div class="form-box">
                 <h2>Buat Akun Baru</h2>
                 <p>Silakan isi data di bawah ini untuk mendaftar</p>

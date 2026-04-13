@@ -19,6 +19,9 @@
 
         <!-- LEFT SIDE -->
         <div class="left">
+            <div class="left-background">
+                <img alt="Background" src="{{ asset('images/aset/construction.jpg') }}" />
+            </div>
             <div class="form-box">
                 <h2>Selamat Datang</h2>
                 <p>Masuk ke akun Way2Home</p>

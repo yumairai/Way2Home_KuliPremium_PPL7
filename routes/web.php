@@ -52,6 +52,32 @@ Route::get('/material/cart', function () {
     return view('customer.cart');
 });
 
+Route::get('/user/projects', function () {
+    return view('customer.proyek_user');
+});
+
+Route::prefix('user')->group(function () {
+    Route::get('/orders', function () {
+        return view('customer.order_user');
+    })->name('user.orders');
+
+    Route::prefix('projects')->group(function () {
+        Route::redirect('/', '/user/projects/1');
+
+        Route::get('/{id}', function ($id) {
+            $viewName = "customer.proyek_user" . $id;
+            if (view()->exists($viewName)) {
+                return view($viewName, ['projectId' => $id]);
+            }
+            abort(404, "Halaman dummy untuk proyek $id belum dibuat.");
+        })->name('user.projects.detail');
+    });
+
+    Route::get('/profile', function () {
+        return view('customer.profile_edit');
+    })->name('user.profile');
+});
+
 // admin
 Route::prefix('admin')->group(function () {
     Route::redirect('/', '/admin/dashboard');
@@ -95,6 +121,6 @@ Route::prefix('admin')->group(function () {
     })->name('admin.preview');
 });
 
-Route::get('/modal', function () {
-    return view('admin.modal');
-})->name('admin.modal');
+Route::get('/tes', function () {
+    return view('customer.proyekuser');
+});

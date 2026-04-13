@@ -23,6 +23,7 @@
             <thead>
                 <tr>
                     <th>Judul Proyek</th>
+                    <th>Nama Pemilik</th>
                     <th>Kategori Proyek</th>
                     <th>Status</th>
                     <th>Progress</th>
@@ -42,6 +43,9 @@
                                 <p class="project-id">ID: W2H-99210</p>
                             </div>
                         </div>
+                    </td>
+                    <td>
+                        <span class="project-owner">ROBBY GANTENG</span>
                     </td>
                     <td>
                         <span class="badge primary">Bangun Rumah</span>
@@ -77,6 +81,9 @@
                         </div>
                     </td>
                     <td>
+                        <span class="project-owner">ROBBY GANTENG</span>
+                    </td>
+                    <td>
                         <span class="badge warning">Renovasi</span>
                     </td>
                     <td>
@@ -110,6 +117,9 @@
                         </div>
                     </td>
                     <td>
+                        <span class="project-owner">ROBBY GANTENG</span>
+                    </td>
+                    <td>
                         <span class="badge primary">Bangun Rumah</span>
                     </td>
                     <td>
@@ -141,6 +151,9 @@
                                 <p class="project-id">ID: W2H-66550</p>
                             </div>
                         </div>
+                    </td>
+                    <td>
+                        <span class="project-owner">ROBBY GANTENG</span>
                     </td>
                     <td>
                         <span class="badge warning">Renovasi</span>
