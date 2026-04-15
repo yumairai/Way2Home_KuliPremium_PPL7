@@ -1,6 +1,6 @@
 @extends('customer-layouts.main')
 @push('styles')
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/customer/dashboard.css') }}">
 @endpush
 <!-- Hero Section -->
 @section('content')
@@ -22,15 +22,15 @@
             </p>
             <!-- Action Hub -->
             <div class="action-buttons">
-                <button class="btn-action primary">
+                <button class="btn-action primary" onclick="window.location.href='/material'">
                     Mulai Belanja
                     <img src="{{ asset('images/icon/shopping-cart.png') }}" alt="Shopping Cart">
                 </button>
-                <button class="btn-action secondary">
+                <button class="btn-action secondary" onclick="window.location.href='/recommendation'">
                     Rekomendasi Desain
                     <img src="{{ asset('images/icon/house.png') }}" alt="Rekomendasi Desain">
                 </button>
-                <button class="btn-action outlined">
+                <button class="btn-action outlined" onclick="window.location.href='/renovation'">
                     Renovasi
                     <img src="{{ asset('images/icon/renovation.png') }}" alt="Renovasi">
                 </button>

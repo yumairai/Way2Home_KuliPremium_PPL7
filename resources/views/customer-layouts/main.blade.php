@@ -20,7 +20,7 @@
     @stack('styles')
 </head>
 
-<body>
+<body data-user-logged-in="{{ Auth::check() ? 'true' : 'false' }}">
     <!-- NAVBAR -->
     @auth
         @include('partials.navbar_user')

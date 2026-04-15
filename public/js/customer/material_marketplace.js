@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // render produk ke dalam grid
     function renderProducts(items) {
         productGrid.innerHTML = ''; // bersihin grid
+        const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
 
         items.forEach(item => {
             const statusBadge = item.stok > 0
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <span class="product-price-value">${item.harga.toLocaleString('id-ID')}</span>
                                 <span class="product-price-unit">/ ${item.satuan}</span>
                             </div>
-                            <button class="add-to-cart-btn">
+                            <button class="add-to-cart-btn" onclick="handleAddToCart(${item.id})">
                                 Tambah
                                 <img src="/images/icon/trolley.png" alt="Troli">
                             </button>
@@ -38,6 +39,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
             `;
+            // Fungsi untuk menangani klik
+            window.handleAddToCart = (itemId) => {
+                if (!isLoggedIn) {
+                    // Jika belum login, arahkan ke halaman login
+                    alert('Silakan login terlebih dahulu untuk menambah barang ke keranjang.');
+                    window.location.href = window.loginUrl;;
+                    return;
+                } else {
+                    console.log('Menambahkan material ID:', itemId, 'ke keranjang...');
+                    // nnti fungsi tambah kan nnya di sini (material bnran)
+                }
+
+            };
             productGrid.innerHTML += card;
         });
     }

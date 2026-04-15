@@ -9,6 +9,10 @@ Route::get('/', function () {
     return view('customer-layouts.dashboard');
 })->name('home');
 
+Route::get('/material', function () {
+    return view('customer-layouts.material_marketplace');
+})->name('material.index');
+
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -23,10 +27,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return view('customer-layouts.dashboard');
     })->name('customer-layouts.dashboard');
-
-    Route::get('/material', function () {
-        return view('customer-layouts.material_marketplace');
-    });
 
     Route::get('/material/cart', function () {
         return view('customer-layouts.cart');

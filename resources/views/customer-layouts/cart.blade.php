@@ -6,7 +6,7 @@
     <section class="cart-section">
         <main class="cart-main">
             <!-- nanti kalo belanjaannya kosong (sesuaikan sama DB nanti), ubah cart title ini jadi belanjaan masi kosong,
-                                    sama cart subtitlenya silakan lanjut berbelanja + tombol balik ke rute /marketplace -->
+                                        sama cart subtitlenya silakan lanjut berbelanja + tombol balik ke rute /marketplace -->
             <div class="cart-header">
                 <h1 class="cart-title">Shopping Cart</h1>
                 <p class="cart-subtitle">Periksa dan konfirmasikan pesanan material Anda.</p>
@@ -35,7 +35,7 @@
                             </div>
                             <div class="delivery-address-field full-width">
                                 <!-- nah, kalo ini tergantung, user ini generate pake desain atau memang dr marketplace langsung
-                                                    kalo dari marketplace, user ngisi alamatnya di sini, kalo dari desain, alamatnya udah terisi otomatis -->
+                                                        kalo dari marketplace, user ngisi alamatnya di sini, kalo dari desain, alamatnya udah terisi otomatis -->
                                 <label class="delivery-address-label" for="alamat_lengkap">Alamat Lengkap</label>
                                 <textarea class="delivery-address-textarea" id="alamat_lengkap"
                                     placeholder="Tuliskan alamat detail seperti nama jalan, nomor rumah, RT/RW, dan kelurahan/kecamatan"></textarea>
@@ -204,3 +204,6 @@
         </main>
     </section>
 @endsection
+@push('scripts')
+    <script src="{{ asset('js/customer/material_marketplace.js') }}"></script>
+@endpush

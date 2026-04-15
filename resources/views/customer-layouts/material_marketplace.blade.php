@@ -6,11 +6,13 @@
     <!-- Hero Section -->
     <section class="hero-section">
         <!-- floating button (kaya grab kalo kata yumi) buat notalin barang !-->
-        <div class="checkout-btn" onclick="window.location.href='/material/cart'">
-            <div class="checkout-left"><img src="{{ asset('images/icon/shopping-cart.png') }}" alt="Cart"> • <span
-                    id="checkoutCount">3</span>Items</div>
-            <div class="checkout-right">Rp<span id="checkoutTotal">6.495.000</span></div>
-        </div>
+        @auth
+            <div class="checkout-btn" onclick="window.location.href='/material/cart'">
+                <div class="checkout-left"><img src="{{ asset('images/icon/shopping-cart.png') }}" alt="Cart"> • <span
+                        id="checkoutCount">3</span>Items</div>
+                <div class="checkout-right">Rp<span id="checkoutTotal">6.495.000</span></div>
+            </div>
+        @endauth
         <div class="hero-container">
             <div class="hero-background">
                 <img alt="Construction Background" src="{{ asset('images/aset/construction.jpg') }}" />
@@ -147,5 +149,8 @@
     </div>
 @endsection
 @push('scripts')
+    <script>
+        window.loginUrl = "{{ route('login') }}";
+    </script>
     <script src="{{ asset('js/customer/material_marketplace.js') }}"></script>
 @endpush
