@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const profileTrigger = document.querySelector('.nav-actions');
+    const profileTrigger = document.getElementById('profileDropdown');
     const dropdown = document.querySelector('.profile-dropdown');
 
     profileTrigger.addEventListener('click', (e) => {

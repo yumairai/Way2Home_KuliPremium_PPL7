@@ -1,5 +1,5 @@
-@extends('customer.proyek_user_layouts')
-@section('content')
+@extends('customer-layouts.proyek_user')
+@section('project_content')
     <!-- Left Column: Primary Project Card -->
     <div class="project-main">
         <section class="project-card">
@@ -10,16 +10,16 @@
                     style="" />
                 <div class="project-image-overlay"></div>
                 <div class="project-header">
-                    <h2>Modern Villa Kemang</h2>
+                    <h2>Rumah Minimalist Jatinangor</h2>
                     <p class="project-location">
                         <span class="material-symbols-outlined" style="">location_on</span>
-                        Jakarta Selatan, DKI Jakarta
+                        Jatinangor, Sumedang
                     </p>
                 </div>
-                <div class="project-status revision">
-                    <span class="status-badge revision">
-                        <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>error</span>
-                        Perlu Revisi
+                <div class="project-status verified">
+                    <span class="status-badge verified">
+                        <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>check</span>
+                        Terverifikasi
                     </span>
                 </div>
             </div>
@@ -27,49 +27,46 @@
                 <div class="info-grid">
                     <div class="info-item">
                         <p class="info-label">Nama Desain</p>
-                        <p class="info-value">The Minimalist V2</p>
+                        <p class="info-value">TMinimalist Nangorian</p>
                     </div>
                     <div class="info-item">
                         <p class="info-label">Budget</p>
-                        <p class="info-value">Rp 2.450.000.000</p>
+                        <p class="info-value">Rp 450.000.000</p>
                     </div>
                     <div class="info-item">
                         <p class="info-label">Estimasi Waktu</p>
-                        <p class="info-value">12 Bulan</p>
+                        <p class="info-value">6 Bulan</p>
                     </div>
                 </div>
                 <!-- Information Section -->
                 <!-- di information-container ada state verified, revision, sama pending -->
-                <div class="information-container">
-                    <div class="information-icon-box">
-                        <span class="material-symbols-outlined">rate_review</span>
+                <div class="information-container verified">
+                    <div class="information-icon-box verified">
+                        <span class="material-symbols-outlined">check</span>
                     </div>
-                    <div class="information-content">
-                        <h3>Dokumen Ditolak</h3>
-                        <p>Scan dokumen IMB yang Anda lampirkan memiliki resolusi rendah dan tidak
-                            terbaca.
-                            Mohon unggah kembali dokumen dengan kualitas yang lebih baik agar dapat
-                            segera kami verifikasi.</p>
+                    <div class="information-content verified">
+                        <h3>Proyek Aktif</h3>
+                        <p>Proyek sedang aktif dan progress dapat dilacak. Terima kasih telah menggunakan layanan <strong
+                                style="color: #004796">Way2Home</strong></p>
                     </div>
-                    <!-- button ini hanya muncul kalo ada revisi/ditolak admin, nanti ubah stylenya aja jadi
-                                                                         'display: none' (kalo gaada revisi) -->
-                    <button class="btn-upload revision">
+                    <button class="btn-upload" style="display: none">
                         <span class="material-symbols-outlined">upload_file</span>
                         Upload Ulang
                     </button>
                 </div>
                 <!-- Action Buttons -->
                 <div class="button-group">
-                    <button class="btn-action btn-cancel" id="cancelBtn">
+                    @php
+                        $sudahBayar = true; // ceritanya udh bayar
+                        $statusDokumen = 'approved';
+                        $isMandor = true; // udh diassign juga sm admin, user baru bisa klik tombol pantau progress
+                        $isProyek = true; // proyek udh aktif, berarti gabisa batalin gitu aja. tombol batalin akan dicegah/dikasi alert.
+                    @endphp
+                    <button class="btn-action btn-cancel" id="cancelBtn" data-proyek="{{ $isProyek ? 'true' : 'false' }}">
                         <span class="material-symbols-outlined">cancel</span>
                         Batalkan Proyek
                     </button>
-                    <!-- button ini ada state disabled biar gabisa diklik kalo user blm terverifikasi dok nya!-->
-                    @php
-                        $sudahBayar = false; // ceritanya udh bayar
-                        $statusDokumen = '';
-                        $isMandor = false;
-                    @endphp
+                    <!-- button ini ada state 'disabled' biar gabisa diklik kalo user blm terverifikasi dok nya!-->
 
                     @if (!$sudahBayar)
                         {{-- Tampilan sebelum bayar --}}
@@ -117,8 +114,8 @@
                     <!-- Milestone-icon ada state in-progress, completed, sama pending !-->
                     <!-- in-progress: user lagi ada di situ, completed: udah kelar, pending: user blm di situ (masi di atas) !-->
                     <!-- Milestone-line ada state ada inactive (berarti dari posisi itu, belum otw ke bawahnya), kalo proses udah selesai
-                                                                                                    misalkan dokumen udah berhasil diverifikasi, nah itu berarti inactive
-                                                                                                    nya diilangin biar jadi milestone-line aja, jangan dikasih inactive !-->
+                                                                                                                                                                                                                                        misalkan dokumen udah berhasil diverifikasi, nah itu berarti inactive
+                                                                                                                                                                                                                                        nya diilangin biar jadi milestone-line aja, jangan dikasih inactive !-->
                     <div class="milestone-timeline">
                         <div class="milestone-icon completed">
                             <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>check</span>
@@ -132,47 +129,51 @@
                 </div>
                 <div class="milestone-item">
                     <div class="milestone-timeline">
-                        <div class="milestone-icon in-progress">
-                            <span class="material-symbols-outlined" style="">history</span>
+                        <div class="milestone-icon">
+                            <span class="material-symbols-outlined" style="">check</span>
                         </div>
-                        <div class="milestone-line inactive"></div>
+                        <div class="milestone-line"></div>
                     </div>
                     <div class="milestone-content">
                         <p class="milestone-label">Verifikasi Dokumen</p>
-                        <p class="milestone-status revision">Butuh Revisi</p>
+                        <p class="milestone-status pending">Berhasil direview</p>
                     </div>
                 </div>
                 <div class="milestone-item">
                     <div class="milestone-timeline">
-                        <div class="milestone-icon pending">
-                            <span class="material-symbols-outlined" style="">payments</span>
+                        <div class="milestone-icon completed">
+                            <span class="material-symbols-outlined" style="">check</span>
                         </div>
-                        <div class="milestone-line inactive"></div>
+                        <!-- contoh ini, kan user udah bayar, maka nya ilang inactivenya !-->
+                        <div class="milestone-line"></div>
                     </div>
                     <div class="milestone-content">
                         <p class="milestone-label">Pembayaran DP</p>
-                        <p class="milestone-date">Menunggu Verifikasi</p>
+                        <p class="milestone-date">Pembayaran Berhasil</p>
                     </div>
                 </div>
                 <div class="milestone-item">
                     <div class="milestone-timeline">
-                        <div class="milestone-icon pending">
-                            <span class="material-symbols-outlined" style="">person</span>
+                        <div class="milestone-icon completed">
+                            <span class="material-symbols-outlined" style="">check</span>
                         </div>
-                        <div class="milestone-line inactive"></div>
+                        <div class="milestone-line"></div>
                     </div>
                     <div class="milestone-content">
                         <p class="milestone-label">Pengalokasian Mandor</p>
-                        <p class="milestone-date">Menunggu</p>
+                        <p class="milestone-date">Mandor dialokasikan</p>
                     </div>
                 </div>
                 <div class="milestone-item">
                     <div class="milestone-timeline">
-                        <div class="milestone-icon pending">
+                        <div class="milestone-icon completed">
                             <span class="material-symbols-outlined" style="">start</span>
                         </div>
                     </div>
-
+                    <div class="milestone-content">
+                        <p class="milestone-label">Proyek Dibuat</p>
+                        <p class="milestone-date">Pantau progress proyek Anda</p>
+                    </div>
                 </div>
             </div>
         </section>

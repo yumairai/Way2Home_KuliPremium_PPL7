@@ -103,9 +103,11 @@ if (mainSubmitBtn) {
         if (selectedPackage === 'paket-komplit') {
             const cert = document.getElementById('sertifikat_tanah');
             const ktp = document.getElementById('ktp_pemilik');
+            const imb = document.getElementById('imb_pbg');
 
             if (!cert || cert.files.length === 0) errors.push("Sertifikat Tanah wajib diunggah.");
             if (!ktp || ktp.files.length === 0) errors.push("KTP Pemilik wajib diunggah.");
+            if (!imb || imb.files.length === 0) errors.push("IMB/PBG Pemilik wajib diunggah.");
         }
 
         if (errors.length > 0) {

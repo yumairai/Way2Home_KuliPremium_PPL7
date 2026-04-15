@@ -1,81 +1,25 @@
 <?php
 
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
 
-// guest
 Route::get('/', function () {
-    return view('welcome');
+    return view('customer-layouts.dashboard');
+})->name('home');
+
+Route::middleware(['guest'])->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
-Route::get('/home', function () {
-    return view('customer.dashboard');
-});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('customer-layouts.dashboard');
+    })->name('customer-layouts.dashboard');
 
-Route::get('/login', function () {
-    return view('login');
-})->name('login');
-
-Route::get('/register', function () {
-    return view('register');
-})->name('register');
-
-// inputnya
-Route::get('/rekomendasi/input', function () {
-    return view('customer.input_preferensi_ai');
-});
-
-// hasil inputnya
-Route::get('/rekomendasi/hasil', function () {
-    return view('customer.rekomendasi_rumah');
-});
-
-// otw ke form pembangunan rumah abis klik tombol pilih desain 
-Route::get('/pembangunan', function () {
-    return view('customer.form_pembangunan_rumah');
-});
-
-// otw ke material marketplace abis klik tombol beli material di form pembangunan rumah
-Route::get('/material-only', function () {
-    return view('customer.material_marketplace');
-});
-
-// otw ke progress track user abis klik tombol lihat progress pembangunan rumah di form pembangunan rumah 
-Route::get('/progress-track-user', function () {
-    return view('customer.material_marketplace'); // sementara ke sini dulu yah hehe
-});
-
-Route::get('/material', function () {
-    return view('customer.material_marketplace');
-});
-
-Route::get('/material/cart', function () {
-    return view('customer.cart');
-});
-
-Route::get('/user/projects', function () {
-    return view('customer.proyek_user');
-});
-
-Route::prefix('user')->group(function () {
-    Route::get('/orders', function () {
-        return view('customer.order_user');
-    })->name('user.orders');
-
-    Route::prefix('projects')->group(function () {
-        Route::redirect('/', '/user/projects/1');
-
-        Route::get('/{id}', function ($id) {
-            $viewName = "customer.proyek_user" . $id;
-            if (view()->exists($viewName)) {
-                return view($viewName, ['projectId' => $id]);
-            }
-            abort(404, "Halaman dummy untuk proyek $id belum dibuat.");
-        })->name('user.projects.detail');
-    });
-
-    Route::get('/profile', function () {
-        return view('customer.profile_edit');
-    })->name('user.profile');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
 // admin
@@ -121,6 +65,51 @@ Route::prefix('admin')->group(function () {
     })->name('admin.preview');
 });
 
+// tes buat navigasi baru untuk sistem layouting
 Route::get('/tes', function () {
-    return view('customer.proyekuser');
+    return view('customer-layouts.dashboard');
+});
+
+Route::get('/tes-material', function () {
+    return view('customer-layouts.material_marketplace');
+});
+
+Route::get('/tes-material/cart', function () {
+    return view('customer-layouts.cart');
+});
+
+Route::get('/tes-input', function () {
+    return view('customer-layouts.input_preferensi_ai');
+});
+
+Route::get('/recom', function () {
+    return view('customer-layouts.rekomendasi_rumah');
+});
+
+Route::get('/form', function () {
+    return view('customer-layouts.form_pembangunan_rumah');
+});
+
+Route::prefix('proyek')->group(function () {
+    Route::redirect('/', '/proyek/1');
+
+    Route::get('/1', function () {
+        return view('customer-layouts.proyek_user1');
+    });
+
+    Route::get('/2', function () {
+        return view('customer-layouts.proyek_user2');
+    });
+
+    Route::get('/3', function () {
+        return view('customer-layouts.proyek_user3');
+    });
+
+    Route::get('/4', function () {
+        return view('customer-layouts.proyek_user4');
+    });
+
+    Route::get('/5', function () {
+        return view('customer-layouts.proyek_user5');
+    });
 });

@@ -1,42 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Pembangunan Rumah</title>
+@extends('customer-layouts.main')
+@push('styles')
     <link rel="stylesheet" href="{{ asset('css/customer/form_pembangunan_rumah.css') }}">
-    <link href="{{ asset('images/aset/logo-w2h.png') }}" type="image" rel="icon">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet">
-</head>
-
-<body>
-    <!-- NAVBAR -->
-    <nav class="glass-nav">
-        <div class="nav-container">
-            <!-- Brand -->
-            <div class="brand">
-                <img src="{{ asset('images/aset/logo-w2h.png') }}" alt="Logo Way2Home">
-                <span class="brand-text">Way2Home</span>
-            </div>
-            <!-- link -->
-            <div class="nav-links">
-                <a href="#">Beranda</a>
-                <a href="#">Desain</a>
-                <a href="#">Material</a>
-                <a href="#">Renovasi</a>
-            </div>
-            <!-- user bisa logout -->
-            <div class="nav-actions">
-                <button onclick="logout()" class="btn-nav primary">Logout</button>
-            </div>
-        </div>
-    </nav>
+@endpush
+@section('content')
     <div class="form-wrapper">
         <!-- judul -->
         <div class="page-title">
@@ -160,8 +126,8 @@
                 <div class="upload-grid">
                     <!-- dokumen sertif tanah -->
                     <label class="upload-item" for="sertifikat_tanah" id="drop-zone-sertifikat">
-                        <input type="file" id="sertifikat_tanah" name="sertifikat_tanah"
-                            accept=".jpg,.jpeg,.png,.pdf" class="file-input-hidden">
+                        <input type="file" id="sertifikat_tanah" name="sertifikat_tanah" accept=".jpg,.jpeg,.png,.pdf"
+                            class="file-input-hidden">
 
                         <!-- Preview -->
                         <div class="preview-container" style="display: none;">
@@ -236,48 +202,7 @@
             </div>
         </form>
     </div>
-    <footer>
-        <div class="footer-container">
-            <div class="footer-brand">
-                <div class="footer-brand-info">
-                    <img src="{{ asset('images/aset/logo-w2h.png') }}" alt="Logo Way2Home">
-                    <span class="footer-brand-name">Way2Home</span>
-                </div>
-                <p class="footer-brand-text">© 2026 Way2Home Construction
-                    Platform. Architectural Excellence.</p>
-            </div>
-            <div class="footer-links">
-                <a href="#">Tentang Kami</a>
-                <a href="#">Proyek</a>
-                <a href="#">Karir</a>
-                <a href="#">Kontak</a>
-                <a href="#">Privasi</a>
-            </div>
-            <div class="footer-actions">
-                <div class="footer-icon-btn">
-                    <img src="{{ asset('images/icon/whatsapp.png') }}" alt="WhatsApp">
-                </div>
-            </div>
-        </div>
-    </footer>
-    <script>
-        // Cek apakah ada token di localStorage
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-            alert('Kamu belum login! Balik ke halaman login ya.');
-            window.location.href = '/login';
-        } else {
-            document.getElementById('tokenDisplay').innerText = token;
-        }
-
-        function logout() {
-            localStorage.removeItem('token');
-            window.location.href = '/login';
-        }
-    </script>
-    <script src="{{ asset('js/dropdown.js') }}"></script>
+@endsection
+@push('scripts')
     <script src="{{ asset('js/customer/form_pembangunan_script.js') }}"></script>
-</body>
-
-</html>
+@endpush

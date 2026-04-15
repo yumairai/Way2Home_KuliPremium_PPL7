@@ -6,7 +6,6 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>@yield('title')</title>
     <link href="{{ asset('css/admin/admin_page.css') }}" rel="stylesheet" />
-    <link href="{{ asset('css/admin/verifikasi.css') }}" rel="stylesheet" />
     <link href="{{ asset('images/logo-w2h.png') }}" type="image" rel="icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,7 +15,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
-    <script src="{{ asset('js/admin/verifikasi.js') }}"></script>
+    @stack('styles')
 </head>
 
 <body class="admin-page">
@@ -143,7 +142,7 @@
             @yield('content')
         </section>
     </main>
-
+@stack('scripts')
 </body>
 
 </html>

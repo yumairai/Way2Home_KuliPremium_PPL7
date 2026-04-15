@@ -4,8 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBtn = document.getElementById('progressBtn'); // Tambahkan ini
 
     if (cancelBtn) {
+
         cancelBtn.addEventListener('click', () => {
-            alert("Project dibatalkan!");
+            const isProjectActive = cancelBtn.getAttribute('data-proyek') === 'true';
+            if (isProjectActive) {
+                alert("Mohon maaf, proyek anda telah berhasil aktif dan tidak dapat dibatalkan. Terima kasih!");
+            } else {
+                alert("Project dibatalkan!");
+            }
         });
     }
 
@@ -24,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (isMandorAssigned) {
                 alert("OTW ke page progress tracking!");
-                // window.location.href = "/url-tracking-kamu";
             } else {
                 alert("Maaf, Mandor belum diassign. Mohon tunggu sebentar!");
             }

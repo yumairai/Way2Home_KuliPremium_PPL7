@@ -7,58 +7,73 @@ use App\Models\User;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-// use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Register
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    public function showRegister()
+    {
+        return view('auth.register');
+    }
+
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email:rfc,dns|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'name'         => 'required|string|max:255',
+            'email'        => 'required|string|email|max:255|unique:users',
+            'password'     => 'required|string|min:8|confirmed',
             'phone_number' => 'required',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'customer',
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'password'     => Hash::make($request->password),
+            'role'         => 'customer',
             'phone_number' => $request->phone_number,
-            // 'email_verified_at' => now(),
         ]);
 
-        Customer::create([
-            'user_id' => $user->id,
-        ]);
+        Customer::create(['user_id' => $user->id]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
 
         return response()->json([
-            'message' => 'Register Berhasil',
-            'token' => $user->createToken('auth_token')->plainTextToken,
-            'user' => $user
+            'message'  => 'Register Berhasil',
+            'redirect' => route('customer-layouts.dashboard')
         ], 201);
     }
 
-    // Login
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
+        $credentials = $request->validate([
+            'email'    => 'required|email',
             'password' => 'required',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Email atau Password Salah'], 401);
+            return response()->json([
+                'message'  => 'Login Berhasil',
+                'redirect' => route('customer-layouts.dashboard')
+            ], 200);
         }
 
-        return response()->json([
-            'message' => 'Login Berhasil',
-            'token' => $user->createToken('auth_token')->plainTextToken,
-            'user' => $user
-        ]);
+        return response()->json(['message' => 'Email atau Password Salah'], 401);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return response()->json(['redirect' => '/'], 200);
     }
 }

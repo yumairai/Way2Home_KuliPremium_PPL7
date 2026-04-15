@@ -1,4 +1,7 @@
 @extends('admin.admin_page')
+@push('styles')
+    <link href="{{ asset('css/admin/verifikasi.css') }}" rel="stylesheet" />
+@endpush
 @section('title')
     Admin - Verfikasi Dokumen
 @endsection
@@ -252,3 +255,6 @@
         </div>
     </div>
 @endsection
+@push('scripts')
+    <script src="{{ asset('js/admin/verifikasi.js') }}"></script>
+@endpush
