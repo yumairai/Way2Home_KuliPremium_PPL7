@@ -24,5 +24,5 @@ pilihDesainBtn.addEventListener("click", (event) => {
         alert("Pilih desain terlebih dahulu!");
         return;
     }
-    window.location.href = "/pembangunan";
+    window.location.href = "/house-build-form";
 });

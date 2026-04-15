@@ -142,7 +142,7 @@ if (mainSubmitBtn) {
                 body: formData,
                 headers: {
                     'Accept': 'application/json',
-                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             });
 
@@ -152,10 +152,10 @@ if (mainSubmitBtn) {
                 // pergi ke halaman sesuai paket
                 if (selectedPackage === 'material-only') {
                     alert("Berhasil! " + data.message_2);
-                    window.location.href = "/material-only";
+                    window.location.href = "/material";
                 } else {
                     alert("Berhasil! " + data.message_1);
-                    window.location.href = "/progress-track-user";
+                    window.location.href = "/project";
                 }
             } else {
                 // Jika Laravel mengembalikan error (misal file kegedean/validasi gagal)

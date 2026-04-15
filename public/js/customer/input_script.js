@@ -48,20 +48,13 @@ submitBtn.addEventListener("click", async (e) => {
         prioritas: document.querySelector('.box.active')?.dataset.value || 'biaya'
     };
 
-    const token = localStorage.getItem('token');
-    
-    if (!token) {
-        alert("Silakan login dulu!");
-        return;
-    }
-
     try {
         const response = await fetch('/api/preferensi/simpan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
             body: JSON.stringify(payload)
         });
@@ -69,7 +62,7 @@ submitBtn.addEventListener("click", async (e) => {
         const result = await response.json();
 
         if (response.ok) {
-            window.location.href = "/rekomendasi/hasil";
+            window.location.href = "/recommendation/result";
         } else {
             alert("Gagal simpan data: " + result.message);
         }

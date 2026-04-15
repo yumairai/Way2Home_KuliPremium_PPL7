@@ -7,10 +7,10 @@
         </div>
         <!-- link -->
         <div class="nav-links">
-            <a class="active" href="#">Beranda</a>
-            <a href="/rekomendasi/input">Desain</a>
+            <a href="/">Beranda</a>
+            <a href="/recommendation">Desain</a>
             <a href="/material">Material</a>
-            <a href="/renovasi">Renovasi</a>
+            <a href="/renovation">Renovasi</a>
         </div>
         <!-- Aksi buat user blm login/masuk -->
         <div class="nav-actions">

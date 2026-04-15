@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Api\AuthController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PreferensiController;
+use App\Http\Controllers\Api\ProyekController;
 
 Route::get('/', function () {
     return view('customer-layouts.dashboard');
@@ -15,9 +17,56 @@ Route::middleware(['guest'])->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::post('/api/preferensi/simpan', [PreferensiController::class, 'store']);
+    Route::post('/api/proyek/ajukan', [ProyekController::class, 'store']); // pindah ke sini yak dari api.php
+
     Route::get('/dashboard', function () {
         return view('customer-layouts.dashboard');
     })->name('customer-layouts.dashboard');
+
+    Route::get('/material', function () {
+        return view('customer-layouts.material_marketplace');
+    });
+
+    Route::get('/material/cart', function () {
+        return view('customer-layouts.cart');
+    });
+
+    Route::get('/recommendation', function () {
+        return view('customer-layouts.input_preferensi_ai');
+    });
+
+    Route::get('/recommendation/result', function () {
+        return view('customer-layouts.rekomendasi_rumah');
+    });
+
+    Route::get('/house-build-form', function () {
+        return view('customer-layouts.form_pembangunan_rumah');
+    });
+
+    Route::prefix('project')->group(function () {
+        Route::redirect('/', '/project/1');
+
+        Route::get('/1', function () {
+            return view('customer-layouts.proyek_user1');
+        });
+
+        Route::get('/2', function () {
+            return view('customer-layouts.proyek_user2');
+        });
+
+        Route::get('/3', function () {
+            return view('customer-layouts.proyek_user3');
+        });
+
+        Route::get('/4', function () {
+            return view('customer-layouts.proyek_user4');
+        });
+
+        Route::get('/5', function () {
+            return view('customer-layouts.proyek_user5');
+        });
+    });
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
@@ -63,53 +112,4 @@ Route::prefix('admin')->group(function () {
             'Cache-Control' => 'no-cache',
         ]);
     })->name('admin.preview');
-});
-
-// tes buat navigasi baru untuk sistem layouting
-Route::get('/tes', function () {
-    return view('customer-layouts.dashboard');
-});
-
-Route::get('/tes-material', function () {
-    return view('customer-layouts.material_marketplace');
-});
-
-Route::get('/tes-material/cart', function () {
-    return view('customer-layouts.cart');
-});
-
-Route::get('/tes-input', function () {
-    return view('customer-layouts.input_preferensi_ai');
-});
-
-Route::get('/recom', function () {
-    return view('customer-layouts.rekomendasi_rumah');
-});
-
-Route::get('/form', function () {
-    return view('customer-layouts.form_pembangunan_rumah');
-});
-
-Route::prefix('proyek')->group(function () {
-    Route::redirect('/', '/proyek/1');
-
-    Route::get('/1', function () {
-        return view('customer-layouts.proyek_user1');
-    });
-
-    Route::get('/2', function () {
-        return view('customer-layouts.proyek_user2');
-    });
-
-    Route::get('/3', function () {
-        return view('customer-layouts.proyek_user3');
-    });
-
-    Route::get('/4', function () {
-        return view('customer-layouts.proyek_user4');
-    });
-
-    Route::get('/5', function () {
-        return view('customer-layouts.proyek_user5');
-    });
 });

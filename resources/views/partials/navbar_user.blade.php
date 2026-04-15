@@ -7,10 +7,10 @@
         </div>
         <!-- link -->
         <div class="nav-links">
-            <a href="#">Beranda</a>
-            <a href="/rekomendasi/input">Desain</a>
+            <a href="/">Beranda</a>
+            <a href="/recommendation">Desain</a>
             <a href="/material">Material</a>
-            <a href="/renovasi">Renovasi</a>
+            <a href="/renovation">Renovasi</a>
         </div>
         <!-- user bisa klik dropdown -->
         <div class="nav-actions">
@@ -41,15 +41,15 @@
                 </div>
                 <!-- Navigation Links -->
                 <div class="dropdown-body">
-                    <a href="/user/orders" class="nav-link">
+                    <a href="/order" class="nav-link">
                         <span class="material-symbols-outlined">shopping_cart</span>
                         <span>Pesanan Saya</span>
                     </a>
-                    <a href="/user/projects" class="nav-link">
+                    <a href="/project" class="nav-link">
                         <span class="material-symbols-outlined">construction</span>
                         <span>Proyek Saya</span>
                     </a>
-                    <a href="/user/profile" class="nav-link">
+                    <a href="/profile" class="nav-link">
                         <span class="material-symbols-outlined">person_edit</span>
                         <span>Edit Profile</span>
                     </a>

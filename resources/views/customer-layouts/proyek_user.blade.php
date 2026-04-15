@@ -11,42 +11,42 @@
                 <p class="sidebar-title">List Project</p>
                 <div class="sidebar-menu">
                     {{-- Item Proyek 1 ceritanya --}}
-                    <a class="sidebar-menu-item {{ request()->is('user/projects/1') ? 'active' : '' }}"
-                        href="{{ url('user/projects/1') }}">
-                        <span class="material-symbols-outlined {{ request()->is('user/projects/1') ? 'filled' : '' }}">
+                    <a class="sidebar-menu-item {{ request()->is('/project/1') ? 'active' : '' }}"
+                        href="{{ url('/project/1') }}">
+                        <span class="material-symbols-outlined {{ request()->is('/project/1') ? 'filled' : '' }}">
                             home_work
                         </span>
                         Modern Villa Kemang
                     </a>
 
                     {{-- Item Proyek 2 ceritanya --}}
-                    <a class="sidebar-menu-item {{ request()->is('user/projects/2') ? 'active' : '' }}"
-                        href="{{ url('user/projects/2') }}">
-                        <span class="material-symbols-outlined {{ request()->is('user/projects/2') ? 'filled' : '' }}">
+                    <a class="sidebar-menu-item {{ request()->is('/project/2') ? 'active' : '' }}"
+                        href="{{ url('/project/2') }}">
+                        <span class="material-symbols-outlined {{ request()->is('/project/2') ? 'filled' : '' }}">
                             home_work
                         </span>
                         Modern Villa Bandung
                     </a>
                     {{-- Item Proyek 3 ceritanya --}}
-                    <a class="sidebar-menu-item {{ request()->is('user/projects/3') ? 'active' : '' }}"
-                        href="{{ url('user/projects/3') }}">
-                        <span class="material-symbols-outlined {{ request()->is('user/projects/3') ? 'filled' : '' }}">
+                    <a class="sidebar-menu-item {{ request()->is('/project/3') ? 'active' : '' }}"
+                        href="{{ url('/project/3') }}">
+                        <span class="material-symbols-outlined {{ request()->is('/project/3') ? 'filled' : '' }}">
                             home_work
                         </span>
                         Modern Villa Surabaya
                     </a>
                     {{-- Item Proyek 4 ceritanya --}}
-                    <a class="sidebar-menu-item {{ request()->is('user/projects/4') ? 'active' : '' }}"
-                        href="{{ url('user/projects/4') }}">
-                        <span class="material-symbols-outlined {{ request()->is('user/projects/4') ? 'filled' : '' }}">
+                    <a class="sidebar-menu-item {{ request()->is('/project/4') ? 'active' : '' }}"
+                        href="{{ url('/project/4') }}">
+                        <span class="material-symbols-outlined {{ request()->is('/project/4') ? 'filled' : '' }}">
                             home_work
                         </span>
                         Rumah Minimalist Bali
                     </a>
                     {{-- Item Proyek 5 ceritanya --}}
-                    <a class="sidebar-menu-item {{ request()->is('user/projects/5') ? 'active' : '' }}"
-                        href="{{ url('user/projects/5') }}">
-                        <span class="material-symbols-outlined {{ request()->is('user/projects/5') ? 'filled' : '' }}">
+                    <a class="sidebar-menu-item {{ request()->is('/project/5') ? 'active' : '' }}"
+                        href="{{ url('/project/5') }}">
+                        <span class="material-symbols-outlined {{ request()->is('/project/5') ? 'filled' : '' }}">
                             home_work
                         </span>
                         Rumah Minimalist Jatinangor
