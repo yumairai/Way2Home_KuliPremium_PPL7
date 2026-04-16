@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Customer;
+use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -59,9 +60,20 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            $user = Auth::user();
+
+            // Logika Pengalihan Berdasarkan Role
+            if ($user->role === 'admin') {
+                return response()->json([
+                    'message'  => 'Login Admin Berhasil',
+                    'redirect' => route('admin.dashboard')
+                ], 200);
+            }
+
+            // Default ke Dashboard Customer
             return response()->json([
                 'message'  => 'Login Berhasil',
-                'redirect' => route('customer-layouts.dashboard')
+                'redirect' => route('customer-layouts.dashboard') // Ke Dashboard Customer
             ], 200);
         }
 
@@ -75,5 +87,17 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return response()->json(['redirect' => '/'], 200);
+    }
+
+    public function index()
+    {
+        if (Auth::check()) {
+            if (Auth::user()->role === 'admin') {
+                return redirect()->route('admin.dashboard');
+            }
+            return redirect()->route('customer-layouts.dashboard');
+        }
+
+        return view('customer-layouts.dashboard');
     }
 }

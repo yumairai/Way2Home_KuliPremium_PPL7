@@ -1,13 +1,11 @@
 <?php
 
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PreferensiController;
 use App\Http\Controllers\Api\ProyekController;
 
-Route::get('/', function () {
-    return view('customer-layouts.dashboard');
-})->name('home');
+Route::get('/', [AuthController::class, 'index'])->name('home');
 
 Route::get('/material', function () {
     return view('customer-layouts.material_marketplace');
@@ -72,7 +70,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // admin
-Route::prefix('admin')->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::redirect('/', '/admin/dashboard');
 
     Route::get('/dashboard', function () {
