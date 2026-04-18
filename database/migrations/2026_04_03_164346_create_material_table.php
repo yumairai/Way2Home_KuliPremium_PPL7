@@ -19,6 +19,7 @@ return new class extends Migration
             $table->bigInteger('harga');
             $table->text('deskripsi')->nullable();
             $table->integer('stok')->default(0);
+            $table->string('satuan');
             $table->string('path_foto_material')->nullable();
             $table->timestamps();
         });

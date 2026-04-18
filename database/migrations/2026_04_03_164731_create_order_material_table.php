@@ -15,11 +15,20 @@ return new class extends Migration
         {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
+            
+            $table->string('order_id_midtrans')->unique();
+            $table->string('snap_token')->nullable();
+            
             $table->date('tanggal_order');
             $table->text('alamat_pengiriman');
-            $table->bigInteger('total_harga'); // Total belanja material
-            $table->enum('status_order', ['menunggu_pembayaran', 'diproses', 'dikirim', 'selesai', 'dibatalkan'])
-                  ->default('menunggu_pembayaran');
+            
+            $table->bigInteger('subtotal_material');
+            $table->bigInteger('biaya_layanan');
+            $table->bigInteger('total_harga');
+            
+            $table->enum('status_order', ['pending', 'settlement', 'expire', 'cancel', 'deny'])
+                ->default('pending');
+                
             $table->timestamps();
         });
     }

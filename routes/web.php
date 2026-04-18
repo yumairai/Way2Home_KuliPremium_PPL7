@@ -1,15 +1,15 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Customer\MaterialController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\PreferensiController;
-use App\Http\Controllers\Api\ProyekController;
+use App\Http\Controllers\Customer\PreferensiController;
+use App\Http\Controllers\Customer\ProyekController;
 
 Route::get('/', [AuthController::class, 'index'])->name('home');
 
-Route::get('/material', function () {
-    return view('customer-layouts.material_marketplace');
-})->name('material.index');
+Route::get('/material', [MaterialController::class, 'index'])->name('material.index');
+Route::get('/api/materials', [MaterialController::class, 'getMaterials']);
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
