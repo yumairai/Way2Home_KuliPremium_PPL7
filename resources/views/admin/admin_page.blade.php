@@ -81,7 +81,10 @@
                 <p class="user-name">Admin Utama</p>
                 <p class="user-role">System Access</p>
             </div>
-            <button class="logout-button" type="button" onclick="window.location.href='/'">
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
+            <button class="logout-button" type="button" onclick="document.getElementById('logout-form').submit()">
                 <span>Keluar</span>
                 <span class="material-symbols-outlined">logout</span>
             </button>

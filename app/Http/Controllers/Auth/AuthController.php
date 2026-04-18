@@ -82,11 +82,17 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $role = Auth::user()->role;
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return response()->json(['redirect' => '/'], 200);
+        if ($role === 'admin') {
+            return redirect()->route('login')->with('message', 'Anda telah logout');
+        }
+
+        return redirect('/')->with('message', 'Anda telah logout');
     }
 
     public function index()
@@ -97,7 +103,6 @@ class AuthController extends Controller
             }
             return redirect()->route('customer-layouts.dashboard');
         }
-
         return view('customer-layouts.dashboard');
     }
 }

@@ -59,7 +59,12 @@
 
                 <!-- Footer / Logout -->
                 <div class="dropdown-footer">
-                    <button class="dropdown-logout-btn" onclick="AuthApp.logout()">
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+
+                    <button type="button" class="dropdown-logout-btn"
+                        onclick="event.preventDefault(); if(confirm('Yakin ingin keluar?')) { document.getElementById('logout-form').submit(); }">
                         <span class="material-symbols-outlined">logout</span>
                         Logout
                     </button>
@@ -69,5 +74,5 @@
     </div>
 </nav>
 @push('scripts')
-    <script src="{{ asset('js/dropdown.js') }}"></script>
+<script src="{{ asset('js/dropdown.js') }}"></script>
 @endpush
