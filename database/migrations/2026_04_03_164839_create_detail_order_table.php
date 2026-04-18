@@ -15,13 +15,17 @@ return new class extends Migration
         {
             $table->id();
             $table->foreignId('order_material_id')
-                  ->constrained('order_material')
-                  ->cascadeOnDelete();            
+                ->constrained('order_material')
+                ->cascadeOnDelete();            
             $table->foreignId('material_id')
-                  ->constrained('materials')
-                  ->cascadeOnDelete();
+                ->constrained('materials')
+                ->cascadeOnDelete();
+
             $table->integer('jumlah');
-            $table->bigInteger('subtotal');
+            
+            $table->bigInteger('harga_satuan'); 
+            
+            $table->bigInteger('subtotal'); 
             
             $table->timestamps();
         });
