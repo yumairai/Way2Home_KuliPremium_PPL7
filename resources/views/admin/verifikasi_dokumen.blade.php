@@ -9,6 +9,24 @@
     <h2>Verifikasi Dokumen</h2>
     <p>Periksa kelengkapan dokumen legalitas mandor dan proyek.</p>
 @endsection
+@section('stats')
+    <div class="verifikasi-stat-card">
+        <p class="verifikasi-stat-label">Total Pengajuan Verifikasi</p>
+        <p class="verifikasi-stat-value">3</p>
+    </div>
+    <div class="verifikasi-stat-card waiting">
+        <p class="verifikasi-stat-label">Menunggu</p>
+        <p class="verifikasi-stat-value">3</p>
+    </div>
+    <div class="verifikasi-stat-card verified">
+        <p class="verifikasi-stat-label">Terverifikasi</p>
+        <p class="verifikasi-stat-value">0</p>
+    </div>
+    <div class="verifikasi-stat-card rejected">
+        <p class="verifikasi-stat-label">Ditolak</p>
+        <p class="verifikasi-stat-value">0</p>
+    </div>
+@endsection
 @section('content')
     <div class="verifikasi-card">
         <div class="table-scroll">
@@ -249,7 +267,7 @@
                     <button class="modal-btn modal-btn-approve">Verifikasi</button>
                 </div>
                 <div class="modal-footer-buttons-right">
-                    <button class="modal-btn modal-btn-submit disabled">Submit</button>
+                    <button class="modal-btn modal-btn-submit disabled" disabled>Submit</button>
                 </div>
             </div>
         </div>

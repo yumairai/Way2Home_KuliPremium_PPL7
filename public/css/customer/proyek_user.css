@@ -666,6 +666,162 @@ html {
     font-size: 11.25rem;
 }
 
+/* SECTION CICILAN */
+.cicilan-section {
+    padding: 2rem;
+    background-color: var(--surface-container-lowest);
+    border-radius: 2rem;
+}
+
+/* TITLE */
+.section-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+/* GRID */
+.card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+@media (min-width: 768px) {
+    .card-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* CARD */
+.card {
+    background: var(--surface-container-highest);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 16px;
+    position: relative;
+    transition: 0.3s;
+}
+
+.card:hover {
+    border-color: var(--primary);
+}
+
+/* ACTIVE CARD */
+.card.active {
+    background: white;
+    border: 2px solid var(--primary-container);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* DISABLED */
+.card.disabled {
+    opacity: 0.6;
+}
+
+/* HEADER */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+/* TEXT */
+.periode-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-slate-600);
+    text-transform: uppercase;
+}
+
+.periode-label.highlight {
+    color: var(--text-blue-900);
+}
+
+.price {
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* DATE */
+.date {
+    margin-top: 10px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-slate-600);
+}
+
+.date.highlight {
+    color: var(--text-blue-900);
+}
+
+/* BADGE */
+.badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid var(--slate-200);
+}
+
+.badge.success {
+    background: var(--bg-green-100);
+    color: var(--success);
+}
+
+.badge.warning {
+    background: var(--bg-yellow-100);
+    color: var(--pending);
+}
+
+.badge.neutral {
+    background: #e5e7eb;
+    color: #6b7280;
+}
+
+/* INFO BOX */
+.info-box {
+    margin-top: 20px;
+    background: #fff7ed;
+    border: 1px solid var(--tertiary);
+    padding: 15px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-slate-600);
+}
+
+/* BUTTON */
+.btn-primary {
+    width: 100%;
+    margin-top: 20px;
+    background: var(--primary);
+    color: white;
+    padding: 16px;
+    border: none;
+    border-radius: 16px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    transition: 0.3s;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 15px rgba(71, 188, 255, 0.3);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
 /* ============================================
    Milestone Section
    ============================================ */

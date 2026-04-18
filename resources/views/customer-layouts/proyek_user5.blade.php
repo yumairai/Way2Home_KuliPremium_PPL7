@@ -55,14 +55,15 @@
                     </button>
                 </div>
                 <!-- Action Buttons -->
-                <div class="button-group">
-                    @php
-                        $sudahBayar = true; // ceritanya udh bayar
-                        $statusDokumen = 'approved';
-                        $isMandor = true; // udh diassign juga sm admin, user baru bisa klik tombol pantau progress
-                        $isProyek = true; // proyek udh aktif, berarti gabisa batalin gitu aja. tombol batalin akan dicegah/dikasi alert.
-                    @endphp
-                    <button class="btn-action btn-cancel" id="cancelBtn" data-proyek="{{ $isProyek ? 'true' : 'false' }}">
+                @php
+                    $sudahBayar = true; // ceritanya udh bayar
+                    $statusDokumen = 'approved';
+                    $isMandor = true; // udh diassign juga sm admin, user baru bisa klik tombol pantau progress
+                    $isProyek = true; // proyek udh aktif, berarti gabisa batalin gitu aja. tombol batalin akan dicegah/dikasi alert.
+                @endphp
+                <div class="button-group" id="buttonGroup" data-proyek="{{ $isProyek ? 'true' : 'false' }}"
+                    data-mandor="{{ $isMandor ? 'true' : 'false' }}">
+                    <button class="btn-action btn-cancel" id="cancelBtn">
                         <span class="material-symbols-outlined">cancel</span>
                         Batalkan Proyek
                     </button>
@@ -78,15 +79,81 @@
                     @else
                         {{-- Tampilan sesudah bayar --}}
                         {{-- Kita kirim status mandor ke JS lewat data-attribute --}}
-                        <button class="btn-action btn-progress-action" id="progressBtn"
-                            data-mandor="{{ $isMandor ? 'true' : 'false' }}">
+                        <button class="btn-action btn-progress-action" id="progressBtn">
                             <span class="material-symbols-outlined">analytics</span>
                             Pantau Progress
                         </button>
                     @endif
                 </div>
             </div>
+
         </section>
+        <!--  CICILAN SECTION (HANYA MUNCUL SAAT PROJECT ACTIVE) !-->
+        @if ($isProyek)
+            <div class="cicilan-section">
+                <h3 class="section-title">Periode Cicilan Rumah</h3>
+                <div class="card-grid">
+                    <!-- Periode 1 -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div>
+                                <p class="periode-label">Periode 1</p>
+                                <p class="price">Rp 25.000.000</p>
+                            </div>
+                            <span class="badge success">Lunas</span>
+                        </div>
+
+                        <div class="date">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            Jatuh Tempo: 15 Okt 2023
+                        </div>
+                    </div>
+                    <!-- Periode 2 (active -> kalo cicilian lagi di periode itu) -->
+                    <div class="card active">
+                        <div class="card-header">
+                            <div>
+                                <p class="periode-label highlight">Periode 2</p>
+                                <p class="price">Rp 25.000.000</p>
+                            </div>
+                            <span class="badge warning">Belum Bayar</span>
+                        </div>
+
+                        <div class="date highlight">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            Jatuh Tempo: 15 Nov 2023
+                        </div>
+                    </div>
+                    <!-- Periode 3 -->
+                    <div class="card disabled">
+                        <div class="card-header">
+                            <div>
+                                <p class="periode-label">Periode 3</p>
+                                <p class="price">Rp 25.000.000</p>
+                            </div>
+                            <span class="badge neutral">Belum Bayar</span>
+                        </div>
+
+                        <div class="date">
+                            <span class="material-symbols-outlined">calendar_today</span>
+                            Jatuh Tempo: 15 Des 2023
+                        </div>
+                    </div>
+                </div>
+                <!-- Info -->
+                <div class="info-box">
+                    <span class="material-symbols-outlined">warning</span>
+                    <p>
+                        <b>Informasi Penting:</b> Jika cicilan belum dibayar sesuai jadwal, pengerjaan proyek akan ditunda
+                        sementara.
+                    </p>
+                </div>
+                <!-- Button -->
+                <button class="btn-primary" id="periodePayBtn">
+                    <span class="material-symbols-outlined">payments</span>
+                    Bayar Periode
+                </button>
+            </div>
+        @endif
     </div>
     <!-- Right Column: Info & Status -->
     <div class="project-sidebar">
@@ -114,8 +181,8 @@
                     <!-- Milestone-icon ada state in-progress, completed, sama pending !-->
                     <!-- in-progress: user lagi ada di situ, completed: udah kelar, pending: user blm di situ (masi di atas) !-->
                     <!-- Milestone-line ada state ada inactive (berarti dari posisi itu, belum otw ke bawahnya), kalo proses udah selesai
-                                                                                                                                                                                                                                        misalkan dokumen udah berhasil diverifikasi, nah itu berarti inactive
-                                                                                                                                                                                                                                        nya diilangin biar jadi milestone-line aja, jangan dikasih inactive !-->
+                                                                                                                                                                                                                                                                                                                    misalkan dokumen udah berhasil diverifikasi, nah itu berarti inactive
+                                                                                                                                                                                                                                                                                                                    nya diilangin biar jadi milestone-line aja, jangan dikasih inactive !-->
                     <div class="milestone-timeline">
                         <div class="milestone-icon completed">
                             <span class="material-symbols-outlined" style='font-variation-settings: "FILL" 1;'>check</span>

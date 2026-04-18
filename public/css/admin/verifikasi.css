@@ -14,9 +14,46 @@
     --status-success: #16a34a;
     --status-warning-bg: #fffbeb;
     --status-warning: #cc6b00;
+    --status-waiting-bg: rgb(255, 255, 205);
+    --status-waiting: rgb(104, 85, 0);
     --status-danger-bg: #fee2e2;
     --status-danger: #dc2626;
     --border-surface: rgba(194, 198, 213, 0.16);
+}
+
+.verifikasi-stat-card {
+    width: 100%;
+    background-color: #f4f2ff;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid #004796;
+}
+
+.verifikasi-stat-card.waiting {
+    border-left: 4px solid var(--status-waiting);
+}
+
+.verifikasi-stat-card.verified {
+    border-left: 4px solid var(--status-success);
+}
+
+.verifikasi-stat-card.rejected {
+    border-left: 4px solid var(--status-danger);
+}
+
+.verifikasi-stat-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #424753;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.verifikasi-stat-value {
+    font-size: 1.875rem;
+    font-weight: 900;
+    color: #0e1744;
 }
 
 .verifikasi-card {

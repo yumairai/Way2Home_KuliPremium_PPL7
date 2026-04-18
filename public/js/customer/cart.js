@@ -1,11 +1,11 @@
 const token = localStorage.getItem('token');
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const cartContainer = document.getElementById('cartContainer');
     const summaryContainer = document.getElementById('summaryContainer');
     const subtotalElement = document.getElementById('subtotalValue');
     const grandTotalElement = document.getElementById('grandTotalValue');
-    
+
     if (!token) {
         window.location.href = '/login';
         return;
@@ -15,14 +15,14 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/api/cart', {
             headers: { 'Authorization': `Bearer ${token}` } // WAJIB ADA
         })
-        .then(res => res.json())
-        .then(response => {
-            if (response.status === 'success') {
-                renderCart(response.data);
-                updateNavbarBadge(response.data);
-            }
-        })
-        .catch(err => console.error("Gagal load keranjang:", err));
+            .then(res => res.json())
+            .then(response => {
+                if (response.status === 'success') {
+                    renderCart(response.data);
+                    updateNavbarBadge(response.data);
+                }
+            })
+            .catch(err => console.error("Gagal load keranjang:", err));
     }
 
     function renderCart(items) {
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Render Item List
         cartContainer.innerHTML = items.map(item => {
-            const material = item.material; 
+            const material = item.material;
             const harga = material.harga;
             const itemTotal = harga * item.jumlah;
             totalHarga += itemTotal;
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- LOGIKA CHECKOUT & MIDTRANS ---
     const checkoutBtn = document.getElementById('checkoutBtn');
-    checkoutBtn.addEventListener('click', function() {
+    checkoutBtn.addEventListener('click', function () {
         const alamat = document.getElementById('alamat_lengkap').value;
         const nama = document.getElementById('nama_lengkap').value;
         const telepon = document.getElementById('nomor_telepon').value;
@@ -118,40 +118,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 telepon: telepon
             })
         })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                window.snap.pay(data.token, {
-                    onSuccess: function() {
-                        alert("Pembayaran berhasil!");
-                        window.location.href = '/material'; 
-                    },
-                    onPending: function() {
-                        alert("Menunggu pembayaran... Silakan cek email atau riwayat pesanan.");
-                        window.location.href = '/material';
-                    },
-                    onError: function() {
-                        alert("Pembayaran gagal!");
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerText = 'Konfirmasi & Bayar';
-                    },
-                    onClose: function() {
-                        alert('Anda menutup jendela pembayaran sebelum selesai.');
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerText = 'Konfirmasi & Bayar';
-                    }
-                });
-            } else {
-                alert("Gagal mendapatkan token: " + data.message);
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.snap.pay(data.token, {
+                        onSuccess: function () {
+                            alert("Pembayaran berhasil!");
+                            window.location.href = '/material';
+                        },
+                        onPending: function () {
+                            alert("Menunggu pembayaran... Silakan cek email atau riwayat pesanan.");
+                            window.location.href = '/material';
+                        },
+                        onError: function () {
+                            alert("Pembayaran gagal!");
+                            checkoutBtn.disabled = false;
+                            checkoutBtn.innerText = 'Konfirmasi & Bayar';
+                        },
+                        onClose: function () {
+                            alert('Anda menutup jendela pembayaran sebelum selesai.');
+                            checkoutBtn.disabled = false;
+                            checkoutBtn.innerText = 'Konfirmasi & Bayar';
+                        }
+                    });
+                } else {
+                    alert("Gagal mendapatkan token: " + data.message);
+                    checkoutBtn.disabled = false;
+                    checkoutBtn.innerText = 'Konfirmasi & Bayar';
+                }
+            })
+            .catch(err => {
+                console.error(err);
                 checkoutBtn.disabled = false;
                 checkoutBtn.innerText = 'Konfirmasi & Bayar';
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            checkoutBtn.disabled = false;
-            checkoutBtn.innerText = 'Konfirmasi & Bayar';
-        });
+            });
     });
 
     // Fungsi Update Navbar
@@ -160,18 +160,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (navBadge) {
             let totalItems = items.reduce((acc, curr) => acc + curr.jumlah, 0);
             navBadge.innerText = totalItems;
-            navBadge.style.display = totalItems > 0 ? 'block' : 'none';
+            navBadge.style.display = totalItems > 0 ? 'inline-flex' : 'none';
         }
     }
 
     // Fungsi update jumlah
-    window.changeQty = function(id, newQty) {
+    window.changeQty = function (id, newQty) {
         if (newQty < 1) {
-            window.deleteItem(id); 
+            window.deleteItem(id);
             return;
         }
 
-        fetch(`/api/cart/update/${id}`, { 
+        fetch(`/api/cart/update/${id}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -180,19 +180,19 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({ jumlah: newQty })
         })
-        .then(async res => {
-            if (res.ok) {
-                loadCart();
-            } else {
-                const errData = await res.json();
-                console.error("Gagal Update:", errData);
-            }
-        })
-        .catch(err => console.error("Network Error:", err));
+            .then(async res => {
+                if (res.ok) {
+                    loadCart();
+                } else {
+                    const errData = await res.json();
+                    console.error("Gagal Update:", errData);
+                }
+            })
+            .catch(err => console.error("Network Error:", err));
     };
 
     // Fungsi hapus item
-    window.deleteItem = function(id) {
+    window.deleteItem = function (id) {
         if (!confirm('Hapus item dari keranjang?')) return;
 
         fetch(`/api/cart/delete/${id}`, {
@@ -202,12 +202,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 'Accept': 'application/json'
             }
         })
-        .then(res => {
-            if (res.ok) {
-                loadCart(); 
-            }
-        })
-        .catch(err => console.error("Error saat menghapus:", err));
+            .then(res => {
+                if (res.ok) {
+                    loadCart();
+                }
+            })
+            .catch(err => console.error("Error saat menghapus:", err));
     };
 
     loadCart();

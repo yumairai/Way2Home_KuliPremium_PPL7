@@ -8,17 +8,19 @@ use Illuminate\Http\Request;
 
 class MaterialController extends Controller
 {
+    private const PER_PAGE = 6;
+
     // Menampilkan halaman marketplace
     public function index(Request $request)
     {
-        $materials = $this->buildQuery($request)->paginate(2)->appends($request->query());
+        $materials = $this->buildQuery($request)->paginate(self::PER_PAGE)->appends($request->query());
         return view('customer-layouts.material_marketplace', compact('materials'));
     }
 
     // API: Memberikan data JSON
     public function getMaterials(Request $request)
     {
-        $materials = $this->buildQuery($request)->paginate(2);
+        $materials = $this->buildQuery($request)->paginate(self::PER_PAGE);
         return response()->json($materials);
     }
 

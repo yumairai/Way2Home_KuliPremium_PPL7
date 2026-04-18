@@ -4,15 +4,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const navCart = document.getElementById('navCart');
 
     if (token) {
-        if (navCart) navCart.style.display = 'block';
+        if (navCart) navCart.style.display = 'inline-flex';
     } else {
         if (navCart) navCart.style.display = 'none';
     }
 
     try {
         const fetchMaterials = fetch('/api/materials').then(res => res.json());
-        
-        const fetchCart = token 
+
+        const fetchCart = token
             ? fetch('/api/cart', { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
             : Promise.resolve({ data: [] });
 
@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderProducts(materials, cartData);
         }
 
-        updateFloatingCart(); 
+        updateFloatingCart();
         setupPriceSlider();
 
     } catch (error) {
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 function renderProducts(items, cartData = []) {
     const productGrid = document.getElementById('productGrid');
     const token = localStorage.getItem('token');
-    productGrid.innerHTML = ''; 
+    productGrid.innerHTML = '';
 
     items.forEach(item => {
         const statusBadge = item.stok > 0
@@ -44,7 +44,7 @@ function renderProducts(items, cartData = []) {
             : '<div class="product-badge badge-preorder">Pre Order</div>';
 
         const inCart = cartData.find(c => c.material_id === item.id);
-        
+
         let actionHtml = '';
         if (token && inCart) {
             // Jika ada di DB, tampilkan selector jumlah
@@ -100,7 +100,7 @@ function setupPriceSlider() {
         const val = slider.value;
         const percentage = (val - slider.min) / (slider.max - slider.min) * 100;
         slider.style.background = `linear-gradient(to right, #004796 ${percentage}%, #e0e0e0 ${percentage}%)`;
-        
+
         if (val >= 10000000) label.textContent = "RP 10.000.000+";
         else if (val <= 0) label.textContent = "RP 0";
         else label.textContent = `RP 0 - ${new Intl.NumberFormat('id-ID').format(val)}`;
@@ -127,7 +127,7 @@ async function handleInitialAdd(id) {
     const success = await updateCartAPI(id, 1);
     if (success) {
         renderQuantitySelector(id, 1);
-        updateFloatingCart(); 
+        updateFloatingCart();
     }
     isProcessing = false;
 }
@@ -140,14 +140,14 @@ async function handleUpdateQty(id, newQty) {
 
     if (newQty < 1) {
         const success = await deleteFromCartAPI(id);
-        
+
         if (success) {
             container.innerHTML = `
                 <button class="add-to-cart-btn" onclick="handleInitialAdd(${id})">
                     Tambah
                     <img src="/images/icon/trolley.png" alt="Troli">
                 </button>`;
-            
+
             updateFloatingCart();
         } else {
             alert("Gagal menghapus item dari keranjang.");
@@ -159,7 +159,7 @@ async function handleUpdateQty(id, newQty) {
             updateFloatingCart();
         }
     }
-    
+
     isProcessing = false;
 }
 
@@ -226,7 +226,7 @@ async function updateFloatingCart() {
         if (response.ok) {
             const result = await response.json();
             const carts = result.data || [];
-            
+
             const floatingBtn = document.querySelector('.checkout-btn');
             const countElement = document.getElementById('checkoutCount');
             const totalElement = document.getElementById('checkoutTotal');
@@ -234,7 +234,10 @@ async function updateFloatingCart() {
 
             if (carts.length === 0) {
                 if (floatingBtn) floatingBtn.style.display = 'none';
-                if (navBadge) navBadge.innerText = '0';
+                if (navBadge) {
+                    navBadge.innerText = '0';
+                    navBadge.style.display = 'none';
+                }
                 return;
             }
 
@@ -251,7 +254,7 @@ async function updateFloatingCart() {
                 totalElement.innerText = totalHarga.toLocaleString('id-ID');
             }
             if (navBadge) {
-                navBadge.style.display = 'block';
+                navBadge.style.display = 'inline-flex';
                 navBadge.innerText = totalItems;
             }
         }

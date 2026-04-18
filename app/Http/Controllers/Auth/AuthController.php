@@ -89,7 +89,7 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         if ($role === 'admin') {
-            return redirect()->route('login')->with('message', 'Anda telah logout');
+            return redirect('/')->with('message', 'Anda telah logout');
         }
 
         return redirect('/')->with('message', 'Anda telah logout');

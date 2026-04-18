@@ -16,7 +16,7 @@
         <div class="nav-actions">
             <div class="cart-icon" onclick="window.location.href='/material/cart'">
                 <img src="{{ asset('images/icon/shopping-bag.png') }}" alt="">
-                <span class="cart-badge" id="navCartBadge">0</span>
+                <span class="cart-badge" id="navCartBadge" style="display: none;">0</span>
             </div>
             <img alt="User profile avatar" class="profile-avatar" id="profileDropdown"
                 src="{{ asset('images/aset/user-dummy.jpg') }}" />
@@ -74,24 +74,33 @@
     </div>
 </nav>
 @push('scripts')
-<script src="{{ asset('js/dropdown.js') }}"></script>
-<script>
-    // Fungsi global untuk update cart badge
-    window.updateNavCartBadge = function() {
-        const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
-        if (!isLoggedIn) return;
+    <script src="{{ asset('js/dropdown.js') }}"></script>
+    <script>
+        // Fungsi global untuk update cart badge
+        window.updateNavCartBadge = function() {
+            const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
+            if (!isLoggedIn) return;
 
-        fetch('/api/cart')
-            .then(res => res.json())
-            .then(data => {
-                const count = data.data ? data.data.reduce((sum, item) => sum + item.jumlah, 0) : 0;
-                document.getElementById('navCartBadge').textContent = count;
-            })
-            .catch(err => console.error('Error fetching cart:', err));
-    };
+            fetch('/api/cart')
+                .then(res => res.json())
+                .then(data => {
+                    const count = data.data ? data.data.reduce((sum, item) => sum + item.jumlah, 0) : 0;
+                    const badge = document.getElementById('navCartBadge');
+                    if (!badge) return;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        window.updateNavCartBadge();
-    });
-</script>
+                    if (count >= 1) {
+                        badge.textContent = count;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(err => console.error('Error fetching cart:', err));
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.updateNavCartBadge();
+        });
+    </script>
 @endpush

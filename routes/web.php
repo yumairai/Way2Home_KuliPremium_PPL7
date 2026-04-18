@@ -66,6 +66,10 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+    Route::get('/profile', function () {
+        return view('customer-layouts.profile');
+    });
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::post('/customer-logout', [AuthController::class, 'logout'])->name('customer.logout');
 });
@@ -111,4 +115,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
             'Cache-Control' => 'no-cache',
         ]);
     })->name('admin.preview');
+});
+
+Route::get('/mandor/tracking', function () {
+    return view('mandor.mandor_tracking');
+})->name('mandor.tracking');
+
+Route::get('/mandor/dashboard', function () {
+    return view('mandor.mandor_dashboard');
+})->name('mandor.dashboard');
+
+Route::get('/customer', function () {
+    return view('customer-layouts.customer_tracking');
 });
