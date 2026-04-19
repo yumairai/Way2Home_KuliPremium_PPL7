@@ -29,8 +29,12 @@ Admin - Verifikasi Dokumen
                 @forelse($proyek as $item)
                 @php
                 $dokumen = $item->detailBangun->dokumenProyek ?? collect();
+
                 $hasRejected = $dokumen->contains('status_verifikasi', 'ditolak');
-                $allVerified = $dokumen->every('status_verifikasi', 'disetujui');
+
+                $isFinal = $dokumen->every(function($doc) {
+                return in_array($doc->status_verifikasi, ['disetujui', 'ditolak']);
+                });
                 @endphp
                 <tr class="table-row">
                     <td class="table-cell table-cell-strong">#{{ $item->id }}</td>
@@ -52,21 +56,27 @@ Admin - Verifikasi Dokumen
 
                     <td class="table-cell table-cell-note">{{ $item->detailBangun->catatan_admin ?? '-' }}</td>
                     <td class="table-cell table-cell-right">
-                        {{-- CRITICAL: Atribut data- di bawah ini yang dibaca JS --}}
-                        <button class="btn btn-primary"
+                        @if($isFinal)
+                        <button class="btn btn-secondary" disabled>
+                            {{ $hasRejected ? 'Rejected' : 'Verified' }}
+                        </button>
+                        @else
+                        <button
+                            class="btn btn-primary"
                             onclick="openDocModal(this)"
                             data-id="{{ $item->id }}"
                             data-name="{{ $item->customer->user->name }}"
                             data-documents="{{ json_encode($dokumen->map(function($d) {
-                    return [
-                        'id' => $d->id,
-                        'nama_dokumen' => $d->jenis_dokumen,
-                        'file_url' => asset('storage/' . $d->file_path),
-                        'status_verifikasi' => $d->status_verifikasi
-                    ];
-                })) }}">
+                                return [
+                                    'id' => $d->id,
+                                    'nama_dokumen' => $d->jenis_dokumen,
+                                    'file_url' => asset('storage/' . $d->file_path),
+                                    'status_verifikasi' => $d->status_verifikasi
+                                ];
+                            })) }}">
                             Review
                         </button>
+                        @endif
                     </td>
                 </tr>
                 @empty
@@ -97,7 +107,7 @@ Admin - Verifikasi Dokumen
     <form id="doc-form" method="POST" class="modal-container">
         @csrf
         @method('PUT')
-        
+
         <input type="hidden" name="status_proyek" id="status-proyek-input" value="">
 
         <div class="modal-header">
@@ -115,7 +125,7 @@ Admin - Verifikasi Dokumen
                 <div class="doc-sidebar">
                     <p class="doc-label">Dokumen Pengaju:</p>
                     <div class="doc-list">
-                        </div>
+                    </div>
                 </div>
                 <div class="doc-preview-container">
                     <div id="preview-placeholder" class="preview-wrapper">
@@ -139,7 +149,7 @@ Admin - Verifikasi Dokumen
             <div class="reason-reject-grid">
                 <div class="reason-reject-field full-width">
                     <label class="reason-reject-label" for="alasan_penolakan">Alasan Penolakan</label>
-                    <textarea name="catatan_admin" class="reason-reject-textarea" id="alasan_penolakan" 
+                    <textarea name="catatan_admin" class="reason-reject-textarea" id="alasan_penolakan"
                         placeholder="Tuliskan alasan penolakan berkas jika ada dokumen yang ditolak"></textarea>
                 </div>
             </div>

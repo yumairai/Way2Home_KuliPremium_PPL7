@@ -33,6 +33,13 @@ class VerifikasiProyekController extends Controller
 
         $proyek = Proyek::findOrFail($id);
 
+        $allFinal = $proyek->detailBangun->dokumenProyek
+            ->every(fn($doc) => in_array($doc->status_verifikasi, ['disetujui', 'ditolak']));
+
+        if ($allFinal) {
+            return back()->with('error', 'Dokumen sudah final, tidak bisa diubah lagi.');
+        }
+
         DB::transaction(function () use ($request, $proyek) {
             $adaDitolak = false;
 

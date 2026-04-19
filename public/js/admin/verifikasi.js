@@ -64,7 +64,7 @@ function renderDocList(documents) {
 
         // Tandai class awal jika sudah ada status dari DB
         if (doc.status_verifikasi === 'disetujui') btn.classList.add('verified');
-        if (doc.status_verifikasi === 'ditolak')       btn.classList.add('rejected');
+        if (doc.status_verifikasi === 'ditolak') btn.classList.add('rejected');
 
         btn.innerHTML = `
             <div class="doc-info">
