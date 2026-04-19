@@ -78,25 +78,21 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('material')->group(function () {
         Route::get('/', [MaterialController::class, 'index'])->name('material.index');
         Route::get('/materials', [MaterialController::class, 'getMaterials']);
-
-        Route::get('/cart', function () {
-            return view('customer-layouts.cart');
-        })->name('cart.view');
+        Route::view('/cart', 'customer-layouts.cart')->name('cart.view');
     });
 
     // Operasi Keranjang (AJAX)
     Route::prefix('cart')->group(function () {
-        Route::get('/cart', [CartController::class, 'index']);
-        Route::post('/cart/add', [CartController::class, 'addToCart']);
-        Route::put('/cart/update/{id}', [CartController::class, 'updateQuantity']);
-        Route::delete('/cart/delete/{id}', [CartController::class, 'removeFromCart']);
-        Route::delete('/cart/remove-material/{id}', [CartController::class, 'removeByMaterial']);
+        Route::get('/', [CartController::class, 'index']);           
+        Route::post('/add', [CartController::class, 'addToCart']);   
+        Route::put('/update/{id}', [CartController::class, 'updateQuantity']);
+        Route::delete('/delete/{id}', [CartController::class, 'removeFromCart']);
+        Route::delete('/remove-material/{id}', [CartController::class, 'removeByMaterial']); 
     });
 
     // Checkout Material
     Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout']);
     Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
-    
 });
 
 /*

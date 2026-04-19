@@ -13,7 +13,7 @@ const getHeaders = () => ({
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Ambil params dari URL (jika ada) saat pertama load
     const urlParams = new URLSearchParams(window.location.search);
-    const apiUrl = '/materials' + (urlParams.toString() ? '?' + urlParams.toString() : '');
+    const apiUrl = '/material/materials' + (urlParams.toString() ? '?' + urlParams.toString() : '');
 
     await fetchMaterials(apiUrl);
     updateFloatingCart();
@@ -45,7 +45,7 @@ async function applyFilters() {
     const sortMap = { 'Harga Terendah': 'harga_rendah', 'Harga Tertinggi': 'harga_tinggi', 'Terbaru': 'terbaru' };
     params.append('sort', sortMap[sort] || 'terbaru');
 
-    const newUrl = '/materials?' + params.toString();
+    const newUrl = '/material/materials?' + params.toString();
     await fetchMaterials(newUrl);
 }
 

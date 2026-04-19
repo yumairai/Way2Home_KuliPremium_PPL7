@@ -81,7 +81,7 @@
         const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
         if (!isLoggedIn) return;
 
-        fetch('/api/cart')
+        fetch('/cart')
             .then(res => res.json())
             .then(data => {
                 const count = data.data ? data.data.reduce((sum, item) => sum + item.jumlah, 0) : 0;
