@@ -26,6 +26,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             MaterialSeeder::class,
             DesainSeeder::class,
+            ProyekSeeder::class,
+            DetailProyekBangunSeeder::class,
+            MandorSeeder::class,
         ]);
     }
 }

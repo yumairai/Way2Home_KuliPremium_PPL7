@@ -1,30 +1,93 @@
-function openDocModal() {
+let selectedMandorId = null;
+let selectedProyekId = null;
+
+function openDocModal(element) {
+    selectedMandorId = element.dataset.mandorId; // ambil dari data attribute
+    selectedProyekId = null;
+
     document.getElementById('list-proyek-modal').style.display = 'flex';
-    // Reset ke item pertama setiap kali modal dibuka
-    document.querySelectorAll('.proyek-item').forEach(i => i.classList.remove('active'));
-    const firstItem = document.querySelector('.proyek-item');
-    if (firstItem) {
-        firstItem.classList.add('active');
-        firstItem.click();
+
+    const items = document.querySelectorAll('.proyek-item');
+    items.forEach(i => i.classList.remove('active'));
+    if (items.length > 0) {
+        items[0].classList.add('active');
+        selectedProyekId = items[0].dataset.proyekId;
     }
 }
 
 function closeDocModal() {
     document.getElementById('list-proyek-modal').style.display = 'none';
+    selectedMandorId = null;
+    selectedProyekId = null;
+}
+
+function unassignMandor(element) {
+    const mandorId = element.dataset.mandorId;
+    const mandorName = element.dataset.mandorName;
+
+    if (!confirm(`Yakin ingin melepas ${mandorName} dari proyeknya?`)) return;
+
+    fetch('/admin/manajemen-mandor/unassign', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        },
+        body: JSON.stringify({ mandor_id: mandorId }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if (data.success) location.reload();
+    })
+    .catch(() => alert('Terjadi kesalahan server.'));
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Klik item proyek
     document.querySelectorAll('.proyek-item').forEach(item => {
-        // Kode js buat nampilin si gambar
         item.addEventListener('click', function () {
             document.querySelectorAll('.proyek-item').forEach(i => i.classList.remove('active'));
             this.classList.add('active');
+            selectedProyekId = this.dataset.proyekId;
         });
     });
 
-    // Tombol Submit
+    // Search mandor (filter by name)
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const keyword = this.value.toLowerCase();
+        document.querySelectorAll('.mandor-entry').forEach(entry => {
+            const name = entry.dataset.name || '';
+            entry.style.display = name.includes(keyword) ? '' : 'none';
+        });
+    });
+
+    // Tombol assign
     document.querySelector('.modal-btn-submit').addEventListener('click', function () {
-        alert('Berhasil mengassign mandor!');
-        closeDocModal();
+        if (!selectedMandorId || !selectedProyekId) {
+            alert('Pilih proyek terlebih dahulu!');
+            return;
+        }
+
+        fetch('/admin/manajemen-mandor/assign', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            },
+            body: JSON.stringify({
+                mandor_id: selectedMandorId,
+                proyek_id: selectedProyekId,
+            }),
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if (data.success) {
+                closeDocModal();
+                location.reload();
+            }
+        })
+        .catch(() => alert('Terjadi kesalahan server.'));
     });
 });

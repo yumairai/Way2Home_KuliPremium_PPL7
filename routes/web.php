@@ -9,6 +9,8 @@ use App\Http\Controllers\Customer\PreferensiController;
 use App\Http\Controllers\Customer\PaymentMaterialController;
 use App\Http\Controllers\Customer\PaymentProyekController;
 use App\Http\Controllers\Admin\VerifikasiProyekController;
+use App\Http\Controllers\Admin\ManageMandorController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -84,11 +86,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Operasi Keranjang (AJAX)
     Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index']);           
-        Route::post('/add', [CartController::class, 'addToCart']);   
+        Route::get('/', [CartController::class, 'index']);
+        Route::post('/add', [CartController::class, 'addToCart']);
         Route::put('/update/{id}', [CartController::class, 'updateQuantity']);
         Route::delete('/delete/{id}', [CartController::class, 'removeFromCart']);
-        Route::delete('/remove-material/{id}', [CartController::class, 'removeByMaterial']); 
+        Route::delete('/remove-material/{id}', [CartController::class, 'removeByMaterial']);
     });
 
     // Checkout Material
@@ -114,9 +116,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         return view('admin.kelola_material');
     })->name('admin.material');
 
-    Route::get('/manajemen-mandor', function () {
-        return view('admin.manajemen_mandor');
-    })->name('admin.mandor');
+
+    Route::get('/manajemen-mandor', [ManageMandorController::class, 'index'])->name('admin.mandor');
+    Route::post('/manajemen-mandor/assign', [ManageMandorController::class, 'assign'])->name('admin.mandor.assign');
+    Route::post('/manajemen-mandor/unassign', [ManageMandorController::class, 'unassign'])->name('admin.mandor.unassign');
 
     Route::get('/monitor-proyek', function () {
         return view('admin.monitor_proyek');

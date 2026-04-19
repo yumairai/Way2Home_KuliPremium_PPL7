@@ -26,11 +26,16 @@ class Proyek extends Model
         return $this->belongsTo(Customer::class, 'customer_id');
     }
 
+    public function mandor()
+    {
+        return $this->belongsTo(Mandor::class, 'mandor_id');
+    }
+
     public function detailBangun()
     {
         return $this->hasOne(DetailProyekBangun::class, 'proyek_id');
     }
-    
+
     public function pembayaran()
     {
         return $this->hasMany(PembayaranProyek::class, 'proyek_id');
