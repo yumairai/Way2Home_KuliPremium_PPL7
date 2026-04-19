@@ -5,6 +5,7 @@ use App\Http\Controllers\Customer\MaterialController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\PreferensiController;
 use App\Http\Controllers\Customer\ProyekController;
+use App\Http\Controllers\Admin\VerifikasiProyekController;
 
 Route::get('/', [AuthController::class, 'index'])->name('home');
 
@@ -72,15 +73,15 @@ Route::middleware(['auth'])->group(function () {
 
 // admin
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::redirect('/', '/admin/dashboard');
+Route::redirect('/', '/admin/dashboard');
 
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-    Route::get('/verifikasi', function () {
-        return view('admin.verifikasi_dokumen');
-    })->name('admin.verifikasi');
+    Route::get('/verifikasi', [VerifikasiProyekController::class, 'index'])->name('admin.verifikasi');
+    
+    Route::put('/verifikasi/{id}', [VerifikasiProyekController::class, 'update'])->name('admin.verifikasi.update');
 
     Route::get('/kelola-material', function () {
         return view('admin.kelola_material');

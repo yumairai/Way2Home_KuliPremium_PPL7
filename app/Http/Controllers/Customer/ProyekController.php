@@ -32,7 +32,7 @@ class ProyekController extends Controller
                 'customer_id'   => $customerId,
                 'jenis_proyek' => 'Bangun Rumah',
                 'alamat_proyek' => $request->alamat_proyek,
-                'status_proyek' => 'perencanaan',
+                'status_proyek' => 'Menunggu Verifikasi',
                 'tanggal_mulai' => now(),
             ]);
 
