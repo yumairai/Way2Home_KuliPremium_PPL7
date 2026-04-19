@@ -76,10 +76,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (totalHarga === 0) serviceFee = 0;
 
         summaryContainer.innerHTML = items.map(item => `
-            <div class="summary-item">
-                <span>${item.material.nama_material} (x${item.jumlah})</span>
-                <span>Rp ${(item.material.harga * item.jumlah).toLocaleString('id-ID')}</span>
-            </div>
+        <div class="cart-summary-item">
+            <span class="summary-item-name">${item.material.nama_material} (x${item.jumlah})</span>
+            <span class="summary-item-price">Rp ${(item.jumlah * item.material.harga).toLocaleString('id-ID')}</span>
+        </div>
         `).join('');
 
         const grandTotal = totalHarga + serviceFee;

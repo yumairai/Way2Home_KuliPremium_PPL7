@@ -50,6 +50,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    Route::post('/preferensi/simpan', [PreferensiController::class, 'store'])->name('proyek.preferensi.simpan');
+
     // Fitur Rekomendasi & Form Pembangunan
     Route::get('/recommendation', function () {
         return view('customer-layouts.input_preferensi_ai');
@@ -71,7 +73,6 @@ Route::middleware(['auth'])->group(function () {
         // Action Ajax
         Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
         Route::post('/bayar-dp', [PaymentProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
-        Route::post('/preferensi/simpan', [PreferensiController::class, 'store'])->name('proyek.preferensi.simpan');
     });
 
     // Material & Shopping Cart
