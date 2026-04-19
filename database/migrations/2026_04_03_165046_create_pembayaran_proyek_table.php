@@ -11,16 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pembayaran_proyek', function (Blueprint $table) 
-        {
+        Schema::create('pembayaran_proyek', function (Blueprint $table) {
             $table->id();
             $table->foreignId('proyek_id')->constrained('proyek')->cascadeOnDelete();
+
+            $table->string('snap_token')->nullable();
+            $table->string('order_id')->nullable();
+
             $table->bigInteger('jumlah_bayar');
-            $table->string('tipe_pembayaran'); // Contoh: 'DP', 'Termin 1', 'Pelunasan'
-            $table->string('metode_pembayaran'); // Contoh: 'Transfer Bank', 'Midtrans', 'E-Wallet'
+            $table->string('tipe_pembayaran'); // Contoh: 'DP', 'Termin 1'
             $table->enum('status_pembayaran', ['pending', 'berhasil', 'gagal', 'diverifikasi'])->default('pending');
             $table->date('tanggal_pembayaran');
-            $table->string('path_bukti_bayar')->nullable(); // Penting untuk verifikasi manual
             $table->timestamps();
         });
     }

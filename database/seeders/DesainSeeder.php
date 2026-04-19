@@ -24,7 +24,7 @@ class DesainSeeder extends Seeder
                 'estimasi_biaya' => 250000000,
                 'estimasi_durasi' => 120, // 120 hari
                 'material_utama' => 'Bata Ringan & Baja Ringan',
-                'path_gambar_desain' => 'desain/modern-minimalis.jpg',
+                'path_gambar_desain' => '\images\rekomendasi\rekom1.jpg',
                 'fasilitas' => 'Carport, Taman Depan, Ruang Jemur',
                 'created_at' => now(),
                 'updated_at' => now(),
