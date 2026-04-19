@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('proyek_id')->constrained('proyek')->cascadeOnDelete();
             $table->foreignId('desain_rumah_id')->constrained('desain_rumah')->restrictOnDelete();
+            $table->text('catatan_admin')->nullable();
             $table->timestamps();
         });
     }
