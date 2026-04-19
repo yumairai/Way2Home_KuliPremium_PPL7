@@ -19,7 +19,18 @@ return new class extends Migration
             $table->string('jenis_proyek');
             $table->text('alamat_proyek');
             $table->date('tanggal_mulai')->nullable();
-            $table->enum('status_proyek', ['Menunggu Verifikasi', 'Revisi Dokumen', 'Pembayaran DP', 'Pengalokasian Mandor', 'Dibatalkan'])->default('Menunggu Verifikasi');
+            $statuses = [
+                'Menunggu Verifikasi', 
+                'Revisi Dokumen', 
+                'Pembayaran DP', 
+                'Pengalokasian Mandor', 
+                'Dibatalkan', 
+                'In Progress', 
+                'Selesai'
+            ];
+            
+            $table->enum('status_proyek', $statuses)->default('Menunggu Verifikasi');
+            
             $table->integer('jumlah_cicilan')->default(0);
             $table->timestamps();
         });
