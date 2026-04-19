@@ -19,6 +19,7 @@ class ManageMandorController extends Controller
         // Proyek yang belum ada mandornya
         $proyeksAvailable = Proyek::whereNull('mandor_id')
             ->where('status_proyek', 'Pengalokasian Mandor')
+            ->with('detailBangun.desainRumah')
             ->get();
 
         $stats = [
