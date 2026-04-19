@@ -38,6 +38,14 @@ Route::middleware(['auth'])->group(function () {
         return view('customer-layouts.rekomendasi_rumah');
     });
 
+    Route::get('/renovation', function () {
+        return view('customer-layouts.renovation');
+    })->name('customer.renovation');
+
+    Route::get('/renovation-form', function () {
+        return view('customer-layouts.renovation_form');
+    })->name('customer.renovation_form');
+
     Route::get('/house-build-form', function () {
         return view('customer-layouts.form_pembangunan_rumah');
     });
@@ -63,6 +71,10 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/5', function () {
             return view('customer-layouts.proyek_user5');
+        });
+        // ceritanya proyek 5 dengan trackingnya
+        Route::get('/5/tracking', function () {
+            return view('customer-layouts.customer_tracking');
         });
     });
 
@@ -117,6 +129,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     })->name('admin.preview');
 });
 
+
+// nanti buatkan auth middleware khusus mandor, biar bisa akses route mandor ini, sekarang sementara dibiarkan aja untuk testing
 Route::get('/mandor/tracking', function () {
     return view('mandor.mandor_tracking');
 })->name('mandor.tracking');
@@ -124,7 +138,3 @@ Route::get('/mandor/tracking', function () {
 Route::get('/mandor/dashboard', function () {
     return view('mandor.mandor_dashboard');
 })->name('mandor.dashboard');
-
-Route::get('/customer', function () {
-    return view('customer-layouts.customer_tracking');
-});

@@ -46,8 +46,12 @@
                         <span>Pesanan Saya</span>
                     </a>
                     <a href="/project" class="nav-link">
-                        <span class="material-symbols-outlined">construction</span>
+                        <span class="material-symbols-outlined">house</span>
                         <span>Proyek Saya</span>
+                    </a>
+                    <a href="/renovation" class="nav-link">
+                        <span class="material-symbols-outlined">construction</span>
+                        <span>Renovasi Saya</span>
                     </a>
                     <a href="/profile" class="nav-link">
                         <span class="material-symbols-outlined">person_edit</span>

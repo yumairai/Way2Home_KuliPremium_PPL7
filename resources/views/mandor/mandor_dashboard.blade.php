@@ -6,8 +6,8 @@
     <header class="dashboard-header">
         <h1 class="dashboard-title">Ringkasan Operasional</h1>
         <p class="dashboard-lead">
-            Pantau kemajuan proyek renovasi Anda dan kelola pengajuan baru secara efisien melalui blueprint digital
-            kami.
+            Pantau projek anda dan kelola pengajuan renovasi. Dapatkan update real-time
+            tentang status proyek dan permintaan klien untuk memastikan semua berjalan lancar.
         </p>
     </header>
     <section class="dashboard-stats">
@@ -16,8 +16,8 @@
                 <span class="material-symbols-outlined">architecture</span>
             </div>
             <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Total Projects</p>
-                <p class="dashboard-stat-value">24</p>
+                <p class="dashboard-stat-label">Project Saat Ini</p>
+                <p class="dashboard-stat-value">-</p>
             </div>
         </div>
         <div class="dashboard-stat-card">
@@ -25,7 +25,7 @@
                 <span class="material-symbols-outlined">task_alt</span>
             </div>
             <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Completed</p>
+                <p class="dashboard-stat-label">Project Diselesaikan</p>
                 <p class="dashboard-stat-value">18</p>
             </div>
         </div>
@@ -34,8 +34,8 @@
                 <span class="material-symbols-outlined">assignment_late</span>
             </div>
             <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Pending Reviews</p>
-                <p class="dashboard-stat-value">06</p>
+                <p class="dashboard-stat-label">Request Renovasi</p>
+                <p class="dashboard-stat-value">3</p>
             </div>
         </div>
     </section>
@@ -44,14 +44,6 @@
             <div>
                 <h2 class="dashboard-section-title">List Pengajuan Renovasi</h2>
                 <div class="dashboard-section-underline"></div>
-            </div>
-            <div class="dashboard-actions">
-                <button class="dashboard-icon-btn" type="button" aria-label="Filter daftar pengajuan">
-                    <span class="material-symbols-outlined">filter_list</span>
-                </button>
-                <button class="dashboard-icon-btn" type="button" aria-label="Cari pengajuan">
-                    <span class="material-symbols-outlined">search</span>
-                </button>
             </div>
         </div>
         <div class="dashboard-request-list">
@@ -63,7 +55,7 @@
                 </div>
                 <div class="dashboard-request-meta">
                     <div>
-                        <p class="dashboard-meta-label">Owner Name</p>
+                        <p class="dashboard-meta-label">Nama Pengaju</p>
                         <p class="dashboard-meta-value">Bapak Budi</p>
                     </div>
                     <div>
@@ -72,10 +64,10 @@
                     </div>
                     <div>
                         <p class="dashboard-meta-label">Estimasi Budget</p>
-                        <p class="dashboard-meta-value">Rp 450.000.000</p>
+                        <p class="dashboard-meta-value">Rp 10.000.000</p>
                     </div>
                     <div>
-                        <p class="dashboard-meta-label">Contact Number</p>
+                        <p class="dashboard-meta-label">Nomor HP</p>
                         <p class="dashboard-meta-muted">0812-3456-7890</p>
                     </div>
                 </div>
@@ -93,7 +85,7 @@
                 </div>
                 <div class="dashboard-request-meta">
                     <div>
-                        <p class="dashboard-meta-label">Owner Name</p>
+                        <p class="dashboard-meta-label">Nama Pengaju</p>
                         <p class="dashboard-meta-value">Ibu Pertiwi</p>
                     </div>
                     <div>
@@ -102,10 +94,10 @@
                     </div>
                     <div>
                         <p class="dashboard-meta-label">Estimasi Budget</p>
-                        <p class="dashboard-meta-value">Rp 125.000.000</p>
+                        <p class="dashboard-meta-value">Rp 12.000.000</p>
                     </div>
                     <div>
-                        <p class="dashboard-meta-label">Contact Number</p>
+                        <p class="dashboard-meta-label">Nomor HP</p>
                         <p class="dashboard-meta-muted">0813-8877-2233</p>
                     </div>
                 </div>
@@ -123,7 +115,7 @@
                 </div>
                 <div class="dashboard-request-meta">
                     <div>
-                        <p class="dashboard-meta-label">Owner Name</p>
+                        <p class="dashboard-meta-label">Nama Pengaju</p>
                         <p class="dashboard-meta-value">Bapak Santoso</p>
                     </div>
                     <div>
@@ -132,10 +124,10 @@
                     </div>
                     <div>
                         <p class="dashboard-meta-label">Estimasi Budget</p>
-                        <p class="dashboard-meta-value">Rp 890.000.000</p>
+                        <p class="dashboard-meta-value">Rp 50.000.000</p>
                     </div>
                     <div>
-                        <p class="dashboard-meta-label">Contact Number</p>
+                        <p class="dashboard-meta-label">Nomor HP</p>
                         <p class="dashboard-meta-muted">0856-1122-3344</p>
                     </div>
                 </div>
@@ -155,8 +147,8 @@
                     <h2 class="dashboard-review-title" id="dashboard-review-title">Review Permintaan Proyek</h2>
                     <p class="dashboard-review-subtitle">Detail pengajuan renovasi dari klien.</p>
                 </div>
-                <button class="dashboard-review-close-btn material-symbols-outlined" type="button"
-                    aria-label="Close modal" data-review-close>close</button>
+                <button class="dashboard-review-close-btn material-symbols-outlined" type="button" aria-label="Close modal"
+                    data-review-close>close</button>
             </div>
 
             <div class="dashboard-review-body">
@@ -190,7 +182,7 @@
                 </div>
 
                 <div class="dashboard-review-block">
-                    <span class="dashboard-review-label">Foto Kerusakan (3)</span>
+                    <span class="dashboard-review-label">Foto Kerusakan (6)</span>
                     <div class="dashboard-review-gallery">
                         <div class="dashboard-review-photo">
                             <img alt="Water damage on ceiling"
@@ -207,18 +199,52 @@
                                 data-alt="exterior view of a residential clay tile roof with several cracked and missing pieces near a gutter"
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAttfMLxHpzbqlnZd0P4EbqBrOy2D6HF9Z_DHno6clDxQOpVEB5GGY1_orsdGJBGJqcafDfNvO7BjrRoxCy_lUD43CPXmXfzVRk2jzH-JhWJvptvVNvOIYMUL3IG6b37tMMY8ywQ-AIfXfqWwj-1nDaAdHa9FWnxFJvYEYtLHwZQNDJtzCW5B-BoqYeUzeoolBY6VeBiLgWsZ1RxgOwBwDgN47J21hti32vruypea9qDgLcOmZtygXOCSQHXjOhlMnpwmyN9_aAsv8" />
                         </div>
+                        <div class="dashboard-review-photo">
+                            <img alt="Cracked roof tiles"
+                                data-alt="exterior view of a residential clay tile roof with several cracked and missing pieces near a gutter"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAttfMLxHpzbqlnZd0P4EbqBrOy2D6HF9Z_DHno6clDxQOpVEB5GGY1_orsdGJBGJqcafDfNvO7BjrRoxCy_lUD43CPXmXfzVRk2jzH-JhWJvptvVNvOIYMUL3IG6b37tMMY8ywQ-AIfXfqWwj-1nDaAdHa9FWnxFJvYEYtLHwZQNDJtzCW5B-BoqYeUzeoolBY6VeBiLgWsZ1RxgOwBwDgN47J21hti32vruypea9qDgLcOmZtygXOCSQHXjOhlMnpwmyN9_aAsv8" />
+                        </div>
+                        <div class="dashboard-review-photo">
+                            <img alt="Cracked roof tiles"
+                                data-alt="exterior view of a residential clay tile roof with several cracked and missing pieces near a gutter"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAttfMLxHpzbqlnZd0P4EbqBrOy2D6HF9Z_DHno6clDxQOpVEB5GGY1_orsdGJBGJqcafDfNvO7BjrRoxCy_lUD43CPXmXfzVRk2jzH-JhWJvptvVNvOIYMUL3IG6b37tMMY8ywQ-AIfXfqWwj-1nDaAdHa9FWnxFJvYEYtLHwZQNDJtzCW5B-BoqYeUzeoolBY6VeBiLgWsZ1RxgOwBwDgN47J21hti32vruypea9qDgLcOmZtygXOCSQHXjOhlMnpwmyN9_aAsv8" />
+                        </div>
+                        <div class="dashboard-review-photo">
+                            <img alt="Cracked roof tiles"
+                                data-alt="exterior view of a residential clay tile roof with several cracked and missing pieces near a gutter"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAttfMLxHpzbqlnZd0P4EbqBrOy2D6HF9Z_DHno6clDxQOpVEB5GGY1_orsdGJBGJqcafDfNvO7BjrRoxCy_lUD43CPXmXfzVRk2jzH-JhWJvptvVNvOIYMUL3IG6b37tMMY8ywQ-AIfXfqWwj-1nDaAdHa9FWnxFJvYEYtLHwZQNDJtzCW5B-BoqYeUzeoolBY6VeBiLgWsZ1RxgOwBwDgN47J21hti32vruypea9qDgLcOmZtygXOCSQHXjOhlMnpwmyN9_aAsv8" />
+                        </div>
                     </div>
                 </div>
-            </div>
+                <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Feedback Mandor</span>
+                    <div class="dashboard-review-note">
+                        <textarea class="dashboard-review-feedback"
+                            placeholder="Tulis feedback dan material yang dibutuhkan secara lengkap untuk renovasi klien..."></textarea>
+                    </div>
+                </div>
 
-            <div class="dashboard-review-actions">
-                <button class="dashboard-review-action-btn dashboard-review-action-btn-primary" type="button">
-                    Ambil Renovasi
-                </button>
+                <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Biaya Renovasi</span>
+                    <div class="dashboard-review-cost-wrap">
+                        <label class="dashboard-review-cost-field" for="dashboard-review-cost">
+                            <span class="dashboard-review-cost-prefix">Rp</span>
+                            <input class="dashboard-review-cost-input" id="dashboard-review-cost" type="number"
+                                inputmode="numeric" min="0" step="1000" placeholder="Contoh: 12500000" />
+                        </label>
+                        <p class="dashboard-review-cost-hint">Masukkan total biaya renovasi.</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-actions">
+                    <button class="dashboard-review-action-btn dashboard-review-action-btn-primary" type="button"
+                        onclick="window.location.href='{{ route('mandor.tracking') }}'">
+                        Ambil Renovasi
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-@endsection
-@push('scripts')
-    <script src="{{ asset('js/mandor/review.js') }}"></script>
-@endpush
+    @endsection
+    @push('scripts')
+        <script src="{{ asset('js/mandor/review.js') }}"></script>
+    @endpush

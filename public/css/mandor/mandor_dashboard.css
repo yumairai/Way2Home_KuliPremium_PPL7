@@ -297,6 +297,7 @@ body {
     box-shadow: 0 24px 48px rgba(14, 23, 68, 0.2);
     display: flex;
     flex-direction: column;
+    margin-top: 3rem;
 }
 
 .dashboard-review-header {
@@ -399,7 +400,6 @@ body {
 }
 
 .dashboard-review-note {
-    border-left: 4px solid var(--primary);
     border-radius: 0.75rem;
     background: var(--surface-container);
     padding: 1.25rem;
@@ -410,6 +410,102 @@ body {
     color: var(--on-surface);
     line-height: 1.75;
     font-style: italic;
+}
+
+.dashboard-review-feedback,
+.dashboard-review-feedbck {
+    width: 100%;
+    border: none;
+    min-height: 9.5rem;
+    border-radius: 0.9rem;
+    background: transparent;
+    color: var(--on-surface);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    padding: 0.95rem 1rem;
+    resize: vertical;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.dashboard-review-feedback::placeholder,
+.dashboard-review-feedbck::placeholder {
+    color: rgba(66, 71, 83, 0.6);
+
+}
+
+.dashboard-review-feedback:focus,
+.dashboard-review-feedbck:focus {
+    outline: 0;
+    border: none;
+    border-color: none;
+    box-shadow: 0 0 0 3px rgba(0, 71, 150, 0.12);
+    background: transparent;
+}
+
+.dashboard-review-cost-wrap {
+    border-radius: 0.75rem;
+    background: var(--surface-container);
+    padding: 1.25rem;
+}
+
+.dashboard-review-cost-field {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border: 1px solid rgba(194, 198, 213, 0.35);
+    border-radius: 0.9rem;
+    background: var(--surface-container-lowest);
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.dashboard-review-cost-prefix {
+    color: var(--primary);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    line-height: 1;
+}
+
+.dashboard-review-cost-input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--on-surface);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0.45rem 0;
+}
+
+.dashboard-review-cost-input::placeholder {
+    color: rgba(66, 71, 83, 0.6);
+}
+
+.dashboard-review-cost-field:hover {
+    border-color: rgba(0, 71, 150, 0.28);
+}
+
+.dashboard-review-cost-field:focus-within {
+    border-color: rgba(0, 71, 150, 0.5);
+    box-shadow: 0 0 0 3px rgba(0, 71, 150, 0.12);
+    background: #ffffff;
+}
+
+.dashboard-review-cost-input::-webkit-outer-spin-button,
+.dashboard-review-cost-input::-webkit-inner-spin-button {
+    margin: 0;
+}
+
+.dashboard-review-cost-hint {
+    margin: 0.6rem 0 0;
+    color: var(--on-surface-variant);
+    font-size: 0.82rem;
+    line-height: 1.4;
 }
 
 .dashboard-review-gallery {
@@ -438,8 +534,7 @@ body {
 }
 
 .dashboard-review-actions {
-    padding: 1.5rem 2rem 2rem;
-    background: var(--surface-container-low);
+    background: transparent;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -459,8 +554,22 @@ body {
     transition: transform 0.2s ease, opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
+.dashboard-review-action-btn:disabled,
+.dashboard-review-action-btn[aria-disabled='true'] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    filter: grayscale(0.2);
+}
+
 .dashboard-review-action-btn:hover {
     transform: translateY(-1px);
+}
+
+.dashboard-review-action-btn:disabled:hover,
+.dashboard-review-action-btn[aria-disabled='true']:hover {
+    transform: none;
 }
 
 .dashboard-review-action-btn-secondary {
@@ -489,6 +598,11 @@ body {
 
 .dashboard-review-action-btn-primary:hover {
     box-shadow: 0 14px 28px rgba(4, 94, 194, 0.24);
+}
+
+.dashboard-review-action-btn-primary:disabled,
+.dashboard-review-action-btn-primary[aria-disabled='true'] {
+    background: linear-gradient(135deg, rgba(4, 94, 194, 0.55), rgba(112, 161, 224, 0.55));
 }
 
 .dashboard-review-action-icon {

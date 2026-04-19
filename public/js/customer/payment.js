@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (isMandorAssigned) {
                     alert("OTW ke page progress tracking!");
                     // di sini kasih route sesuai id proyek user, sekarang masih dummy dlu ke user tracking dummy
-                    window.location.href = "/customer"
+                    window.location.href = "/project/5/tracking";
                 } else {
                     alert("Maaf, Mandor belum diassign. Mohon tunggu sebentar!");
                 }

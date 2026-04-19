@@ -7,8 +7,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openButtons = document.querySelectorAll('[data-review-open]');
     const closeButtons = modal.querySelectorAll('[data-review-close]');
+    const feedbackInput = modal.querySelector('.dashboard-review-feedback');
+    const costInput = modal.querySelector('#dashboard-review-cost');
+    const takeRenovationButton = modal.querySelector('.dashboard-review-actions .dashboard-review-action-btn-primary');
     const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
     let lastTrigger = null;
+
+    const updateTakeRenovationButtonState = () => {
+        if (!(takeRenovationButton instanceof HTMLButtonElement)) {
+            return;
+        }
+
+        const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
+        const costValue = costInput instanceof HTMLInputElement ? costInput.value.trim() : '';
+        const isCostValid = Number(costValue) > 0;
+        const isFormComplete = feedbackValue.length > 0 && isCostValid;
+
+        takeRenovationButton.disabled = !isFormComplete;
+        takeRenovationButton.setAttribute('aria-disabled', String(!isFormComplete));
+    };
 
     const setModalState = (isOpen) => {
         modal.hidden = !isOpen;
@@ -44,6 +61,16 @@ document.addEventListener('DOMContentLoaded', () => {
     closeButtons.forEach((button) => {
         button.addEventListener('click', closeModal);
     });
+
+    if (feedbackInput instanceof HTMLTextAreaElement) {
+        feedbackInput.addEventListener('input', updateTakeRenovationButtonState);
+    }
+
+    if (costInput instanceof HTMLInputElement) {
+        costInput.addEventListener('input', updateTakeRenovationButtonState);
+    }
+
+    updateTakeRenovationButtonState();
 
     modal.addEventListener('click', (event) => {
         if (event.target === modal || event.target.hasAttribute('data-review-close')) {
