@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>@yield('title')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="{{ asset('css/admin/admin_page.css') }}" rel="stylesheet" />
     <link href="{{ asset('images/logo-w2h.png') }}" type="image" rel="icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,15 +44,21 @@
             </a>
 
             <a class="sidebar-link {{ Route::is('admin.kelola_material') ? 'active' : '' }}"
-                href="{{ route('admin.kelola_material') }}">
+                href="{{ route('admin.material') }}">
                 <span class="material-symbols-outlined filled">construction</span>
                 <span>Kelola Material</span>
             </a>
 
             <a class="sidebar-link {{ Route::is('admin.manajemen_mandor') ? 'active' : '' }}"
-                href="{{ route('admin.manajemen_mandor') }}">
+                href="{{ route('admin.mandor') }}">
                 <span class="material-symbols-outlined filled">engineering</span>
                 <span>Manajemen Mandor</span>
+            </a>
+
+            <a class="sidebar-link {{ Route::is('admin.monitor_proyek') ? 'active' : '' }}"
+                href="{{ route('admin.monitor') }}">
+                <span class="material-symbols-outlined filled">monitoring</span>
+                <span>Project Monitor</span>
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -89,7 +96,51 @@
             @yield('header')
         </header>
         <div class="stats-grid">
-            @yield('stats')
+            <article class="stat-card">
+                <div class="stat-head">
+                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
+                        <span class="material-symbols-outlined">group</span>
+                    </div>
+                </div>
+                <p class="stat-title">Total User</p>
+                <h3 class="stat-value">1,284</h3>
+            </article>
+            <article class="stat-card">
+                <div class="stat-head">
+                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
+                        <span class="material-symbols-outlined">task_alt</span>
+                    </div>
+                </div>
+                <p class="stat-title">Proyek Selesai</p>
+                <h3 class="stat-value">312</h3>
+            </article>
+            <article class="stat-card">
+                <div class="stat-head">
+                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
+                        <span class="material-symbols-outlined">home_repair_service</span>
+                    </div>
+                </div>
+                <p class="stat-title">Permintaan Renovasi</p>
+                <h3 class="stat-value">45</h3>
+            </article>
+            <article class="stat-card">
+                <div class="stat-head">
+                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
+                        <span class="material-symbols-outlined">add_business</span>
+                    </div>
+                </div>
+                <p class="stat-title">Pengajuan Proyek</p>
+                <h3 class="stat-value">18</h3>
+            </article>
+            <article class="stat-card special">
+                <div class="stat-head">
+                    <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2); color: #fff;">
+                        <span class="material-symbols-outlined">payments</span>
+                    </div>
+                </div>
+                <p class="stat-title" style="color: rgba(235,245,255,0.9);">Total Revenue</p>
+                <h3 class="stat-value" style="font-size:1.25rem;">Rp 8.42B</h3>
+            </article>
         </div>
         <section class="project-section">
             @yield('content')

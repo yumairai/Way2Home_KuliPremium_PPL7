@@ -21,7 +21,6 @@ return new class extends Migration
             $table->string('file_path');            
             $table->enum('status_verifikasi', ['pending', 'disetujui', 'ditolak'])
                   ->default('pending');
-            $table->text('catatan_admin')->nullable();
             $table->timestamps();
         });
     }

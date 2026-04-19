@@ -49,7 +49,7 @@ submitBtn.addEventListener("click", async (e) => {
     };
 
     try {
-        const response = await fetch('/api/preferensi/simpan', {
+        const response = await fetch('/preferensi/simpan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
