@@ -77,11 +77,8 @@ Admin - Manajemen Mandor
                         Assign Proyek
                     </button>
                     @else
-                    <button class="mandor-assign-btn disabled"
-                        data-mandor-id="{{ $mandor->id }}"
-                        data-mandor-name="{{ $mandor->user->name }}"
-                        onclick="unassignMandor(this)">
-                        Lepas Mandor
+                    <button class="mandor-assign-btn disabled" disabled>
+                        Assign Proyek
                     </button>
                     @endif
                 </div>
@@ -106,13 +103,18 @@ Admin - Manajemen Mandor
                 <h3 class="list-title">LIST PROYEK</h3>
                 <div class="proyek-list">
                     @forelse($proyeksAvailable as $proyek)
+                    @php
+                    $desain = $proyek->detailBangun?->desainRumah;
+                    @endphp
                     <button class="proyek-item" data-proyek-id="{{ $proyek->id }}">
                         <div class="project-card">
                             <div class="project-thumb">
-                                <img src="{{ asset('images/project-placeholder.png') }}" alt="{{ $proyek->jenis_proyek }}" />
+                                <img
+                                    src="{{ $desain ? asset($desain->path_gambar_desain) : asset('images/project-placeholder.png') }}"
+                                    alt="{{ $desain?->tipe_rumah ?? $proyek->jenis_proyek }}" />
                             </div>
                             <div>
-                                <p class="project-title">{{ $proyek->jenis_proyek }}</p>
+                                <p class="project-title">{{ $desain?->tipe_rumah ?? $proyek->jenis_proyek }}</p>
                                 <div class="title-wrapper">
                                     <p class="project-id"><strong>ID:</strong> {{ $proyek->id }}</p>
                                     <p class="project-status"><strong>Alamat:</strong> {{ $proyek->alamat_proyek }}</p>
