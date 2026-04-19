@@ -137,7 +137,7 @@ if (mainSubmitBtn) {
         });
 
         try {
-            const response = await fetch('/api/proyek/ajukan', {
+            const response = await fetch('/proyek/ajukan', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -155,7 +155,7 @@ if (mainSubmitBtn) {
                     window.location.href = "/material";
                 } else {
                     alert("Berhasil! " + data.message_1);
-                    window.location.href = "/project";
+                    window.location.href = "/proyek";
                 }
             } else {
                 // Jika Laravel mengembalikan error (misal file kegedean/validasi gagal)

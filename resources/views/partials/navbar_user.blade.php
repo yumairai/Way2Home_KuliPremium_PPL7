@@ -45,7 +45,7 @@
                         <span class="material-symbols-outlined">shopping_cart</span>
                         <span>Pesanan Saya</span>
                     </a>
-                    <a href="/project" class="nav-link">
+                    <a href="{{ route('proyek.index') }}" class="nav-link">
                         <span class="material-symbols-outlined">construction</span>
                         <span>Proyek Saya</span>
                     </a>
