@@ -15,7 +15,7 @@ class DetailProyekBangunSeeder extends Seeder
     {
         $proyekList = DB::table('proyek')->get();
 
-        $desainId = 1;
+        $desainId = rand(1, 3);
 
         foreach ($proyekList as $proyek) {
             $catatan = null;

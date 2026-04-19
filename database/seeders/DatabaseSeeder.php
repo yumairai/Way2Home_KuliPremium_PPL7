@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             ProyekSeeder::class,
             DetailProyekBangunSeeder::class,
             MandorSeeder::class,
+            DokumenProyekSeeder::class
         ]);
     }
 }

@@ -20,7 +20,7 @@ class ProyekSeeder extends Seeder
             [
                 'customer_id'   => $customerIds[0] ?? 1,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan Rumah Minimalis',
+                'jenis_proyek'  => 'Pembangunan',
                 'alamat_proyek' => 'Jl. Melati No. 12, Bandung',
                 'tanggal_mulai' => null, // Biasanya tanggal fiksasi nunggu mandor
                 'status_proyek' => 'Pengalokasian Mandor',
@@ -29,7 +29,7 @@ class ProyekSeeder extends Seeder
             [
                 'customer_id'   => $customerIds[1] ?? 2,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Renovasi Lantai 2',
+                'jenis_proyek'  => 'Pembangunan',
                 'alamat_proyek' => 'Komp. Asri B-9, Jakarta',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Pengalokasian Mandor',
@@ -38,7 +38,7 @@ class ProyekSeeder extends Seeder
             [
                 'customer_id'   => $customerIds[2] ?? 3,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan Ruko 2 Pintu',
+                'jenis_proyek'  => 'Pembangunan',
                 'alamat_proyek' => 'Jl. Raya Utama No. 45, Surabaya',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Pengalokasian Mandor',
@@ -49,7 +49,7 @@ class ProyekSeeder extends Seeder
             [
                 'customer_id'   => $customerIds[0] ?? 1,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan Gazebo Taman',
+                'jenis_proyek'  => 'Pembangunan ',
                 'alamat_proyek' => 'Jl. Melati No. 12, Bandung',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Revisi Dokumen',
@@ -60,7 +60,7 @@ class ProyekSeeder extends Seeder
             [
                 'customer_id'   => $customerIds[1] ?? 2,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Renovasi Dapur Modern',
+                'jenis_proyek'  => 'Pembangunan',
                 'alamat_proyek' => 'Komp. Asri B-9, Jakarta',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Menunggu Verifikasi',

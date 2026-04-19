@@ -88,8 +88,8 @@ class UserSeeder extends Seeder
                 'address' => 'Mess Kontraktor B',
             ],
             [
-                'name'    => 'Dedi Tukang',
-                'email'   => 'dedi@gmail.com',
+                'name'    => 'Prayoga Mandor',
+                'email'   => 'prayoga@gmail.com',
                 'phone'   => '083333333333',
                 'address' => 'Jl. Pembangunan No. 99',
             ],
