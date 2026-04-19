@@ -30,7 +30,7 @@ Route::middleware(['guest'])->group(function () {
 
 // Customer Routes (Sudah Login)
 Route::middleware(['auth'])->group(function () {
-    
+
     // Dashboard & Logouts
     Route::get('/dashboard', function () {
         return view('customer-layouts.dashboard');
@@ -42,7 +42,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/recommendation', function () {
         return view('customer-layouts.input_preferensi_ai');
     })->name('recommendation.input');
-    
+
     Route::get('/recommendation/result', function () {
         return view('customer-layouts.rekomendasi_rumah');
     })->name('recommendation.result');
@@ -55,7 +55,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('proyek')->group(function () {
         Route::get('/', [ProyekController::class, 'index'])->name('proyek.index');
         Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
-        
+
         // Action Ajax
         Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
         Route::post('/bayar-dp', [ProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
@@ -66,7 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('material')->group(function () {
         Route::get('/', [MaterialController::class, 'index'])->name('material.index');
         Route::get('/api-list', [MaterialController::class, 'getMaterials'])->name('material.api');
-        
+
         Route::get('/cart', function () {
             return view('customer-layouts.cart');
         })->name('cart.view');
@@ -98,15 +98,21 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/verifikasi', [VerifikasiProyekController::class, 'index'])->name('admin.verifikasi');
     Route::put('/verifikasi/{id}', [VerifikasiProyekController::class, 'update'])->name('admin.verifikasi.update');
 
-    Route::get('/kelola-material', function () { return view('admin.kelola_material'); })->name('admin.material');
-    Route::get('/manajemen-mandor', function () { return view('admin.manajemen_mandor'); })->name('admin.mandor');
-    Route::get('/monitor-proyek', function () { return view('admin.monitor_proyek'); })->name('admin.monitor');
+    Route::get('/kelola-material', function () {
+        return view('admin.kelola_material');
+    })->name('admin.material');
+    Route::get('/manajemen-mandor', function () {
+        return view('admin.manajemen_mandor');
+    })->name('admin.mandor');
+    Route::get('/monitor-proyek', function () {
+        return view('admin.monitor_proyek');
+    })->name('admin.monitor');
 
     // Preview Dokumen Proyek
     Route::get('/preview/{filename}', function ($filename) {
         $path = public_path('images/aset/' . $filename);
         if (!file_exists($path)) abort(404);
-        
+
         $mimeType = mime_content_type($path);
         return response()->file($path, ['Content-Type' => $mimeType]);
     })->name('admin.preview');

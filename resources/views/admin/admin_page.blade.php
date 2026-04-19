@@ -44,19 +44,19 @@
             </a>
 
             <a class="sidebar-link {{ Route::is('admin.kelola_material') ? 'active' : '' }}"
-                href="{{ route('admin.kelola_material') }}">
+                href="{{ route('admin.material') }}">
                 <span class="material-symbols-outlined filled">construction</span>
                 <span>Kelola Material</span>
             </a>
 
             <a class="sidebar-link {{ Route::is('admin.manajemen_mandor') ? 'active' : '' }}"
-                href="{{ route('admin.manajemen_mandor') }}">
+                href="{{ route('admin.mandor') }}">
                 <span class="material-symbols-outlined filled">engineering</span>
                 <span>Manajemen Mandor</span>
             </a>
 
             <a class="sidebar-link {{ Route::is('admin.monitor_proyek') ? 'active' : '' }}"
-                href="{{ route('admin.monitor_proyek') }}">
+                href="{{ route('admin.monitor') }}">
                 <span class="material-symbols-outlined filled">monitoring</span>
                 <span>Project Monitor</span>
             </a>
