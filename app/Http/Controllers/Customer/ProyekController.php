@@ -13,6 +13,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ProyekController extends Controller
 {
+    public function show($id)
+    {
+        return view('customer-layouts.proyek_user', ['id' => $id]);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

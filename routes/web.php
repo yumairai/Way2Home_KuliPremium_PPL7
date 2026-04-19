@@ -52,30 +52,10 @@ Route::middleware(['auth'])->group(function () {
 
     Route::prefix('project')->group(function () {
         Route::redirect('/', '/project/1');
-
-        Route::get('/1', function () {
-            return view('customer-layouts.proyek_user1');
-        });
-
-        Route::get('/2', function () {
-            return view('customer-layouts.proyek_user2');
-        });
-
-        Route::get('/3', function () {
-            return view('customer-layouts.proyek_user3');
-        });
-
-        Route::get('/4', function () {
-            return view('customer-layouts.proyek_user4');
-        });
-
-        Route::get('/5', function () {
-            return view('customer-layouts.proyek_user5');
-        });
-        // ceritanya proyek 5 dengan trackingnya
-        Route::get('/5/tracking', function () {
+        Route::get('/{id}/tracking', function () {
             return view('customer-layouts.customer_tracking');
-        });
+        })->where('id', '[1-5]');
+        Route::get('/{id}', [ProyekController::class, 'show'])->where('id', '[1-5]');
     });
 
     Route::get('/profile', function () {

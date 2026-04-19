@@ -52,6 +52,7 @@
                         'Pengajuan Anda sedang dalam antrean tim verifikasi teknis. Kami akan segera memberikan analisis material dan jasa berdasarkan spesifikasi lokasi di Bandung.',
                     'budget_needed' => '-',
                     'mandor_contact' => null,
+                    'mandor_name' => null,
                 ],
                 [
                     'id' => 'REV-2',
@@ -59,9 +60,10 @@
                     'location' => 'Bandung, Jawa Barat',
                     'budget_user' => 'Rp 150.000.000',
                     'feedback' =>
-                        'Proyek renovasi Anda sedang berjalan. Tim mandor sudah mulai koordinasi material dan jadwal pekerjaan di lapangan.',
+                        'Proyek renovasi Anda sedang berjalan. Silahkan hubungi mandor untuk update harian dan koordinasi kebutuhan material.',
                     'budget_needed' => 'Rp 190.000.000',
-                    'mandor_contact' => 'Mandor Budi - 0812-3456-7890',
+                    'mandor_contact' => '6281384310179',
+                    'mandor_name' => 'Mandor Budi',
                 ],
                 [
                     'id' => 'REV-3',
@@ -71,7 +73,8 @@
                     'feedback' =>
                         'Berdasarkan survei visual dan data teknis, area renovasi memerlukan perkuatan struktur pada bagian atap. Penggunaan material baja ringan standar SNI sangat disarankan. Kami telah menghitung efisiensi tenaga kerja lokal untuk menekan biaya jasa tanpa mengurangi kualitas finishing.',
                     'budget_needed' => 'Rp 274.500.000',
-                    'mandor_contact' => 'Mandor Budi - 0812-3456-7890',
+                    'mandor_contact' => '6281384310179',
+                    'mandor_name' => 'Mandor Budi',
                 ],
                 [
                     'id' => 'REV-4',
@@ -80,7 +83,8 @@
                     'budget_user' => 'Rp 250.000.000',
                     'feedback' => 'Request renovasi telah selesai. Terima kasih sudah menggunakan layanan kami.',
                     'budget_needed' => 'Rp 274.500.000',
-                    'mandor_contact' => 'Mandor Budi - 0812-3456-7890',
+                    'mandor_contact' => '6281384310179',
+                    'mandor_name' => 'Mandor Budi',
                 ],
             ];
         @endphp
@@ -165,11 +169,14 @@
                                                 </div>
                                                 <div>
                                                     <p class="rv-info-label">Kontak Mandor</p>
-                                                    <p class="rv-info-value">{{ $request['mandor_contact'] }}</p>
+                                                    <p class="rv-info-value">{{ $request['mandor_name'] }} -
+                                                        {{ $request['mandor_contact'] }}</p>
                                                 </div>
                                             </div>
                                             <div class="rv-actions-spacer"></div>
-                                            <button class="rv-action-btn rv-action-btn-primary">Hubungi Mandor</button>
+                                            <button class="rv-action-btn rv-action-btn-primary"
+                                                onclick="window.location.href= 'https://wa.me/{{ $request['mandor_contact'] }}'">Hubungi
+                                                Mandor</button>
                                         </div>
                                     @endif
                                 </div>
