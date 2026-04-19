@@ -10,16 +10,24 @@ use App\Http\Controllers\Customer\PaymentMaterialController;
 use App\Http\Controllers\Customer\PaymentProyekController;
 use App\Http\Controllers\Admin\VerifikasiProyekController;
 
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-// Public Routes
 Route::get('/', [AuthController::class, 'index'])->name('home');
 
-// Callback Midtrans 
+// Callback Midtrans (Harus di luar auth karena dipanggil server-to-server)
 Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
 Route::post('/proyek/callback', [ProyekController::class, 'callback']);
 
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Belum Login)
+|--------------------------------------------------------------------------
+*/
 
-// Guest Routes (Belum Login)
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
@@ -27,11 +35,15 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
+/*
+|--------------------------------------------------------------------------
+| Customer Routes (Sudah Login)
+|--------------------------------------------------------------------------
+*/
 
-// Customer Routes (Sudah Login)
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard & Logouts
+    // Dashboard & Logout
     Route::get('/dashboard', function () {
         return view('customer-layouts.dashboard');
     })->name('customer-layouts.dashboard');
@@ -58,14 +70,14 @@ Route::middleware(['auth'])->group(function () {
 
         // Action Ajax
         Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
-        Route::post('/bayar-dp', [ProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
+        Route::post('/bayar-dp', [PaymentProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
         Route::post('/preferensi/simpan', [PreferensiController::class, 'store'])->name('proyek.preferensi.simpan');
     });
 
     // Material & Shopping Cart
     Route::prefix('material')->group(function () {
         Route::get('/', [MaterialController::class, 'index'])->name('material.index');
-        Route::get('/api-list', [MaterialController::class, 'getMaterials'])->name('material.api');
+        Route::get('/materials', [MaterialController::class, 'getMaterials']);
 
         Route::get('/cart', function () {
             return view('customer-layouts.cart');
@@ -74,22 +86,25 @@ Route::middleware(['auth'])->group(function () {
 
     // Operasi Keranjang (AJAX)
     Route::prefix('cart')->group(function () {
-        Route::get('/data', [CartController::class, 'index'])->name('cart.data');
-        Route::post('/add', [CartController::class, 'addToCart'])->name('cart.add');
-        Route::put('/update/{id}', [CartController::class, 'updateQuantity'])->name('cart.update');
-        Route::delete('/delete/{id}', [CartController::class, 'removeFromCart'])->name('cart.delete');
-        Route::delete('/remove-material/{id}', [CartController::class, 'removeByMaterial'])->name('cart.removeMaterial');
+        Route::get('/cart', [CartController::class, 'index']);
+        Route::post('/cart/add', [CartController::class, 'addToCart']);
+        Route::put('/cart/update/{id}', [CartController::class, 'updateQuantity']);
+        Route::delete('/cart/delete/{id}', [CartController::class, 'removeFromCart']);
+        Route::delete('/cart/remove-material/{id}', [CartController::class, 'removeByMaterial']);
     });
 
     // Checkout Material
-    Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout'])->name('checkout.material');
-
-    // Pembayaran DP Proyek
-    Route::post('/proyek/bayar-dp', [PaymentProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
+    Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout']);
+    Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
+    
 });
 
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
 
-// Admin Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
@@ -101,9 +116,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/kelola-material', function () {
         return view('admin.kelola_material');
     })->name('admin.material');
+
     Route::get('/manajemen-mandor', function () {
         return view('admin.manajemen_mandor');
     })->name('admin.mandor');
+
     Route::get('/monitor-proyek', function () {
         return view('admin.monitor_proyek');
     })->name('admin.monitor');

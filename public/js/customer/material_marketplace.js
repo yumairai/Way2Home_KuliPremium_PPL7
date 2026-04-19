@@ -13,7 +13,7 @@ const getHeaders = () => ({
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Ambil params dari URL (jika ada) saat pertama load
     const urlParams = new URLSearchParams(window.location.search);
-    const apiUrl = '/api/materials' + (urlParams.toString() ? '?' + urlParams.toString() : '');
+    const apiUrl = '/materials' + (urlParams.toString() ? '?' + urlParams.toString() : '');
 
     await fetchMaterials(apiUrl);
     updateFloatingCart();
@@ -45,7 +45,7 @@ async function applyFilters() {
     const sortMap = { 'Harga Terendah': 'harga_rendah', 'Harga Tertinggi': 'harga_tinggi', 'Terbaru': 'terbaru' };
     params.append('sort', sortMap[sort] || 'terbaru');
 
-    const newUrl = '/api/materials?' + params.toString();
+    const newUrl = '/materials?' + params.toString();
     await fetchMaterials(newUrl);
 }
 
@@ -60,7 +60,7 @@ async function fetchMaterials(url) {
         // Ambil data produk & data keranjang secara paralel
         const [resMat, resCart] = await Promise.all([
             fetch(url).then(res => res.json()),
-            isLoggedIn ? fetch('/api/cart').then(res => res.json()) : { data: [] }
+            isLoggedIn ? fetch('/cart').then(res => res.json()) : { data: [] }
         ]);
 
         const materials = resMat.data;
@@ -157,7 +157,7 @@ async function handleInitialAdd(id) {
         return;
     }
 
-    const res = await fetch('/api/cart/add', {
+    const res = await fetch('/cart/add', {
         method: 'POST',
         headers: getHeaders(),
         body: JSON.stringify({ material_id: id, jumlah: 1 })
@@ -182,7 +182,7 @@ async function updateCartQty(id, newQty) {
     const container = document.getElementById(`action-${id}`);
     
     if (newQty < 1) {
-        const res = await fetch(`/api/cart/remove-material/${id}`, { 
+        const res = await fetch(`/cart/remove-material/${id}`, { 
             method: 'DELETE', 
             headers: getHeaders() 
         });
@@ -191,7 +191,7 @@ async function updateCartQty(id, newQty) {
             updateFloatingCart();
         }
     } else {
-        const res = await fetch('/api/cart/add', {
+        const res = await fetch('/cart/add', {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ material_id: id, jumlah: newQty })
@@ -229,7 +229,7 @@ async function updateFloatingCart() {
     if (!isLoggedIn) return;
 
     try {
-        const res = await fetch('/api/cart');
+        const res = await fetch('/cart');
         const result = await res.json();
         const carts = result.data || [];
         

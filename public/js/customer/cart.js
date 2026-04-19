@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function loadCart() {
-        fetch('/api/cart', {
+        fetch('/cart', {
             headers: { 'Authorization': `Bearer ${token}` } // WAJIB ADA
         })
         .then(res => res.json())
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkoutBtn.disabled = true;
         checkoutBtn.innerText = 'Memproses...';
 
-        fetch('/api/payment/checkout', {
+        fetch('/payment/checkout', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch(`/api/cart/update/${id}`, { 
+        fetch(`/cart/update/${id}`, { 
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.deleteItem = function(id) {
         if (!confirm('Hapus item dari keranjang?')) return;
 
-        fetch(`/api/cart/delete/${id}`, {
+        fetch(`/cart/delete/${id}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${token}`,
