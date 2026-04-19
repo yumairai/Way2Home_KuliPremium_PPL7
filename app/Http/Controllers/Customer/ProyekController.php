@@ -13,6 +13,37 @@ use Illuminate\Support\Facades\Storage;
 
 class ProyekController extends Controller
 {
+    public function index()
+    {
+        $customer = Auth::user()->customer;
+        $proyek   = Proyek::where('customer_id', $customer->id)->first();
+
+        if ($proyek) {
+            return redirect()->route('proyek.show', $proyek->id);
+        }
+
+        return redirect()->route('customer-layouts.dashboard');
+    }
+
+    public function show($id)
+    {
+        $customer = Auth::user()->customer;
+
+        $proyeks = Proyek::with([
+            'detailBangun.desainRumah',
+            'detailBangun.dokumenProyek',
+            'pembayaranDP',
+        ])
+            ->where('customer_id', $customer->id)
+            ->get();
+
+        $proyek = $proyeks->first(fn($p) => $p->id == $id);
+
+        abort_if(is_null($proyek), 404);
+
+        return view('customer-layouts.proyek.show', compact('proyek', 'proyeks'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([

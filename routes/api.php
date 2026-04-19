@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\MaterialController;
-use App\Http\Controllers\Customer\PaymentController;
+use App\Http\Controllers\Customer\PaymentMaterialController;
 
 Route::middleware('web')->group(function () {
     // Material API
@@ -17,6 +17,6 @@ Route::middleware('web')->group(function () {
     Route::delete('/cart/remove-material/{id}', [CartController::class, 'removeByMaterial']);
 
     // Payment & Checkout API
-    Route::post('/payment/checkout', [PaymentController::class, 'checkout']);
-    Route::post('/payment/callback', [PaymentController::class, 'callback']);
+    Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout']);
+    Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
 });

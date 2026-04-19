@@ -17,6 +17,11 @@ class DetailProyekBangun extends Model
         'catatan_admin'
     ];
 
+    public function desainRumah()
+    {
+        return $this->belongsTo(DesainRumah::class, 'desain_rumah_id');
+    }
+
     public function proyek()
     {
         return $this->belongsTo(Proyek::class, 'proyek_id');

@@ -12,12 +12,12 @@ class Proyek extends Model
     protected $table = 'proyek';
 
     protected $fillable = [
-        'customer_id', 
-        'mandor_id', 
-        'jenis_proyek', 
-        'alamat_proyek', 
-        'tanggal_mulai', 
-        'status_proyek', 
+        'customer_id',
+        'mandor_id',
+        'jenis_proyek',
+        'alamat_proyek',
+        'tanggal_mulai',
+        'status_proyek',
         'jumlah_cicilan'
     ];
 
@@ -29,5 +29,17 @@ class Proyek extends Model
     public function detailBangun()
     {
         return $this->hasOne(DetailProyekBangun::class, 'proyek_id');
+    }
+    
+    public function pembayaran()
+    {
+        return $this->hasMany(PembayaranProyek::class, 'proyek_id');
+    }
+
+    public function pembayaranDP()
+    {
+        return $this->hasOne(PembayaranProyek::class, 'proyek_id')
+            ->where('tipe_pembayaran', 'DP')
+            ->where('status_pembayaran', 'berhasil');
     }
 }
