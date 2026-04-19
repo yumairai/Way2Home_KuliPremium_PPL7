@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>@yield('title')</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="{{ asset('css/admin/admin_page.css') }}" rel="stylesheet" />
     <link href="{{ asset('images/logo-w2h.png') }}" type="image" rel="icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -145,7 +146,7 @@
             @yield('content')
         </section>
     </main>
-@stack('scripts')
+    @stack('scripts')
 </body>
 
 </html>
