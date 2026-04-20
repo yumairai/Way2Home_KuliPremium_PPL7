@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\RumahDataset;
+use App\Models\DesainRumah;
 use Illuminate\Support\Collection;
 
 /**
@@ -19,9 +19,10 @@ use Illuminate\Support\Collection;
  *
  * Fitur yang digunakan:
  *   - lokasi        : match eksak (binary 0/1)
+ *   - gaya_arsitektur : match eksak (binary 0/1)
  *   - luas_tanah    : normalized proximity  (1 - |norm_a - norm_b|)
- *   - jumlah_kamar  : normalized proximity
- *   - harga         : normalized proximity
+ *   - jumlah_kamar_tidur : normalized proximity
+ *   - estimasi_biaya     : normalized proximity
  */
 class RekomendasiService
 {
@@ -30,7 +31,7 @@ class RekomendasiService
     // ─────────────────────────────────────────
     private const STATS = [
         'luas_tanah'   => ['min' => 30,          'max' => 350],
-        'jumlah_kamar' => ['min' => 1,            'max' => 6],
+        'jumlah_kamar' => ['min' => 1,            'max' => 10],
         'harga'        => ['min' => 100_000_000,  'max' => 2_000_000_000],
     ];
 
@@ -38,9 +39,9 @@ class RekomendasiService
     // Bobot berdasarkan prioritas user
     // ─────────────────────────────────────────
     private const WEIGHTS = [
-        'biaya'   => ['lokasi' => 0.15, 'luas' => 0.10, 'kamar' => 0.15, 'harga' => 0.60],
-        'estetik' => ['lokasi' => 0.35, 'luas' => 0.30, 'kamar' => 0.20, 'harga' => 0.15],
-        'cepat'   => ['lokasi' => 0.20, 'luas' => 0.40, 'kamar' => 0.15, 'harga' => 0.25],
+        'biaya'   => ['lokasi' => 0.10, 'gaya' => 0.10, 'luas' => 0.10, 'kamar' => 0.15, 'harga' => 0.55],
+        'estetik' => ['lokasi' => 0.20, 'gaya' => 0.30, 'luas' => 0.20, 'kamar' => 0.15, 'harga' => 0.15],
+        'cepat'   => ['lokasi' => 0.20, 'gaya' => 0.10, 'luas' => 0.35, 'kamar' => 0.15, 'harga' => 0.20],
     ];
 
     /**
@@ -70,20 +71,27 @@ class RekomendasiService
         // Ambil semua rumah dari DB (chunk-based untuk memori efisien)
         $scored = collect();
 
-        RumahDataset::chunk(500, function ($rows) use ($preferensi, $normUser, $weights, &$scored) {
-            foreach ($rows as $rumah) {
-                $score = $this->hitungSkor($rumah, $preferensi, $normUser, $weights);
+        DesainRumah::query()->chunk(500, function ($rows) use ($preferensi, $normUser, $weights, &$scored) {
+            foreach ($rows as $desain) {
+                $score = $this->hitungSkor($desain, $preferensi, $normUser, $weights);
 
                 $scored->push([
-                    'id'            => $rumah->id,
-                    'nama_rumah'    => $rumah->nama_rumah,
-                    'lokasi'        => $rumah->lokasi,
-                    'luas_tanah'    => $rumah->luas_tanah,
-                    'jumlah_kamar'  => $rumah->jumlah_kamar,
-                    'jumlah_lantai' => $rumah->jumlah_lantai,
-                    'tahun_bangun'  => $rumah->tahun_bangun,
-                    'harga'         => $rumah->harga,
-                    'material_digunakan' => $rumah->material_digunakan,
+                    'id'            => $desain->id,
+                    'nama_rumah'    => $desain->tipe_rumah,
+                    'lokasi'        => $desain->lokasi ?? '-',
+                    'gaya_arsitektur' => $desain->gaya_arsitektur ?? '-',
+                    'deskripsi'     => $desain->deskripsi,
+                    'luas_tanah'    => $desain->luas_tanah,
+                    'luas_bangunan' => $desain->luas_bangunan,
+                    'jumlah_kamar'  => $desain->jumlah_kamar_tidur,
+                    'jumlah_kamar_mandi' => $desain->jumlah_kamar_mandi,
+                    'jumlah_lantai' => $desain->jumlah_lantai ?? 1,
+                    'tahun_bangun'  => $desain->tahun_bangun ?? now()->year,
+                    'harga'         => $desain->estimasi_biaya,
+                    'estimasi_durasi' => $desain->estimasi_durasi,
+                    'material_digunakan' => $desain->material_digunakan ?: $desain->material_utama,
+                    'fasilitas'     => $desain->fasilitas,
+                    'path_gambar_desain' => $desain->path_gambar_desain,
                     'skor'          => round($score * 100, 2), // dalam persen
                 ]);
             }
@@ -99,29 +107,33 @@ class RekomendasiService
     // Hitung skor kemiripan untuk 1 rumah
     // ─────────────────────────────────────────
     private function hitungSkor(
-        RumahDataset $rumah,
+        DesainRumah $rumah,
         array $preferensi,
         array $normUser,
         array $weights
     ): float {
         // 1. Lokasi: exact match
-        $skorLokasi = ($rumah->lokasi === $preferensi['lokasi']) ? 1.0 : 0.0;
+        $skorLokasi = strcasecmp((string) $rumah->lokasi, (string) $preferensi['lokasi']) === 0 ? 1.0 : 0.0;
 
-        // 2. Luas tanah: proximity similarity
+        // 2. Gaya arsitektur: exact match
+        $skorGaya = strcasecmp((string) $rumah->gaya_arsitektur, (string) $preferensi['gaya_arsitektur']) === 0 ? 1.0 : 0.0;
+
+        // 3. Luas tanah: proximity similarity
         $normLuas  = $this->normalize($rumah->luas_tanah,   self::STATS['luas_tanah']);
         $skorLuas  = $this->proximitySimilarity($normLuas,  $normUser['luas']);
 
-        // 3. Jumlah kamar: proximity similarity
-        $normKamar = $this->normalize($rumah->jumlah_kamar, self::STATS['jumlah_kamar']);
+        // 4. Jumlah kamar: proximity similarity
+        $normKamar = $this->normalize($rumah->jumlah_kamar_tidur, self::STATS['jumlah_kamar']);
         $skorKamar = $this->proximitySimilarity($normKamar, $normUser['kamar']);
 
-        // 4. Harga: proximity similarity (budget sebagai batas atas ideal)
-        $normHarga = $this->normalize($rumah->harga, self::STATS['harga']);
+        // 5. Harga: proximity similarity (budget sebagai batas atas ideal)
+        $normHarga = $this->normalize($rumah->estimasi_biaya, self::STATS['harga']);
         $skorHarga = $this->hargaSimilarity($normHarga, $normUser['harga']);
 
         // Weighted sum
         return
             $weights['lokasi'] * $skorLokasi +
+            $weights['gaya']   * $skorGaya   +
             $weights['luas']   * $skorLuas   +
             $weights['kamar']  * $skorKamar  +
             $weights['harga']  * $skorHarga;
