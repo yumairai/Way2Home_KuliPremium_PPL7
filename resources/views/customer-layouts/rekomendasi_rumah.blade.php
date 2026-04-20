@@ -255,7 +255,7 @@
 <div class="rekom-header">
     <div>
         <span class="ai-badge">
-            ⚙️ &nbsp;Content-Based Filtering · Pure ML Engine
+            Content-Based Filtering · Pure ML Engine
         </span>
     </div>
     <h1>REKOMENDASI RUMAH</h1>
@@ -264,12 +264,12 @@
 {{-- Preferensi Summary Chips --}}
 @if(!empty($preferensi))
 <div class="preferensi-summary">
-    <span class="pref-chip">📍 {{ $preferensi['lokasi'] }}</span>
-    <span class="pref-chip">🏠 {{ $preferensi['gaya_arsitektur'] }}</span>
-    <span class="pref-chip">📐 {{ $preferensi['luas_area'] }} m²</span>
-    <span class="pref-chip">🛏 {{ $preferensi['jumlah_kamar'] }} Kamar</span>
-    <span class="pref-chip">💰 Rp {{ number_format($preferensi['budget'], 0, ',', '.') }}</span>
-    <span class="pref-chip">🎯 Prioritas: {{ ucfirst($preferensi['prioritas']) }}</span>
+    <span class="pref-chip">Lokasi: {{ $preferensi['lokasi'] }}</span>
+    <span class="pref-chip">Gaya: {{ $preferensi['gaya_arsitektur'] }}</span>
+    <span class="pref-chip">Luas: {{ $preferensi['luas_area'] }} m²</span>
+    <span class="pref-chip">Kamar: {{ $preferensi['jumlah_kamar'] }}</span>
+    <span class="pref-chip">Budget: Rp {{ number_format($preferensi['budget'], 0, ',', '.') }}</span>
+    <span class="pref-chip">Prioritas: {{ ucfirst($preferensi['prioritas']) }}</span>
 </div>
 @endif
 
@@ -292,10 +292,16 @@
         $skor      = $rumah['skor'];
         $skorClass = $skor >= 70 ? 'skor-high' : ($skor >= 50 ? 'skor-mid' : 'skor-low');
         $harga     = \App\Services\RekomendasiService::formatHarga($rumah['harga']);
-        $durasi    = \App\Services\RekomendasiService::estimasiDurasi($rumah['luas_tanah']);
+        $durasi    = !empty($rumah['estimasi_durasi'])
+            ? ((int) $rumah['estimasi_durasi'] . ' Bulan')
+            : \App\Services\RekomendasiService::estimasiDurasi($rumah['luas_tanah']);
         $materials = collect(explode(';', $rumah['material_digunakan'] ?? ''))
                         ->map(fn($m) => trim($m))->filter()->take(6)->values();
-        $photo     = $dummyPhotos[$index % count($dummyPhotos)];
+        $photo     = !empty($rumah['path_gambar_desain'])
+            ? (preg_match('/^https?:\\/\\//', $rumah['path_gambar_desain'])
+                ? $rumah['path_gambar_desain']
+                : asset($rumah['path_gambar_desain']))
+            : $dummyPhotos[$index % count($dummyPhotos)];
     @endphp
 
     <div class="card">
@@ -316,28 +322,32 @@
                 <h2>{{ $rumah['nama_rumah'] }}</h2>
 
                 <div class="detail-row">
-                    <span class="icon">📍</span>
+                    <span class="icon">Lokasi:</span>
                     <span>{{ $rumah['lokasi'] }}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="icon">📐</span>
-                    <span>Luas: <strong>{{ $rumah['luas_tanah'] }} m²</strong></span>
+                    <span class="icon">Gaya:</span>
+                    <span>{{ $rumah['gaya_arsitektur'] ?? '-' }}</span>
                 </div>
                 <div class="detail-row">
-                    <span class="icon">🛏</span>
+                    <span class="icon">Luas:</span>
+                    <span><strong>{{ $rumah['luas_tanah'] }} m²</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="icon">Kamar:</span>
                     <span>{{ $rumah['jumlah_kamar'] }} Kamar &nbsp;·&nbsp; {{ $rumah['jumlah_lantai'] }} Lantai</span>
                 </div>
                 <div class="detail-row">
-                    <span class="icon">🏗</span>
-                    <span>Tahun Bangun: <strong>{{ $rumah['tahun_bangun'] }}</strong></span>
+                    <span class="icon">Tahun:</span>
+                    <span><strong>{{ $rumah['tahun_bangun'] }}</strong></span>
                 </div>
                 <div class="detail-row">
-                    <span class="icon">⏱</span>
-                    <span>Est. Durasi: <strong>{{ $durasi }}</strong></span>
+                    <span class="icon">Durasi:</span>
+                    <span><strong>{{ $durasi }}</strong></span>
                 </div>
                 <div class="detail-row">
-                    <span class="icon">💰</span>
-                    <span>Harga: <strong>{{ $harga }}</strong></span>
+                    <span class="icon">Harga:</span>
+                    <span><strong>{{ $harga }}</strong></span>
                 </div>
             </div>
         </div>
@@ -360,14 +370,14 @@
 </div>
 @else
 <div class="empty-state">
-    <h2>😕 Tidak ada rekomendasi ditemukan.</h2>
+    <h2>Tidak ada rekomendasi ditemukan.</h2>
     <p>Coba sesuaikan preferensi Anda.</p>
 </div>
 @endif
 
 <div class="back-btn-wrap">
     <button class="btn-back" onclick="window.location.href='/recommendation'">
-        ← Ubah Preferensi
+        Ubah Preferensi
     </button>
 </div>
 
@@ -376,7 +386,7 @@
     <div class="modal-box">
         <h3 id="modalTitle">Material Digunakan</h3>
         <ul id="modalList"></ul>
-        <button class="modal-close" onclick="tutupModal()">Tutup ✕</button>
+        <button class="modal-close" onclick="tutupModal()">Tutup</button>
     </div>
 </div>
 
@@ -386,12 +396,12 @@
 <script>
     function pilihRumah(id, nama) {
         if (confirm('Pilih rumah "' + nama + '"?\n\nAnda akan diarahkan ke halaman pembangunan.')) {
-            window.location.href = '/house-build-form?rumah_id=' + id;
+            window.location.href = '/house-build-form?desain_id=' + id;
         }
     }
 
     function lihatMaterial(materials, nama) {
-        document.getElementById('modalTitle').textContent = '📦 Material: ' + nama;
+        document.getElementById('modalTitle').textContent = 'Material: ' + nama;
         const list = document.getElementById('modalList');
         list.innerHTML = '';
         materials.forEach(function(m) {
