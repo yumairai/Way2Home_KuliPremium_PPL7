@@ -44,9 +44,7 @@ Route::middleware(['auth'])->group(function () {
         return view('customer-layouts.renovation_form');
     })->name('customer.renovation_form');
 
-    Route::get('/house-build-form', function () {
-        return view('customer-layouts.form_pembangunan_rumah');
-    });
+    Route::get('/house-build-form', [ProyekController::class, 'create'])->name('proyek.form_bangun');
 
     Route::prefix('project')->group(function () {
         Route::redirect('/', '/project/1');
