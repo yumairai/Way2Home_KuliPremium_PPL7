@@ -89,6 +89,7 @@ const mainSubmitBtn = document.getElementById('mainSubmitBtn');
 if (mainSubmitBtn) {
     mainSubmitBtn.addEventListener('click', async () => {
         const alamat = document.getElementById('alamatProyek');
+        const desainInput = document.getElementById('desain_id');
         const selectedRadio = document.querySelector('input[name="package"]:checked');
         const selectedPackage = selectedRadio ? selectedRadio.value : '';
 
@@ -97,6 +98,9 @@ if (mainSubmitBtn) {
         // --- VALIDASI FRONTEND ---
         if (!alamat || !alamat.value.trim()) {
             errors.push("Alamat lengkap proyek belum diisi.");
+        }
+        if (!desainInput || !desainInput.value) {
+            errors.push("Desain rumah belum dipilih.");
         }
 
         // Jika pilih Paket Komplit (Jasa + Material), dokumen wajib ada
@@ -124,7 +128,7 @@ if (mainSubmitBtn) {
 
         const formData = new FormData();
         formData.append('alamat_proyek', alamat.value);
-        formData.append('desain_id', 1); // Pastikan ID desain valid (biasanya diambil dari URL atau hidden input)
+        formData.append('desain_id', desainInput.value);
         formData.append('package', selectedPackage);
 
         // Masukkan semua file yang ada ke dalam FormData
