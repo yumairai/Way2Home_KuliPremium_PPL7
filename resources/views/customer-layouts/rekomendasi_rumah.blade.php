@@ -42,8 +42,9 @@
             color: #3a5ba8;
             font-weight: 500;
         }
+
+        /* ── Card Container ── */
         .card-container {
-            display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 24px;
             max-width: 1320px;
@@ -51,92 +52,113 @@
             padding: 0 1.5rem;
             align-items: stretch;
         }
+        @media (max-width: 1100px) {
+            .card-container { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 760px) {
+            .card-container { grid-template-columns: 1fr; }
+        }
+
+        /* ── Card ── */
         .card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border-radius: 18px;
             overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
             position: relative;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
         }
         .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 28px rgba(0,0,0,0.13);
+            transform: translateY(-6px);
+            box-shadow: 0 14px 40px rgba(0,0,0,0.2);
         }
+
+        /* ── Photo wrapper fills entire card ── */
+        .card-photo {
+            position: relative;
+            width: 100%;
+            /* Fixed height so info overlay sits consistently */
+            height: 460px;
+            flex-shrink: 0;
+        }
+        .card-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ── Top badges (Desain N + skor) ── */
         .rank-badge {
             position: absolute;
-            top: 12px;
-            left: 12px;
+            top: 14px;
+            left: 14px;
             background: rgba(0,0,0,0.55);
             color: #fff;
             border-radius: 8px;
-            padding: 3px 10px;
-            font-size: 0.73rem;
-            font-weight: 600;
-            z-index: 2;
+            padding: 5px 14px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            z-index: 3;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(4px);
         }
         .skor-badge {
             position: absolute;
-            top: 12px;
-            right: 12px;
+            top: 14px;
+            right: 14px;
             border-radius: 8px;
-            padding: 3px 10px;
-            font-size: 0.73rem;
+            padding: 5px 12px;
+            font-size: 0.78rem;
             font-weight: 700;
+            z-index: 3;
+            backdrop-filter: blur(4px);
+        }
+        .skor-high { background: rgba(212,237,218,0.92); color: #155724; }
+        .skor-mid  { background: rgba(255,243,205,0.92); color: #856404; }
+        .skor-low  { background: rgba(248,215,218,0.92); color: #721c24; }
+
+        /* ── Gradient overlay at the bottom of the photo ── */
+        .card-overlay {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(
+                to top,
+                rgba(0,0,0,0.88) 0%,
+                rgba(0,0,0,0.65) 55%,
+                transparent 100%
+            );
+            padding: 24px 18px 16px;
             z-index: 2;
+            color: #fff;
         }
-        .skor-high { background: #d4edda; color: #155724; }
-        .skor-mid  { background: #fff3cd; color: #856404; }
-        .skor-low  { background: #f8d7da; color: #721c24; }
-        .card-img-placeholder {
-            width: 100%;
-            height: 190px;
-            background: linear-gradient(135deg, #e8edf7 0%, #c9d6f0 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-        }
-        @media (max-width: 1100px) {
-            .card-container {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-        @media (max-width: 760px) {
-            .card-container {
-                grid-template-columns: 1fr;
-            }
-        }
-        .details {
-            padding: 14px 16px 10px;
-            flex: 1;
-        }
-        .details h2 {
-            font-size: 1rem;
+        .card-overlay h2 {
+            font-size: 1.05rem;
             font-weight: 700;
             margin: 0 0 10px;
-            color: #1a2340;
-            line-height: 1.35;
-            overflow-wrap: anywhere;
+            line-height: 1.3;
+            color: #fff;
         }
         .detail-row {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            align-items: start;
-            gap: 6px;
-            font-size: 0.83rem;
-            color: #555;
-            margin-bottom: 5px;
-            line-height: 1.35;
+            display: flex;
+            align-items: flex-start;
+            gap: 7px;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.88);
+            margin-bottom: 4px;
+            line-height: 1.4;
         }
-        .detail-row span:last-child { min-width: 0; overflow-wrap: anywhere; }
-        .detail-row strong { color: #222; }
+        .detail-row span.icon { flex-shrink: 0; }
+        .detail-row strong { color: #fff; }
+
+        /* ── Buttons below overlay ── */
         .card-footer-btns {
             display: flex;
             gap: 8px;
-            padding: 0 16px 16px;
+            padding: 12px 14px 14px;
+            background: #fff;
             flex-wrap: wrap;
         }
         .btn-pilih {
@@ -168,6 +190,8 @@
             line-height: 1.2;
         }
         .btn-detail:hover { background: #dde8ff; }
+
+        /* ── Back button ── */
         .back-btn-wrap {
             text-align: center;
             padding-bottom: 3rem;
@@ -184,7 +208,8 @@
             transition: all 0.2s;
         }
         .btn-back:hover { background: #1a4fa8; color: #fff; }
-        /* Modal */
+
+        /* ── Modal ── */
         .modal-overlay {
             display: none;
             position: fixed; inset: 0;
@@ -250,6 +275,17 @@
 
 {{-- Kartu Hasil --}}
 @if(!empty($hasil))
+@php
+    /* Kumpulan foto dummy rumah dari Unsplash (bebas pakai) */
+    $dummyPhotos = [
+        'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=700&h=500&fit=crop',
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=700&h=500&fit=crop',
+        'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=700&h=500&fit=crop',
+        'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=700&h=500&fit=crop',
+        'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=700&h=500&fit=crop',
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=700&h=500&fit=crop',
+    ];
+@endphp
 <div class="card-container">
     @foreach($hasil as $index => $rumah)
     @php
@@ -259,41 +295,54 @@
         $durasi    = \App\Services\RekomendasiService::estimasiDurasi($rumah['luas_tanah']);
         $materials = collect(explode(';', $rumah['material_digunakan'] ?? ''))
                         ->map(fn($m) => trim($m))->filter()->take(6)->values();
+        $photo     = $dummyPhotos[$index % count($dummyPhotos)];
     @endphp
+
     <div class="card">
-        <span class="rank-badge">#{{ $index + 1 }}</span>
-        <span class="skor-badge {{ $skorClass }}">{{ $skor }}% Match</span>
+        <div class="card-photo">
+            {{-- Foto dummy rumah --}}
+            <img src="{{ $photo }}"
+                 alt="Foto {{ $rumah['nama_rumah'] }}"
+                 loading="lazy">
 
-        <div class="card-img-placeholder">🏠</div>
+            {{-- Badge kiri atas: Desain N --}}
+            <span class="rank-badge">Desain {{ $index + 1 }}</span>
 
-        <div class="details">
-            <h2>{{ $rumah['nama_rumah'] }}</h2>
-            <div class="detail-row">
-                <span>📍</span>
-                <span>{{ $rumah['lokasi'] }}</span>
-            </div>
-            <div class="detail-row">
-                <span>📐</span>
-                <span>Luas: <strong>{{ $rumah['luas_tanah'] }} m²</strong></span>
-            </div>
-            <div class="detail-row">
-                <span>🛏</span>
-                <span>{{ $rumah['jumlah_kamar'] }} Kamar &nbsp;·&nbsp; {{ $rumah['jumlah_lantai'] }} Lantai</span>
-            </div>
-            <div class="detail-row">
-                <span>🏗</span>
-                <span>Tahun Bangun: <strong>{{ $rumah['tahun_bangun'] }}</strong></span>
-            </div>
-            <div class="detail-row">
-                <span>⏱</span>
-                <span>Est. Durasi: <strong>{{ $durasi }}</strong></span>
-            </div>
-            <div class="detail-row">
-                <span>💰</span>
-                <span>Harga: <strong>{{ $harga }}</strong></span>
+            {{-- Badge kanan atas: Skor --}}
+            <span class="skor-badge {{ $skorClass }}">{{ $skor }}% Match</span>
+
+            {{-- Overlay info di bawah foto --}}
+            <div class="card-overlay">
+                <h2>{{ $rumah['nama_rumah'] }}</h2>
+
+                <div class="detail-row">
+                    <span class="icon">📍</span>
+                    <span>{{ $rumah['lokasi'] }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="icon">📐</span>
+                    <span>Luas: <strong>{{ $rumah['luas_tanah'] }} m²</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="icon">🛏</span>
+                    <span>{{ $rumah['jumlah_kamar'] }} Kamar &nbsp;·&nbsp; {{ $rumah['jumlah_lantai'] }} Lantai</span>
+                </div>
+                <div class="detail-row">
+                    <span class="icon">🏗</span>
+                    <span>Tahun Bangun: <strong>{{ $rumah['tahun_bangun'] }}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="icon">⏱</span>
+                    <span>Est. Durasi: <strong>{{ $durasi }}</strong></span>
+                </div>
+                <div class="detail-row">
+                    <span class="icon">💰</span>
+                    <span>Harga: <strong>{{ $harga }}</strong></span>
+                </div>
             </div>
         </div>
 
+        {{-- Tombol aksi di bawah kartu --}}
         <div class="card-footer-btns">
             <button class="btn-pilih"
                 onclick="pilihRumah({{ $rumah['id'] }}, '{{ addslashes($rumah['nama_rumah']) }}')">
