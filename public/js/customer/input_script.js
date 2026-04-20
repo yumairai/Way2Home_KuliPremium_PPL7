@@ -5,10 +5,22 @@ const areaValue = document.getElementById("areaValue");
 const budgetRange = document.getElementById("budgetRange");
 const budgetValue = document.getElementById("budgetValue");
 
+function updateRangeProgress(rangeEl) {
+    if (!rangeEl) return;
+    const min = Number(rangeEl.min) || 0;
+    const max = Number(rangeEl.max) || 100;
+    const val = Number(rangeEl.value) || min;
+    const progress = ((val - min) / (max - min)) * 100;
+    rangeEl.style.setProperty("--range-progress", `${progress}%`);
+}
+
 // Area update
-areaRange.addEventListener("input", () => {
-    areaValue.textContent = areaRange.value;
-});
+if (areaRange && areaValue) {
+    areaRange.addEventListener("input", () => {
+        areaValue.textContent = areaRange.value;
+        updateRangeProgress(areaRange);
+    });
+}
 
 // Budget format function
 function formatRupiah(number) {
@@ -16,9 +28,15 @@ function formatRupiah(number) {
 }
 
 // Budget update
-budgetRange.addEventListener("input", () => {
-    budgetValue.textContent = formatRupiah(budgetRange.value);
-});
+if (budgetRange && budgetValue) {
+    budgetRange.addEventListener("input", () => {
+        budgetValue.textContent = formatRupiah(budgetRange.value);
+        updateRangeProgress(budgetRange);
+    });
+}
+
+updateRangeProgress(areaRange);
+updateRangeProgress(budgetRange);
 
 // biar bisa select box
 const boxes = document.querySelectorAll(".box");

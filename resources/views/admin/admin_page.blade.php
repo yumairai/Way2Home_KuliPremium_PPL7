@@ -55,10 +55,10 @@
                 <span>Manajemen Mandor</span>
             </a>
 
-            <a class="sidebar-link {{ Route::is('admin.monitor_proyek') ? 'active' : '' }}"
-                href="{{ route('admin.monitor') }}">
-                <span class="material-symbols-outlined filled">monitoring</span>
-                <span>Project Monitor</span>
+            <a class="sidebar-link {{ Route::is('admin.manajemen_order') ? 'active' : '' }}"
+                href="{{ route('admin.order') }}">
+                <span class="material-symbols-outlined filled">shopping_cart</span>
+                <span>Manajemen Order</span>
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -96,51 +96,7 @@
             @yield('header')
         </header>
         <div class="stats-grid">
-            <article class="stat-card">
-                <div class="stat-head">
-                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
-                        <span class="material-symbols-outlined">group</span>
-                    </div>
-                </div>
-                <p class="stat-title">Total User</p>
-                <h3 class="stat-value">1,284</h3>
-            </article>
-            <article class="stat-card">
-                <div class="stat-head">
-                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
-                        <span class="material-symbols-outlined">task_alt</span>
-                    </div>
-                </div>
-                <p class="stat-title">Proyek Selesai</p>
-                <h3 class="stat-value">312</h3>
-            </article>
-            <article class="stat-card">
-                <div class="stat-head">
-                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
-                        <span class="material-symbols-outlined">home_repair_service</span>
-                    </div>
-                </div>
-                <p class="stat-title">Permintaan Renovasi</p>
-                <h3 class="stat-value">45</h3>
-            </article>
-            <article class="stat-card">
-                <div class="stat-head">
-                    <div class="stat-icon" style="background: rgba(180, 205, 254, 0.2); color: var(--color-secondary);">
-                        <span class="material-symbols-outlined">add_business</span>
-                    </div>
-                </div>
-                <p class="stat-title">Pengajuan Proyek</p>
-                <h3 class="stat-value">18</h3>
-            </article>
-            <article class="stat-card special">
-                <div class="stat-head">
-                    <div class="stat-icon" style="background: rgba(255, 255, 255, 0.2); color: #fff;">
-                        <span class="material-symbols-outlined">payments</span>
-                    </div>
-                </div>
-                <p class="stat-title" style="color: rgba(235,245,255,0.9);">Total Revenue</p>
-                <h3 class="stat-value" style="font-size:1.25rem;">Rp 8.42B</h3>
-            </article>
+            @yield('stats')
         </div>
         <section class="project-section">
             @yield('content')

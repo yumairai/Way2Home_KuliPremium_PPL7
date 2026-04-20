@@ -72,6 +72,25 @@ Route::middleware(['auth'])->group(function () {
         return view('customer-layouts.form_pembangunan_rumah');
     })->name('proyek.form');
 
+    // FItur renovasi
+    Route::get('/renovation', function () {
+        return view('customer-layouts.renovation');
+    })->name('customer.renovation');
+
+    Route::get('/renovation-form', function () {
+        return view('customer-layouts.renovation_form');
+    })->name('customer.renovation_form');
+
+    // Fitur order history
+    Route::get('/order', function () {
+        return view('customer-layouts.order');
+    })->name('customer.order');
+
+    // Fitur profile
+    Route::get('/profile', function () {
+        return view('customer-layouts.profile');
+    })->name('customer.profile');
+
     // Manajemen Proyek
     Route::prefix('proyek')->group(function () {
         Route::get('/', [ProyekController::class, 'index'])->name('proyek.index');
@@ -120,6 +139,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         return view('admin.kelola_material');
     })->name('admin.material');
 
+    Route::get('/order-management', function () {
+        return view('admin.manajemen_order');
+    })->name('admin.order');
 
     Route::get('/manajemen-mandor', [ManageMandorController::class, 'index'])->name('admin.mandor');
     Route::post('/manajemen-mandor/assign', [ManageMandorController::class, 'assign'])->name('admin.mandor.assign');
@@ -138,3 +160,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         return response()->file($path, ['Content-Type' => $mimeType]);
     })->name('admin.preview');
 });
+
+// nanti buatkan auth middleware khusus mandor, biar bisa akses route mandor ini, sekarang sementara dibiarkan aja untuk testing
+Route::get('/mandor/tracking', function () {
+    return view('mandor.mandor_tracking');
+})->name('mandor.tracking');
+
+Route::get('/mandor/dashboard', function () {
+    return view('mandor.mandor_dashboard');
+})->name('mandor.dashboard');

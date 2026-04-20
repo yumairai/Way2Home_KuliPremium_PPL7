@@ -16,7 +16,7 @@
         <div class="nav-actions">
             <div class="cart-icon" onclick="window.location.href='/material/cart'">
                 <img src="{{ asset('images/icon/shopping-bag.png') }}" alt="">
-                <span class="cart-badge" id="navCartBadge">0</span>
+                <span class="cart-badge" id="navCartBadge" style="display: none;">0</span>
             </div>
             <img alt="User profile avatar" class="profile-avatar" id="profileDropdown"
                 src="{{ asset('images/aset/user-dummy.jpg') }}" />
@@ -41,15 +41,19 @@
                 </div>
                 <!-- Navigation Links -->
                 <div class="dropdown-body">
-                    <a href="/order" class="nav-link">
+                    <a href="{{ route('customer.order') }}" class="nav-link">
                         <span class="material-symbols-outlined">shopping_cart</span>
                         <span>Pesanan Saya</span>
                     </a>
                     <a href="{{ route('proyek.index') }}" class="nav-link">
-                        <span class="material-symbols-outlined">construction</span>
+                        <span class="material-symbols-outlined">house</span>
                         <span>Proyek Saya</span>
                     </a>
-                    <a href="/profile" class="nav-link">
+                    <a href="{{ route('customer.renovation') }}" class="nav-link">
+                        <span class="material-symbols-outlined">construction</span>
+                        <span>Renovasi Saya</span>
+                    </a>
+                    <a href="{{ route('customer.profile') }}" class="nav-link">
                         <span class="material-symbols-outlined">person_edit</span>
                         <span>Edit Profile</span>
                     </a>
@@ -74,24 +78,37 @@
     </div>
 </nav>
 @push('scripts')
-<script src="{{ asset('js/dropdown.js') }}"></script>
-<script>
-    // Fungsi global untuk update cart badge
-    window.updateNavCartBadge = function() {
-        const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
-        if (!isLoggedIn) return;
+    <script src="{{ asset('js/dropdown.js') }}"></script>
+    <script>
+        // Fungsi global untuk update cart badge
+        window.updateNavCartBadge = function() {
+            const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
+            if (!isLoggedIn) return;
 
-        fetch('/cart')
-            .then(res => res.json())
-            .then(data => {
-                const count = data.data ? data.data.reduce((sum, item) => sum + item.jumlah, 0) : 0;
-                document.getElementById('navCartBadge').textContent = count;
-            })
-            .catch(err => console.error('Error fetching cart:', err));
-    };
+            fetch('/cart', {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const count = data.data ? data.data.reduce((sum, item) => sum + item.jumlah, 0) : 0;
+                    const badge = document.getElementById('navCartBadge');
+                    if (!badge) return;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        window.updateNavCartBadge();
-    });
-</script>
+                    if (count >= 1) {
+                        badge.textContent = count;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.textContent = '0';
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(err => console.error('Error fetching cart:', err));
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            window.updateNavCartBadge();
+        });
+    </script>
 @endpush

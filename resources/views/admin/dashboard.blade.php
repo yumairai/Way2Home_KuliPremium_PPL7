@@ -41,7 +41,7 @@
                 <span class="material-symbols-outlined">add_business</span>
             </div>
         </div>
-        <p class="stat-title">Pengajuan Proyek</p>
+        <p class="stat-title">Pembangunan Rumah</p>
         <h3 class="stat-value">18</h3>
     </article>
     <article class="stat-card special">
@@ -51,7 +51,7 @@
             </div>
         </div>
         <p class="stat-title" style="color: rgba(235,245,255,0.9);">Total Revenue</p>
-        <h3 class="stat-value" style="font-size:1.25rem;">Rp 8.42B</h3>
+        <h3 class="stat-value" style="font-size:1.25rem;">Rp 17.523.500.000</h3>
     </article>
 @endsection
 @section('content')

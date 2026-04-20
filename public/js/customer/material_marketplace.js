@@ -55,7 +55,7 @@ async function fetchMaterials(url) {
     const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
 
     try {
-        productGrid.innerHTML = '<div class="loading">Memuat material...</div>';
+        productGrid.innerHTML = '<div class="loader"></div>';
 
         // Ambil data produk & data keranjang secara paralel
         const [resMat, resCart] = await Promise.all([

@@ -5,13 +5,55 @@
 @section('content')
     <div class="bg-ellipse"></div>
     <div class="container">
-        <h1>PREFERENSI</h1>
+        <div class="page-hero">
+            <div class="page-hero-copy">
+                <p class="hero-eyebrow">Perencanaan rumah yang lebih presisi</p>
+                <h1>PREFERENSI</h1>
+                <p class="hero-description">Sesuaikan lokasi, gaya, luas, dan budget Anda agar AI kami dapat merekomendasikan
+                    rumah yang paling sesuai dengan kebutuhan Anda.</p>
+            </div>
+            <div class="page-hero-visual" aria-hidden="true">
+                <img src="{{ asset('images/aset/construction.jpg') }}" alt="Ilustrasi rumah dan konstruksi">
+                <div class="page-hero-visual-overlay"></div>
+                <div class="hero-floating-card">
+                    <span>Jawa Barat</span>
+                    <strong>Siap Membangun</strong>
+                </div>
+            </div>
+        </div>
         <div class="form-card">
             <!-- ROW 1 -->
             <div class="row">
                 <div class="input-group">
                     <label>PREFERENSI LOKASI</label>
                     <select id="lokasi">
+                        <option>Kota Bandung</option>
+                        <option>Kabupaten Bandung</option>
+                        <option>Kabupaten Bandung Barat</option>
+                        <option>Kota Cimahi</option>
+                        <option>Kabupaten Sumedang</option>
+                        <option>Kabupaten Garut</option>
+                        <option>Kota Tasikmalaya</option>
+                        <option>Kabupaten Tasikmalaya</option>
+                        <option>Kabupaten Cianjur</option>
+                        <option>Kota Sukabumi</option>
+                        <option>Kabupaten Sukabumi</option>
+                        <option>Kota Bogor</option>
+                        <option>Kabupaten Bogor</option>
+                        <option>Kota Depok</option>
+                        <option>Kota Bekasi</option>
+                        <option>Kabupaten Bekasi</option>
+                        <option>Kabupaten Karawang</option>
+                        <option>Kabupaten Purwakarta</option>
+                        <option>Kabupaten Subang</option>
+                        <option>Kabupaten Indramayu</option>
+                        <option>Kota Cirebon</option>
+                        <option>Kabupaten Cirebon</option>
+                        <option>Kabupaten Kuningan</option>
+                        <option>Kabupaten Majalengka</option>
+                        <option>Kabupaten Ciamis</option>
+                        <option>Kota Banjar</option>
+                        <option>Kabupaten Pangandaran</option>
                         <option>Bandung Barat</option>
                         <option>Bandung Timur</option>
                     </select>
