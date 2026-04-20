@@ -37,6 +37,11 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
+Route::prefix('material')->group(function () {
+    Route::get('/', [MaterialController::class, 'index'])->name('material.index');
+    Route::get('/materials', [MaterialController::class, 'getMaterials']);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Customer Routes (Sudah Login)
@@ -79,10 +84,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Material & Shopping Cart
     Route::prefix('material')->group(function () {
-        Route::get('/', [MaterialController::class, 'index'])->name('material.index');
-        Route::get('/materials', [MaterialController::class, 'getMaterials']);
         Route::view('/cart', 'customer-layouts.cart')->name('cart.view');
     });
+
 
     // Operasi Keranjang (AJAX)
     Route::prefix('cart')->group(function () {

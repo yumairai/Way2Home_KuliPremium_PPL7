@@ -1,214 +1,265 @@
-const token = localStorage.getItem('token');
+/**
+ * WAY2HOME - Material Marketplace JS
+ * Gabungan: Pagination + Filter + Cart Logic (Session Based)
+ */
 
-document.addEventListener('DOMContentLoaded', function() {
-    const cartContainer = document.getElementById('cartContainer');
-    const summaryContainer = document.getElementById('summaryContainer');
-    const subtotalElement = document.getElementById('subtotalValue');
-    const grandTotalElement = document.getElementById('grandTotalValue');
+// Global Header untuk Laravel CSRF
+const getHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Ambil params dari URL (jika ada) saat pertama load
+    const urlParams = new URLSearchParams(window.location.search);
+    const apiUrl = '/material/materials' + (urlParams.toString() ? '?' + urlParams.toString() : '');
+
+    await fetchMaterials(apiUrl);
+    updateFloatingCart();
+
+    // 2. Pasang Event Listener untuk Filter & Search
+    const searchBtn = document.querySelector('.search-btn');
+    const applyFilterBtn = document.querySelector('.reset-filter-btn'); // Tombol "Apply Filter"
+
+    if (searchBtn) searchBtn.addEventListener('click', () => applyFilters());
+    if (applyFilterBtn) applyFilterBtn.addEventListener('click', () => applyFilters());
+});
+
+// FUNGSI FILTER: Mengumpulkan input dan panggil fetch
+async function applyFilters() {
+    const search = document.querySelector('.search-input').value;
+    const price = document.getElementById('priceRange').value;
+    const sort = document.querySelector('.sort-select').value;
     
-    if (!token) {
-        window.location.href = '/login';
+    // Ambil kategori yang diceklis
+    const categories = Array.from(document.querySelectorAll('.checkbox-input:checked'))
+                            .map(cb => cb.nextElementSibling.innerText);
+
+    let params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (price > 0) params.append('harga_max', price);
+    categories.forEach(c => params.append('kategori[]', c));
+    
+    // Mapping Sort
+    const sortMap = { 'Harga Terendah': 'harga_rendah', 'Harga Tertinggi': 'harga_tinggi', 'Terbaru': 'terbaru' };
+    params.append('sort', sortMap[sort] || 'terbaru');
+
+    const newUrl = '/material/materials?' + params.toString();
+    await fetchMaterials(newUrl);
+}
+
+// FUNGSI UTAMA: Ambil data Material & Cart
+async function fetchMaterials(url) {
+    const productGrid = document.getElementById('productGrid');
+    const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
+
+    try {
+        productGrid.innerHTML = '<div class="loading">Memuat material...</div>';
+
+        // Ambil data produk & data keranjang secara paralel
+        const [resMat, resCart] = await Promise.all([
+            fetch(url).then(res => res.json()),
+            isLoggedIn ? fetch('/cart').then(res => res.json()) : { data: [] }
+        ]);
+
+        const materials = resMat.data;
+        const cartData = resCart.data || [];
+
+        if (!materials || materials.length === 0) {
+            productGrid.innerHTML = '<div class="empty-state"><p>Material tidak ditemukan.</p></div>';
+            return;
+        }
+
+        // Render Produk
+        productGrid.innerHTML = '';
+        materials.forEach(item => {
+            const cartItem = cartData.find(c => c.material_id === item.id);
+            const statusBadge = item.stok > 0 
+                ? '<div class="product-badge badge-ready">Ready Stock</div>' 
+                : '<div class="product-badge badge-preorder">Pre Order</div>';
+
+            let actionHtml = '';
+            if (isLoggedIn && cartItem) {
+                actionHtml = `
+                    <div class="cart-quantity">
+                        <button class="cart-quantity-btn" onclick="updateCartQty(${item.id}, ${cartItem.jumlah - 1})">-</button>
+                        <input type="number" class="cart-quantity-input" value="${cartItem.jumlah}" 
+                            min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                            onchange="updateCartQtyDirect(${item.id}, this.value)" 
+                            onblur="updateCartQtyDirect(${item.id}, this.value)">
+                        <button class="cart-quantity-btn" onclick="updateCartQty(${item.id}, ${cartItem.jumlah + 1})">+</button>
+                    </div>`;
+            } else {
+                actionHtml = `
+                    <button class="add-to-cart-btn" onclick="handleInitialAdd(${item.id})">
+                        Tambah <img src="/images/icon/trolley.png" alt="Troli">
+                    </button>`;
+            }
+
+            productGrid.innerHTML += `
+                <div class="product-card">
+                    <div class="product-image-container">
+                        <img src="${item.path_foto_material}" class="product-image" alt="${item.nama_material}">
+                        ${statusBadge}
+                    </div>
+                    <div class="product-body">
+                        <div class="product-info">
+                            <h3 class="product-title">${item.nama_material}</h3>
+                            <p class="product-description">${item.kategori} • ${item.deskripsi}</p>
+                        </div>
+                        <div class="product-footer">
+                            <div class="product-price">
+                                <span class="product-price-label">Rp</span>
+                                <span class="product-price-value">${item.harga.toLocaleString('id-ID')}</span>
+                                <span class="product-price-unit">/${item.satuan}</span>
+                            </div>
+                            <div id="action-${item.id}">${actionHtml}</div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        renderPagination(resMat);
+
+    } catch (error) {
+        console.error('Error:', error);
+        productGrid.innerHTML = '<p>Gagal memuat data.</p>';
+    }
+}
+
+// FUNGSI PAGINATION
+function renderPagination(result) {
+    const container = document.getElementById('paginationContainer');
+    if (!container || !result.links) return;
+
+    let html = '';
+    result.links.forEach(link => {
+        const isActive = link.active ? 'active' : '';
+        const isDisabled = !link.url ? 'disabled' : '';
+        let label = link.label;
+
+        // Rapikan label chevron
+        if (label.includes('Previous')) label = '<img src="/images/icon/chevron-left.png">';
+        else if (label.includes('Next')) label = '<img src="/images/icon/chevron-right.png">';
+
+        html += `<button class="pagination-btn ${isActive}" ${isDisabled} onclick="fetchMaterials('${link.url}')">${label}</button>`;
+    });
+    container.innerHTML = html;
+}
+
+// LOGIKA KERANJANG
+async function handleInitialAdd(id) {
+    const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
+    if (!isLoggedIn) {
+        alert('Silakan login terlebih dahulu!');
+        window.location.href = window.loginUrl;
         return;
     }
 
-    function loadCart() {
-        fetch('/cart', {
-            headers: { 'Authorization': `Bearer ${token}` } // WAJIB ADA
-        })
-        .then(res => res.json())
-        .then(response => {
-            if (response.status === 'success') {
-                renderCart(response.data);
-                updateNavbarBadge(response.data);
-            }
-        })
-        .catch(err => console.error("Gagal load keranjang:", err));
-    }
-
-    function renderCart(items) {
-        if (!items || items.length === 0) {
-            cartContainer.innerHTML = '<p class="cart-subtitle">Keranjang belanja kosong.</p>';
-            summaryContainer.innerHTML = '';
-            subtotalElement.innerText = 'Rp 0';
-            document.getElementById('serviceFeeValue').innerText = 'Rp 0';
-            grandTotalElement.innerText = 'Rp 0';
-            return;
-        }
-
-        let totalHarga = 0;
-
-        // Render Item List
-        cartContainer.innerHTML = items.map(item => {
-            const material = item.material; 
-            const harga = material.harga;
-            const itemTotal = harga * item.jumlah;
-            totalHarga += itemTotal;
-
-            return `
-            <div class="cart-item">
-                <div class="cart-item-image-container">
-                    <img class="cart-item-image" src="/${material.path_foto_material}" alt="${material.nama_material}">
-                </div>
-                <div class="cart-item-content">
-                    <div class="cart-item-header">
-                        <h3 class="cart-item-title">${material.nama_material}</h3>
-                        <button class="cart-item-delete" onclick="deleteItem(${item.id})">
-                            <img src="/images/icon/bin.png" alt="Delete">
-                        </button>
-                    </div>
-                    <div class="cart-item-description">${material.deskripsi || '-'}</div>
-                    <div class="cart-item-footer">
-                        <span class="cart-item-price">Rp ${harga.toLocaleString('id-ID')}</span>
-                        <div class="cart-quantity">
-                            <button class="cart-quantity-btn" onclick="changeQty(${item.id}, ${item.jumlah - 1})">-</button>
-                            <span class="cart-quantity-value">${item.jumlah}</span>
-                            <button class="cart-quantity-btn" onclick="changeQty(${item.id}, ${item.jumlah + 1})">+</button>
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-
-        // --- LOGIKA BIAYA LAYANAN ---
-        let serviceFee = totalHarga * 0.02; // 2%
-        if (serviceFee < 5000) serviceFee = 5000;
-        if (serviceFee > 50000) serviceFee = 50000;
-        if (totalHarga === 0) serviceFee = 0;
-
-        summaryContainer.innerHTML = items.map(item => `
-        <div class="cart-summary-item">
-            <span class="summary-item-name">${item.material.nama_material} (x${item.jumlah})</span>
-            <span class="summary-item-price">Rp ${(item.jumlah * item.material.harga).toLocaleString('id-ID')}</span>
-        </div>
-        `).join('');
-
-        const grandTotal = totalHarga + serviceFee;
-
-        // Update UI
-        subtotalElement.innerText = `Rp ${totalHarga.toLocaleString('id-ID')}`;
-        document.getElementById('serviceFeeValue').innerText = `Rp ${serviceFee.toLocaleString('id-ID')}`;
-        grandTotalElement.innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
-    }
-
-    // --- LOGIKA CHECKOUT & MIDTRANS ---
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    checkoutBtn.addEventListener('click', function() {
-        const alamat = document.getElementById('alamat_lengkap').value;
-        const nama = document.getElementById('nama_lengkap').value;
-        const telepon = document.getElementById('nomor_telepon').value;
-
-        if (!alamat || !nama || !telepon) {
-            alert('Harap isi data pengiriman dengan lengkap!');
-            return;
-        }
-
-        checkoutBtn.disabled = true;
-        checkoutBtn.innerText = 'Memproses...';
-
-        fetch('/payment/checkout', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                alamat: alamat,
-                nama: nama,
-                telepon: telepon
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                window.snap.pay(data.token, {
-                    onSuccess: function() {
-                        alert("Pembayaran berhasil!");
-                        window.location.href = '/material'; 
-                    },
-                    onPending: function() {
-                        alert("Menunggu pembayaran... Silakan cek email atau riwayat pesanan.");
-                        window.location.href = '/material';
-                    },
-                    onError: function() {
-                        alert("Pembayaran gagal!");
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerText = 'Konfirmasi & Bayar';
-                    },
-                    onClose: function() {
-                        alert('Anda menutup jendela pembayaran sebelum selesai.');
-                        checkoutBtn.disabled = false;
-                        checkoutBtn.innerText = 'Konfirmasi & Bayar';
-                    }
-                });
-            } else {
-                alert("Gagal mendapatkan token: " + data.message);
-                checkoutBtn.disabled = false;
-                checkoutBtn.innerText = 'Konfirmasi & Bayar';
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            checkoutBtn.disabled = false;
-            checkoutBtn.innerText = 'Konfirmasi & Bayar';
-        });
+    const res = await fetch('/cart/add', {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ material_id: id, jumlah: 1 })
     });
 
-    // Fungsi Update Navbar
-    function updateNavbarBadge(items) {
-        const navBadge = document.querySelector('.cart-badge');
-        if (navBadge) {
-            let totalItems = items.reduce((acc, curr) => acc + curr.jumlah, 0);
-            navBadge.innerText = totalItems;
-            navBadge.style.display = totalItems > 0 ? 'block' : 'none';
+    if (res.ok) {
+        // Update tampilan tombol ke +/-
+        document.getElementById(`action-${id}`).innerHTML = `
+            <div class="cart-quantity">
+                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 0)">-</button>
+                <input type="number" class="cart-quantity-input" value="1" 
+                    min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    onchange="updateCartQtyDirect(${id}, this.value)" 
+                    onblur="updateCartQtyDirect(${id}, this.value)">
+                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 2)">+</button>
+            </div>`;
+        updateFloatingCart();
+    }
+}
+
+async function updateCartQty(id, newQty) {
+    const container = document.getElementById(`action-${id}`);
+    
+    if (newQty < 1) {
+        const res = await fetch(`/cart/remove-material/${id}`, { 
+            method: 'DELETE', 
+            headers: getHeaders() 
+        });
+        if (res.ok) {
+            container.innerHTML = `<button class="add-to-cart-btn" onclick="handleInitialAdd(${id})">Tambah <img src="/images/icon/trolley.png"></button>`;
+            updateFloatingCart();
+        }
+    } else {
+        const res = await fetch('/cart/add', {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({ material_id: id, jumlah: newQty })
+        });
+        if (res.ok) {
+            container.innerHTML = `
+                <div class="cart-quantity">
+                    <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty - 1})">-</button>
+                    <input type="number" class="cart-quantity-input" value="${newQty}" 
+                        min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                        onchange="updateCartQtyDirect(${id}, this.value)" 
+                        onblur="updateCartQtyDirect(${id}, this.value)">
+                    <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty + 1})">+</button>
+                </div>`;
+            updateFloatingCart();
         }
     }
+}
 
-    // Fungsi update jumlah
-    window.changeQty = function(id, newQty) {
-        if (newQty < 1) {
-            window.deleteItem(id); 
-            return;
+// Update quantity langsung dari input (saat user ketik dan selesai)
+async function updateCartQtyDirect(id, value) {
+    const newQty = parseInt(value);
+    
+    // Jika 0 atau kurang, hapus dari cart
+    if (isNaN(newQty) || newQty <= 0) {
+        await updateCartQty(id, 0); // 0 akan trigger remove
+        return;
+    }
+    
+    await updateCartQty(id, newQty);
+}
+
+async function updateFloatingCart() {
+    const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
+    if (!isLoggedIn) return;
+
+    try {
+        const res = await fetch('/cart');
+        const result = await res.json();
+        const carts = result.data || [];
+        
+        const floatingCart = document.querySelector('.checkout-btn');
+        if (!floatingCart) return;
+
+        if (carts.length > 0) {
+            const totalItems = carts.reduce((sum, i) => sum + i.jumlah, 0);
+            const totalHarga = carts.reduce((sum, i) => sum + (i.jumlah * i.material.harga), 0);
+            
+            floatingCart.style.display = 'flex';
+            document.getElementById('checkoutCount').innerText = totalItems;
+            document.getElementById('checkoutTotal').innerText = totalHarga.toLocaleString('id-ID');
+        } else {
+            floatingCart.style.display = 'none';
         }
+        
+        // Update navbar cart badge
+        if (window.updateNavCartBadge) window.updateNavCartBadge();
+    } catch (e) { console.error(e); }
+}
 
-        fetch(`/cart/update/${id}`, { 
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({ jumlah: newQty })
-        })
-        .then(async res => {
-            if (res.ok) {
-                loadCart();
-            } else {
-                const errData = await res.json();
-                console.error("Gagal Update:", errData);
-            }
-        })
-        .catch(err => console.error("Network Error:", err));
-    };
-
-    // Fungsi hapus item
-    window.deleteItem = function(id) {
-        if (!confirm('Hapus item dari keranjang?')) return;
-
-        fetch(`/cart/delete/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json'
-            }
-        })
-        .then(res => {
-            if (res.ok) {
-                loadCart(); 
-            }
-        })
-        .catch(err => console.error("Error saat menghapus:", err));
-    };
-
-    loadCart();
-});
+// SLIDER HARGA (Desain)
+const slider = document.getElementById('priceRange');
+if (slider) {
+    slider.addEventListener('input', function() {
+        const val = this.value;
+        const label = document.getElementById('currentPriceLabel');
+        const percentage = (val - this.min) / (this.max - this.min) * 100;
+        this.style.background = `linear-gradient(to right, #004796 ${percentage}%, #e0e0e0 ${percentage}%)`;
+        label.textContent = val > 0 ? `RP 0 - ${new Intl.NumberFormat('id-ID').format(val)}` : "RP 0";
+    });
+}
