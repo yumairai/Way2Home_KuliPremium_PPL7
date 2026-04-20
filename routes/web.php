@@ -34,9 +34,7 @@ Route::middleware(['auth'])->group(function () {
         return view('customer-layouts.input_preferensi_ai');
     });
 
-    Route::get('/recommendation/result', function () {
-        return view('customer-layouts.rekomendasi_rumah');
-    });
+    Route::get('/recommendation/result', [PreferensiController::class, 'result']);
 
     Route::get('/renovation', function () {
         return view('customer-layouts.renovation');

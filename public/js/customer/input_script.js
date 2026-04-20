@@ -20,32 +20,51 @@ budgetRange.addEventListener("input", () => {
     budgetValue.textContent = formatRupiah(budgetRange.value);
 });
 
-// biar bisa select box
+// Priority box selector
 const boxes = document.querySelectorAll(".box");
-
 boxes.forEach(box => {
     box.addEventListener("click", () => {
-
-        // hapus semua active
         boxes.forEach(b => b.classList.remove("active"));
-
-        // set yang dipilih
         box.classList.add("active");
     });
 });
+
+// Set default priority active
+if (!document.querySelector('.box.active') && boxes.length > 0) {
+    boxes[0].classList.add("active");
+}
 
 const submitBtn = document.getElementById("submitBtn");
 
 submitBtn.addEventListener("click", async (e) => {
     e.preventDefault();
 
+    // Validasi jumlah kamar
+    const jumlahKamar = parseInt(document.getElementById('jumlah_kamar').value);
+    if (!jumlahKamar || jumlahKamar < 1 || jumlahKamar > 10) {
+        alert("Jumlah kamar harus diisi antara 1 - 10.");
+        document.getElementById('jumlah_kamar').focus();
+        return;
+    }
+
+    // Validasi prioritas
+    const prioritasEl = document.querySelector('.box.active');
+    if (!prioritasEl) {
+        alert("Silakan pilih prioritas preferensi terlebih dahulu.");
+        return;
+    }
+
+    // Loading state
+    submitBtn.disabled = true;
+    submitBtn.textContent = "⏳ Memproses ML Engine...";
+
     const payload = {
-        lokasi: document.getElementById('lokasi').value,
+        lokasi:          document.getElementById('lokasi').value,
         gaya_arsitektur: document.getElementById('gaya_arsitektur').value,
-        luas_area: document.getElementById('areaRange').value,
-        jumlah_kamar: document.getElementById('jumlah_kamar').value,
-        budget: document.getElementById('budgetRange').value,
-        prioritas: document.querySelector('.box.active')?.dataset.value || 'biaya'
+        luas_area:       parseInt(document.getElementById('areaRange').value),
+        jumlah_kamar:    jumlahKamar,
+        budget:          parseInt(document.getElementById('budgetRange').value),
+        prioritas:       prioritasEl.dataset.value,
     };
 
     try {
@@ -62,12 +81,19 @@ submitBtn.addEventListener("click", async (e) => {
         const result = await response.json();
 
         if (response.ok) {
-            window.location.href = "/recommendation/result";
+            submitBtn.textContent = "✅ Rekomendasi Siap! Mengalihkan...";
+            setTimeout(() => {
+                window.location.href = "/recommendation/result";
+            }, 500);
         } else {
-            alert("Gagal simpan data: " + result.message);
+            alert("Gagal memproses: " + (result.message || "Terjadi kesalahan."));
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Buat Rekomendasi";
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("Terjadi kesalahan koneksi.");
+        alert("Terjadi kesalahan koneksi. Pastikan server berjalan.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Buat Rekomendasi";
     }
 });
