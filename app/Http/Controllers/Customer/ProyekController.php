@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Proyek;
 use App\Models\DetailProyekBangun;
 use App\Models\DokumenProyek;
+use App\Models\DesainRumah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,25 @@ use Illuminate\Support\Facades\Storage;
 
 class ProyekController extends Controller
 {
+
+    public function create(Request $request)
+    {
+        $desainId = $request->query('desain_id', $request->query('rumah_id'));
+        $desain = null;
+
+        if (!empty($desainId)) {
+            $desain = DesainRumah::query()->find($desainId);
+        }
+
+        if (!$desain) {
+            $desain = DesainRumah::query()->orderBy('id')->first();
+        }
+
+        abort_if(!$desain, 404, 'Data desain rumah belum tersedia.');
+
+        return view('customer-layouts.form_pembangunan_rumah', compact('desain'));
+    }
+
     public function index()
     {
         $customer = Auth::user()->customer;
