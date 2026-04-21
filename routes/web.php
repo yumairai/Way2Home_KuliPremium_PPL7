@@ -138,6 +138,7 @@ Route::middleware(['auth'])->group(function () {
     // Checkout Material
     Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout']);
     Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
+    Route::post('/proyek/payment-success', [PaymentProyekController::class, 'handleSuccess']);
 });
 
 /*
