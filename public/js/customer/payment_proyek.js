@@ -49,8 +49,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.snap_token) {
                         window.snap.pay(data.snap_token, {
                             onSuccess: function(result) {
-                                alert("Pembayaran Berhasil!");
-                                window.location.reload();
+                                fetch('/proyek/payment-success', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                    },
+                                    body: JSON.stringify({
+                                        order_id: result.order_id
+                                    })
+                                })
+                                .then(res => res.json())
+                                .then(() => {
+                                    alert("Pembayaran Berhasil!");
+                                    window.location.reload();
+                                })
+                                .catch(() => {
+                                    alert("Gagal update status di server");
+                                });
                             },
                             onPending: function(result) {
                                 alert("Silahkan selesaikan pembayaran Anda.");

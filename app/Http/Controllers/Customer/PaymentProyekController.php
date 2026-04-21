@@ -8,6 +8,7 @@ use App\Models\PembayaranProyek;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Midtrans\Config;
 use Midtrans\Snap;
 
@@ -120,5 +121,45 @@ class PaymentProyekController extends Controller
         } else {
             Log::error('Relasi proyek tidak ditemukan untuk Order ID: ' . $pembayaran->order_id);
         }
+    }
+    public function handleSuccess(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required'
+        ]);
+
+        $orderId = $request->order_id;
+
+        // Ambil data pembayaran lokal
+        $pembayaran = PembayaranProyek::where('order_id', $orderId)->firstOrFail();
+
+        // Verifikasi ke Midtrans (API status)
+        $serverKey = config('midtrans.server_key');
+
+        $response = Http::withBasicAuth($serverKey, '')
+            ->get("https://api.sandbox.midtrans.com/v2/{$orderId}/status");
+
+        if (!$response->successful()) {
+            return response()->json(['message' => 'Gagal verifikasi ke Midtrans'], 500);
+        }
+
+        $data = $response->json();
+
+        $transactionStatus = $data['transaction_status'] ?? null;
+        $fraudStatus       = $data['fraud_status'] ?? null;
+
+        // Validasi status
+        if (
+            ($transactionStatus === 'capture' && $fraudStatus === 'accept') ||
+            $transactionStatus === 'settlement'
+        ) {
+            $this->tandaiDP($pembayaran);
+            return response()->json(['message' => 'Pembayaran tervalidasi']);
+        }
+
+        return response()->json([
+            'message' => 'Status belum valid',
+            'status' => $transactionStatus
+        ], 400);
     }
 }
