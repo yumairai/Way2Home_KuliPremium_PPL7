@@ -9,28 +9,27 @@ use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // --- 1. SEEDER UNTUK ADMIN ---
-        $adminUser = User::create([
-            'name'         => 'Super Admin',
-            'email'        => 'admin@gmail.com',
-            'password'     => 'password', // Langsung teks biasa
-            'role'         => 'admin',
-            'phone_number' => '081111111111',
-            'address'      => 'Kantor Pusat Management',
-        ]);
+        // --- 1. ADMIN ---
+        $adminUser = User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name'         => 'Super Admin',
+                'password'     => 'password',
+                'role'         => 'admin',
+                'phone_number' => '081111111111',
+                'address'      => 'Kantor Pusat Management',
+            ]
+        );
 
-        Admin::create([
-            'user_id'     => $adminUser->id,
-            'level_admin' => 'super_admin',
-        ]);
+        Admin::updateOrCreate(
+            ['user_id' => $adminUser->id],
+            ['level_admin' => 'super_admin']
+        );
 
 
-        // --- 2. SEEDER UNTUK CUSTOMER (3 Akun) ---
+        // --- 2. CUSTOMER (MULTIPLE) ---
         $customers = [
             [
                 'name'    => 'Budi Customer',
@@ -56,24 +55,28 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($customers as $c) {
-            $user = User::create([
-                'name'         => $c['name'],
-                'email'        => $c['email'],
-                'password'     => '12345678', // Langsung teks biasa
-                'role'         => 'customer',
-                'phone_number' => $c['phone'],
-                'address'      => $c['address'],
-            ]);
+            $user = User::updateOrCreate(
+                ['email' => $c['email']],
+                [
+                    'name'         => $c['name'],
+                    'password'     => 'passwordcustomer',
+                    'role'         => 'customer',
+                    'phone_number' => $c['phone'],
+                    'address'      => $c['address'],
+                ]
+            );
 
-            Customer::create([
-                'user_id'            => $user->id,
-                'no_hp'              => $c['phone'],
-                'path_file_foto_ktp' => $c['ktp'],
-            ]);
+            Customer::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'no_hp'              => $c['phone'],
+                    'path_file_foto_ktp' => $c['ktp'],
+                ]
+            );
         }
 
 
-        // --- 3. SEEDER UNTUK MANDOR (3 Akun) ---
+        // --- 3. MANDOR (MULTIPLE) ---
         $mandors = [
             [
                 'name'    => 'Asep Mandor',
@@ -96,14 +99,16 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($mandors as $m) {
-            User::create([
-                'name'         => $m['name'],
-                'email'        => $m['email'],
-                'password'     => 'passwordmandor', // Langsung teks biasa
-                'role'         => 'mandor',
-                'phone_number' => $m['phone'],
-                'address'      => $m['address'],
-            ]);
+            User::updateOrCreate(
+                ['email' => $m['email']],
+                [
+                    'name'         => $m['name'],
+                    'password'     => 'passwordmandor',
+                    'role'         => 'mandor',
+                    'phone_number' => $m['phone'],
+                    'address'      => $m['address'],
+                ]
+            );
         }
     }
 }

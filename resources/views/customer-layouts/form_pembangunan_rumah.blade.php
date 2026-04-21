@@ -3,6 +3,23 @@
     <link rel="stylesheet" href="{{ asset('css/customer/form_pembangunan_rumah.css') }}">
 @endpush
 @section('content')
+    @php
+        $imagePath = !empty($desain->path_gambar_desain)
+            ? (preg_match('/^https?:\\/\\//', $desain->path_gambar_desain)
+                ? $desain->path_gambar_desain
+                : asset($desain->path_gambar_desain))
+            : asset('images/rekomendasi/rekom1.jpg');
+
+        $materialList = collect(explode(';', (string) $desain->material_digunakan))
+            ->map(fn($item) => trim($item))
+            ->filter()
+            ->values();
+
+        if ($materialList->isEmpty() && !empty($desain->material_utama)) {
+            $materialList = collect([$desain->material_utama]);
+        }
+    @endphp
+
     <div class="form-wrapper">
         <!-- judul -->
         <div class="page-title">
@@ -14,25 +31,33 @@
         <section class="form-section">
             <div class="design-card">
                 <div class="design-card-image">
-                    <img alt="Rekomendasi Rumah" src="{{ asset('images/rekomendasi/rekom1.jpg') }}" />
+                    <img alt="Rekomendasi Rumah" src="{{ $imagePath }}" />
                     <div class="design-badge">Desain Dipilih</div>
                 </div>
                 <div class="design-card-details">
                     <div class="detail-item">
-                        <span class="detail-label">Desain 1</span>
-                        <span class="detail-value">Modern Minimalist</span>
+                        <span class="detail-label">Tipe Rumah</span>
+                        <span class="detail-value">{{ $desain->tipe_rumah }}</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Estimasi Biaya</span>
-                        <span class="detail-value">Rp 400.000.000</span>
+                        <span class="detail-value">Rp {{ number_format($desain->estimasi_biaya, 0, ',', '.') }}</span>
                     </div>
                     <div class="detail-item">
-                        <span class="detail-label">Area</span>
-                        <span class="detail-value">50m²</span>
+                        <span class="detail-label">Area (Tanah/Bangunan)</span>
+                        <span class="detail-value">{{ $desain->luas_tanah }}m² / {{ $desain->luas_bangunan }}m²</span>
                     </div>
                     <div class="detail-item">
                         <span class="detail-label">Estimasi Waktu</span>
-                        <span class="detail-value">6 Bulan</span>
+                        <span class="detail-value">{{ $desain->estimasi_durasi }} Bulan</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Gaya Arsitektur</span>
+                        <span class="detail-value">{{ $desain->gaya_arsitektur ?? '-' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Fasilitas</span>
+                        <span class="detail-value">{{ $desain->fasilitas ?? '-' }}</span>
                     </div>
                 </div>
             </div>
@@ -45,42 +70,26 @@
                 <div class="section-header-divider"></div>
             </div>
             <div class="material-grid">
-                <div class="material-card">
-                    <div class="material-info">
-                        <p>Semen Portland</p>
-                        <p>250 Sak</p>
+                @forelse($materialList as $material)
+                    @php
+                        $parts = array_map('trim', explode(':', $material, 2));
+                        $namaMaterial = $parts[0] ?? 'Material';
+                        $qtyMaterial = $parts[1] ?? 'Sesuai RAB';
+                    @endphp
+                    <div class="material-card">
+                        <div class="material-info">
+                            <p>{{ $namaMaterial }}</p>
+                            <p>{{ $qtyMaterial }}</p>
+                        </div>
                     </div>
-                </div>
-                <div class="material-card">
-                    <div class="material-info">
-                        <p>Beton Ready Mix</p>
-                        <p>45 m³</p>
+                @empty
+                    <div class="material-card">
+                        <div class="material-info">
+                            <p>Material Utama</p>
+                            <p>{{ $desain->material_utama ?? 'Sesuai RAB' }}</p>
+                        </div>
                     </div>
-                </div>
-                <div class="material-card">
-                    <div class="material-info">
-                        <p>Pasir Pasang</p>
-                        <p>30 m³</p>
-                    </div>
-                </div>
-                <div class="material-card">
-                    <div class="material-info">
-                        <p>Batu Belah</p>
-                        <p>20 m³</p>
-                    </div>
-                </div>
-                <div class="material-card">
-                    <div class="material-info">
-                        <p>Kaca Polos 5mm</p>
-                        <p>15 Lembar</p>
-                    </div>
-                </div>
-                <div class="material-card">
-                    <div class="material-info">
-                        <p>Besi Beton (8/10mm)</p>
-                        <p>120 Lonjor</p>
-                    </div>
-                </div>
+                @endforelse
             </div>
         </section>
 
@@ -113,7 +122,7 @@
 
         <!-- form pembangunan -->
         <form>
-            <input type="hidden" id="desain_id" value="1">
+            <input type="hidden" id="desain_id" value="{{ $desain->id }}">
 
             <!-- Address Input -->
             <div class="form-group">

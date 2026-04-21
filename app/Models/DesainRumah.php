@@ -14,13 +14,18 @@ class DesainRumah extends Model
     protected $fillable = [
         'tipe_rumah',
         'deskripsi',
+        'lokasi',
+        'gaya_arsitektur',
         'luas_tanah',
         'luas_bangunan',
         'jumlah_kamar_tidur',
         'jumlah_kamar_mandi',
+        'jumlah_lantai',
+        'tahun_bangun',
         'estimasi_biaya',
         'estimasi_durasi',
         'material_utama',
+        'material_digunakan',
         'path_gambar_desain',
         'fasilitas',
     ];

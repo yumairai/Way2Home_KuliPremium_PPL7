@@ -85,6 +85,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/order', function () {
         return view('customer-layouts.order');
     })->name('customer.order');
+    Route::get('/recommendation/result', [PreferensiController::class, 'result']);
+
+    Route::get('/renovation', function () {
+        return view('customer-layouts.renovation');
+    })->name('customer.renovation');
+
+    Route::get('/renovation-form', function () {
+        return view('customer-layouts.renovation_form');
+    })->name('customer.renovation_form');
+
+    Route::get('/house-build-form', [ProyekController::class, 'create'])->name('proyek.form_bangun');
+
+    Route::prefix('project')->group(function () {
+        Route::redirect('/', '/project/1');
+        Route::get('/{id}/tracking', function () {
+            return view('customer-layouts.customer_tracking');
+        })->where('id', '[1-5]');
+        Route::get('/{id}', [ProyekController::class, 'show'])->where('id', '[1-5]');
+    });
 
     // Fitur profile
     Route::get('/profile', function () {
@@ -160,6 +179,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
         return response()->file($path, ['Content-Type' => $mimeType]);
     })->name('admin.preview');
 });
+
 
 // nanti buatkan auth middleware khusus mandor, biar bisa akses route mandor ini, sekarang sementara dibiarkan aja untuk testing
 Route::get('/mandor/tracking', function () {
