@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@gmail.com'],
             [
                 'name'         => 'Super Admin',
-                'password'     => 'password',
+                'password'     => 'passwordadmin',
                 'role'         => 'admin',
                 'phone_number' => '081111111111',
                 'address'      => 'Kantor Pusat Management',
