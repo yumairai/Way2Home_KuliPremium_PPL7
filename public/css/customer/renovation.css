@@ -233,6 +233,48 @@ body {
     margin-bottom: 1rem;
 }
 
+.rv-review-details {
+    margin-top: 0.5rem;
+    border-top: 1px solid rgba(194, 198, 213, 0.25);
+}
+
+.rv-review-summary {
+    list-style: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 700;
+    color: var(--on-tertiary-fixed-variant);
+    padding-top: 1rem;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.rv-review-summary:hover {
+    color: var(--on-tertiary-fixed);
+    transform: scale(1.02);
+
+}
+
+.rv-review-summary::-webkit-details-marker {
+    display: none;
+}
+
+.rv-review-summary-icon {
+    font-size: 1.1rem;
+}
+
+.rv-review-details-disabled .rv-review-summary {
+    color: var(--outline);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.rv-review-details .mandor-section {
+    margin-top: 1rem;
+}
+
 .rv-section-label {
     display: block;
     margin-bottom: 0.75rem;
@@ -312,6 +354,85 @@ body {
     font-weight: 800;
 }
 
+.rv-material-box {
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    background: var(--surface-container-lowest);
+    border: 2px solid rgba(0, 71, 150, 0.08);
+}
+
+.rv-material-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.rv-material-icon {
+    color: var(--primary);
+}
+
+.rv-material-label {
+    font-weight: 700;
+    color: var(--on-background);
+}
+
+.rv-material-content {
+    margin-bottom: 1rem;
+}
+
+.rv-material-content:not(:last-of-type) {
+    padding-bottom: 1rem;
+    border-bottom: 1px dashed rgba(114, 119, 132, 0.35);
+}
+
+.rv-material-name {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--on-background);
+}
+
+.rv-material-meta {
+    margin: 0 0 0.35rem;
+    color: var(--on-surface-variant);
+}
+
+.rv-material-price {
+    margin: 0.5rem 0 0;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.rv-material-total {
+    margin: 0.5rem 0 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.6rem;
+    background: rgba(0, 91, 190, 0.08);
+}
+
+.rv-material-total-label {
+    margin: 0 0 0.25rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.rv-material-total-value {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--on-background);
+}
+
+.rv-material-actions {
+    display: flex;
+    justify-content: flex-start;
+}
+
 .rv-actions {
     display: flex;
     flex-wrap: wrap;
@@ -365,6 +486,10 @@ body {
 
 .rv-actions-spacer {
     flex: 1;
+}
+
+.rv-hidden {
+    display: none !important;
 }
 
 .rv-done-btn {

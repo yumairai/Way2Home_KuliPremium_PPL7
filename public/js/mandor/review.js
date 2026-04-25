@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('dashboard-review-modal');
     const requestMap = window.renovationRequestMap || {};
+    const materialCatalog = Array.isArray(window.renovationMaterialCatalog) ? window.renovationMaterialCatalog : [];
 
     if (!modal) {
         return;
@@ -17,9 +18,90 @@ document.addEventListener('DOMContentLoaded', () => {
     const descriptionEl = modal.querySelector('#dashboard-review-description');
     const photoCountEl = modal.querySelector('#dashboard-review-photo-count');
     const galleryEl = modal.querySelector('#dashboard-review-gallery');
+    const materialListEl = modal.querySelector('#dashboard-review-material-list');
+    const materialTotalEl = modal.querySelector('#dashboard-review-material-total');
     const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
     let lastTrigger = null;
     let selectedRequestId = null;
+    const selectedMaterialQty = {};
+
+    const formatRupiah = (value) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
+
+    const getMaterialSummary = () => {
+        const selectedMaterials = materialCatalog
+            .map((material) => {
+                const qty = Number(selectedMaterialQty[material.id] || 0);
+                if (qty <= 0) {
+                    return null;
+                }
+
+                const price = Number(material.harga || 0);
+                return {
+                    ...material,
+                    qty,
+                    subtotal: qty * price,
+                };
+            })
+            .filter(Boolean);
+
+        const total = selectedMaterials.reduce((sum, material) => sum + material.subtotal, 0);
+        const itemCount = selectedMaterials.reduce((sum, material) => sum + material.qty, 0);
+
+        return { selectedMaterials, total, itemCount };
+    };
+
+    const renderMaterialList = () => {
+        if (!materialListEl) {
+            return;
+        }
+
+        materialListEl.innerHTML = '';
+
+        materialCatalog.forEach((material) => {
+            const qty = Number(selectedMaterialQty[material.id] || 0);
+
+            const itemEl = document.createElement('div');
+            itemEl.className = 'dashboard-review-material-item';
+
+            const metaEl = document.createElement('div');
+            metaEl.className = 'dashboard-review-material-main';
+            metaEl.innerHTML = `
+                <p class="dashboard-review-material-name">${material.nama_material || '-'}</p>
+                <p class="dashboard-review-material-meta">${material.deskripsi || '-'}</p>
+                <p class="dashboard-review-material-price">Harga: ${formatRupiah(material.harga || 0)} / ${material.satuan || '-'}</p>
+            `;
+
+            const counterEl = document.createElement('div');
+            counterEl.className = 'dashboard-review-material-counter';
+            counterEl.innerHTML = `
+                <button type="button" class="dashboard-review-material-counter-btn" data-material-action="decrease" data-material-id="${material.id}">-</button>
+                <span class="dashboard-review-material-counter-value" data-material-qty="${material.id}">${qty}</span>
+                <button type="button" class="dashboard-review-material-counter-btn" data-material-action="increase" data-material-id="${material.id}">+</button>
+            `;
+
+            itemEl.appendChild(metaEl);
+            itemEl.appendChild(counterEl);
+            materialListEl.appendChild(itemEl);
+        });
+    };
+
+    const updateMaterialTotals = () => {
+        const { total } = getMaterialSummary();
+
+        if (materialTotalEl) {
+            materialTotalEl.textContent = formatRupiah(total);
+        }
+
+        updateTakeRenovationButtonState();
+    };
+
+    const resetMaterialSelection = () => {
+        materialCatalog.forEach((material) => {
+            selectedMaterialQty[material.id] = 0;
+        });
+        renderMaterialList();
+        updateMaterialTotals();
+    };
 
     const populateModal = (requestId) => {
         const request = requestMap[requestId];
@@ -80,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             takeRenovationButton.dataset.requestId = request.id;
         }
 
+        resetMaterialSelection();
         updateTakeRenovationButtonState();
     };
 
@@ -91,8 +174,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
         const costValue = costInput instanceof HTMLInputElement ? costInput.value.trim() : '';
         const isCostValid = Number(costValue) > 0;
+        const { itemCount } = getMaterialSummary();
+        const hasMaterialSelected = itemCount > 0;
         const hasRequestSelected = typeof selectedRequestId === 'string' && selectedRequestId.length > 0;
-        const isFormComplete = feedbackValue.length > 0 && isCostValid && hasRequestSelected;
+        const isFormComplete = feedbackValue.length > 0 && isCostValid && hasMaterialSelected && hasRequestSelected;
 
         takeRenovationButton.disabled = !isFormComplete;
         takeRenovationButton.setAttribute('aria-disabled', String(!isFormComplete));
@@ -151,19 +236,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (takeRenovationButton instanceof HTMLButtonElement) {
         takeRenovationButton.addEventListener('click', () => {
-            const baseUrl = takeRenovationButton.dataset.trackingUrl;
             const requestId = takeRenovationButton.dataset.requestId;
+            const mandorCost = Number(costInput instanceof HTMLInputElement ? costInput.value : 0);
+            const { selectedMaterials, total: materialTotal } = getMaterialSummary();
 
-            if (!baseUrl || !requestId) {
+            if (!requestId) {
                 return;
             }
 
-            const targetUrl = new URL(baseUrl, window.location.origin);
-            targetUrl.searchParams.set('request_id', requestId);
-            window.location.href = targetUrl.toString();
+            const materialLines = selectedMaterials.map((material) => {
+                return `- ${material.nama_material}: ${material.qty} ${material.satuan} (${formatRupiah(material.subtotal)})`;
+            });
+
+            const grandTotal = materialTotal + mandorCost;
+
+            const messageLines = [
+                `Ringkasan Biaya untuk #${requestId}`,
+                '',
+                'Material:',
+                ...(materialLines.length ? materialLines : ['- Belum ada material']),
+                `Total Material: ${formatRupiah(materialTotal)}`,
+                `Biaya Renovasi Mandor: ${formatRupiah(mandorCost)}`,
+                `Total Keseluruhan: ${formatRupiah(grandTotal)}`,
+                '',
+                'Anda berhasil mengambil renovasi ini, silahkan menuju ke dasbor tracking',
+            ];
+
+            alert(messageLines.join('\n'));
         });
     }
 
+    if (materialListEl) {
+        materialListEl.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-material-action]');
+            if (!button) {
+                return;
+            }
+
+            const materialId = button.getAttribute('data-material-id');
+            const action = button.getAttribute('data-material-action');
+
+            if (!materialId || !(materialId in selectedMaterialQty)) {
+                return;
+            }
+
+            const currentQty = Number(selectedMaterialQty[materialId] || 0);
+
+            if (action === 'increase') {
+                selectedMaterialQty[materialId] = currentQty + 1;
+            }
+
+            if (action === 'decrease') {
+                selectedMaterialQty[materialId] = Math.max(0, currentQty - 1);
+            }
+
+            const qtyEl = materialListEl.querySelector(`[data-material-qty="${materialId}"]`);
+            if (qtyEl) {
+                qtyEl.textContent = String(selectedMaterialQty[materialId]);
+            }
+
+            updateMaterialTotals();
+        });
+    }
+
+    renderMaterialList();
+    resetMaterialSelection();
     updateTakeRenovationButtonState();
 
     modal.addEventListener('click', (event) => {

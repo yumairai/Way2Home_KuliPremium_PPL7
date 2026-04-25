@@ -66,6 +66,38 @@
         ];
 
         $requestMap = collect($renovationRequests)->mapWithKeys(fn($request) => [$request['id'] => $request]);
+        $materialCatalog = [
+            [
+                'id' => 'MAT-001',
+                'nama_material' => 'Besi Beton 19mm',
+                'kategori' => 'Beton',
+                'harga' => 320000,
+                'satuan' => 'btg',
+                'stok' => 2500,
+                'deskripsi' => 'Perwira • 19mm • 27kg',
+                'path_foto_material' => 'images/material/beton.jpg',
+            ],
+            [
+                'id' => 'MAT-002',
+                'nama_material' => 'Semen Portland 50kg',
+                'kategori' => 'Semen',
+                'harga' => 76000,
+                'satuan' => 'zak',
+                'stok' => 1800,
+                'deskripsi' => 'Mutu K-225 • Kuat tekan stabil',
+                'path_foto_material' => 'images/material/semen.jpg',
+            ],
+            [
+                'id' => 'MAT-003',
+                'nama_material' => 'Cat Eksterior Weatherproof',
+                'kategori' => 'Cat',
+                'harga' => 295000,
+                'satuan' => 'pail',
+                'stok' => 900,
+                'deskripsi' => '20L • Tahan UV & hujan',
+                'path_foto_material' => 'images/material/cat.jpg',
+            ],
+        ];
         $activeProjects = '-';
         $completedProjects = 18; // data jumlah proyek yang sudah diselesaikan oleh suatu id mandor (mandor tertentu) nnti ambil dr db
         $requestCount = count($renovationRequests);
@@ -203,6 +235,17 @@
                 </div>
 
                 <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Material Renovasi</span>
+                    <div class="dashboard-review-material-wrap">
+                        <div class="dashboard-review-material-list" id="dashboard-review-material-list"></div>
+                        <div class="dashboard-review-material-total">
+                            <p class="dashboard-review-material-total-label">Total Harga Material</p>
+                            <p class="dashboard-review-material-total-value" id="dashboard-review-material-total">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-block">
                     <span class="dashboard-review-label">Biaya Renovasi</span>
                     <div class="dashboard-review-cost-wrap">
                         <label class="dashboard-review-cost-field" for="dashboard-review-cost">
@@ -226,6 +269,7 @@
 
     <script>
         window.renovationRequestMap = @json($requestMap);
+        window.renovationMaterialCatalog = @json($materialCatalog);
     </script>
 @endsection
 @push('scripts')
