@@ -3,106 +3,6 @@
     <link rel="stylesheet" href="{{ asset('css/mandor/mandor_dashboard.css') }}" />
 @endpush
 @section('content')
-    @php
-        $renovationRequests = [
-            [
-                'id' => 'REV-001',
-                'applicant_name' => 'Bapak Budi',
-                'budget' => 'Rp 10.000.000',
-                'phone' => '0812-3456-7890',
-                'location' => 'Jl. Melati No. 45, Kebayoran Baru, Jakarta Selatan',
-                'description' =>
-                    'Atap bocor di area ruang tamu dan plafon sudah mulai berjamur. Kerusakan terlihat semakin parah saat hujan deras semalam. Kami membutuhkan pengecekan struktur rangka atap dan penggantian genteng serta pengecatan ulang plafon.',
-                'photos' => [
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                ],
-            ],
-            [
-                'id' => 'REV-002',
-                'applicant_name' => 'Ibu Pertiwi',
-                'budget' => 'Rp 12.000.000',
-                'phone' => '0813-8877-2233',
-                'location' => 'Jl. Cendana No. 12, Cimahi Tengah, Jawa Barat',
-                'description' =>
-                    'Dinding kamar retak memanjang dan ada rembesan air dari sisi samping rumah. Mohon dicek struktur dinding, plester ulang, dan pengecatan interior.',
-                'photos' => [
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                ],
-            ],
-            [
-                'id' => 'REV-003',
-                'applicant_name' => 'Bapak Santoso',
-                'budget' => 'Rp 50.000.000',
-                'phone' => '0856-1122-3344',
-                'location' => 'Jl. Kenanga No. 8, Setiabudi, Jakarta Selatan',
-                'description' =>
-                    'Renovasi dapur total untuk perluasan area dan perbaikan saluran air. Butuh pembongkaran kabinet lama, instalasi pipa baru, serta finishing keramik lantai.',
-                'photos' => [
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                ],
-            ],
-            [
-                'id' => 'REV-004',
-                'applicant_name' => 'Bapak Fadhli',
-                'budget' => 'Rp 40.000.000',
-                'phone' => '0856-2222-1111',
-                'location' => 'Jl. Jatinangor No. 8, Hegar, Sumedang ',
-                'description' =>
-                    'Renovasi dapur total untuk perluasan area dan perbaikan saluran air. Butuh pembongkaran kabinet lama, instalasi pipa baru, serta finishing keramik lantai.',
-                'photos' => [asset('images/aset/user-dummy.jpg'), asset('images/aset/user-dummy.jpg')],
-            ],
-        ];
-
-        $requestMap = collect($renovationRequests)->mapWithKeys(fn($request) => [$request['id'] => $request]);
-        $materialCatalog = [
-            [
-                'id' => 'MAT-001',
-                'nama_material' => 'Besi Beton 19mm',
-                'kategori' => 'Beton',
-                'harga' => 320000,
-                'satuan' => 'btg',
-                'stok' => 2500,
-                'deskripsi' => 'Perwira • 19mm • 27kg',
-                'path_foto_material' => 'images/material/beton.jpg',
-            ],
-            [
-                'id' => 'MAT-002',
-                'nama_material' => 'Semen Portland 50kg',
-                'kategori' => 'Semen',
-                'harga' => 76000,
-                'satuan' => 'zak',
-                'stok' => 1800,
-                'deskripsi' => 'Mutu K-225 • Kuat tekan stabil',
-                'path_foto_material' => 'images/material/semen.jpg',
-            ],
-            [
-                'id' => 'MAT-003',
-                'nama_material' => 'Cat Eksterior Weatherproof',
-                'kategori' => 'Cat',
-                'harga' => 295000,
-                'satuan' => 'pail',
-                'stok' => 900,
-                'deskripsi' => '20L • Tahan UV & hujan',
-                'path_foto_material' => 'images/material/cat.jpg',
-            ],
-        ];
-        $activeProjects = '-';
-        $completedProjects = 18; // data jumlah proyek yang sudah diselesaikan oleh suatu id mandor (mandor tertentu) nnti ambil dr db
-        $requestCount = count($renovationRequests);
-    @endphp
-
     <header class="dashboard-header">
         <h1 class="dashboard-title">Ringkasan Operasional</h1>
         <p class="dashboard-lead">
@@ -147,11 +47,12 @@
             </div>
         </div>
         <div class="dashboard-request-list">
-            @foreach ($renovationRequests as $request)
+            @forelse ($renovationRequests as $request)
                 <div
                     class="dashboard-request-card {{ $loop->odd ? 'dashboard-request-card-primary' : 'dashboard-request-card-soft' }}">
                     <div class="dashboard-request-image-wrap">
-                        <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Foto Pengaju Renovasi">
+                        <img src="{{ $request['photos'][0] ?? asset('images/aset/user-dummy.jpg') }}"
+                            alt="Foto Pengaju Renovasi">
                     </div>
                     <div class="dashboard-request-meta">
                         <div>
@@ -178,7 +79,16 @@
                         </button>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="dashboard-request-card dashboard-request-card-soft">
+                    <div class="dashboard-request-meta">
+                        <div>
+                            <p class="dashboard-meta-label">Info</p>
+                            <p class="dashboard-meta-value">Belum ada request renovasi yang perlu direview saat ini.</p>
+                        </div>
+                    </div>
+                </div>
+            @endforelse
         </div>
     </section>
     <div class="dashboard-review-modal" id="dashboard-review-modal" aria-hidden="true" hidden>
@@ -217,6 +127,13 @@
                     <span class="dashboard-review-label">Deskripsi Kerusakan</span>
                     <div class="dashboard-review-note">
                         <p id="dashboard-review-description">-</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Riwayat Negosiasi Customer</span>
+                    <div class="dashboard-review-note">
+                        <div id="dashboard-review-negotiation-list"></div>
                     </div>
                 </div>
 

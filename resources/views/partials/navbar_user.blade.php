@@ -10,7 +10,7 @@
             <a href="/">Beranda</a>
             <a href="/recommendation">Desain</a>
             <a href="/material">Material</a>
-            <a href="/renovation">Renovasi</a>
+            <a href="{{ Auth::user()?->role === 'mandor' ? route('mandor.dashboard') : route('customer.renovation') }}">Renovasi</a>
         </div>
         <!-- user bisa klik dropdown -->
         <div class="nav-actions">
@@ -49,7 +49,8 @@
                         <span class="material-symbols-outlined">house</span>
                         <span>Proyek Saya</span>
                     </a>
-                    <a href="{{ route('customer.renovation') }}" class="nav-link">
+                    <a href="{{ Auth::user()?->role === 'mandor' ? route('mandor.dashboard') : route('customer.renovation') }}"
+                        class="nav-link">
                         <span class="material-symbols-outlined">construction</span>
                         <span>Renovasi Saya</span>
                     </a>

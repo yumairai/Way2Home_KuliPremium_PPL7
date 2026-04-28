@@ -3,11 +3,6 @@
      <link rel="stylesheet" href="{{ asset('css/mandor/mandor_tracking.css') }}" />
  @endpush
  @section('content')
-     @php
-         $isHaveProject = false; // klo trueberarti mandor lagi di assign ke proyek sama admin
-         $isHaveRenovation = false; // kalo true berarti udh ambil request renov cust, tapi blm tentu diterima cust.
-         $isAccepted = false; // udha diterima cust, (cust udh klik jasa renovasi di page list renovasi)
-     @endphp
      @if (!$isHaveProject && !$isHaveRenovation)
          <header class="mandor-project-head">
              <div class="mandor-project-main">
@@ -30,27 +25,27 @@
                      <span class="mandor-project-label">Active Project</span>
                  </nav>
                  <h1 class="mandor-project-title">
-                     Renovasi Modern Villa Kemang
+                     Renovasi {{ $renovationData['request_id'] ?? '-' }}
                  </h1>
                  <div class="mandor-project-meta-row">
                      <div class="mandor-project-meta-pill">
                          <span class="material-symbols-outlined mandor-icon-primary">person</span>
-                         <span>Budi Doremi</span>
+                         <span>{{ $renovationData['customer_name'] ?? '-' }}</span>
                      </div>
                      <div class="mandor-project-meta-pill">
                          <span class="material-symbols-outlined mandor-icon-primary">call</span>
-                         <span>+62 812-3456-7890</span>
+                         <span>{{ $renovationData['customer_phone'] ?? '-' }}</span>
                      </div>
                      <div class="mandor-project-meta-pill hightlight">
                          <span class="material-symbols-outlined mandor-icon-primary">payments</span>
-                         <span>Biaya Renovasi: Rp 7.550.000</span>
+                         <span>Biaya Renovasi: {{ $renovationData['biaya_total'] ?? '-' }}</span>
                      </div>
                  </div>
              </div>
              <div class="mandor-project-dates">
                  <div class="mandor-date-row mandor-date-row-divider">
                      <span class="mandor-date-label">Tanggal Mulai</span>
-                     <span class="mandor-date-value">12 Jan 2024</span>
+                     <span class="mandor-date-value">{{ $renovationData['tanggal_mulai'] ?? '-' }}</span>
                  </div>
                  <p class="mandor-date-value">Harap komunikasi dengan klien untuk informasi lebih lanjut dan kenyamanan
                      renovasi.</p>
@@ -72,14 +67,10 @@
                              </div>
                              <h2 class="mandor-reno-title">Deskripsi Kerusakan User</h2>
                          </div>
-                         <div class="mandor-reno-body mandor-reno-description">
-                             "Ada kebocoran di pipa bawah wastafel kamar mandi utama. Air merembes hingga ke dinding luar
-                             dan
-                             menyebabkan cat mengelupas serta timbul jamur. Selain itu, ubin di area shower mulai goyang dan
-                             ada
-                             beberapa yang retak. Mohon pengecekan instalasi air dan penggantian ubin yang rusak."
-                         </div>
-                     </section>
+                          <div class="mandor-reno-body mandor-reno-description">
+                             "{{ $renovationData['deskripsi'] ?? '-' }}"
+                          </div>
+                      </section>
                      <!-- Foto Kerusakan (Gallery Grid) -->
                      <section class="mandor-reno-card mandor-reno-card-gallery">
                          <div class="mandor-reno-head-row">
@@ -89,35 +80,19 @@
                                  </div>
                                  <h2 class="mandor-reno-title">Foto Kerusakan</h2>
                              </div>
-                             <span class="mandor-reno-subtitle">3 Attachments</span>
-                         </div>
-                         <div class="mandor-reno-gallery-grid">
-                             <div class="mandor-reno-photo-card">
-                                 <img class="mandor-reno-photo"
-                                     data-alt="close-up of a leaking water pipe under a bathroom sink with visible water droplets and rust"
-                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjmNx7M5g8czXp1U9zkERXU-j_sHNI_y2qqs-zhLjN058fHf4xNvyeE4nniMsCY-ZOhucJ_BapIi_8XSZoRZUIh9Hm4ZLettqclXBoW6nw67A32Io0eoKc-SVGNsF9xbgrKItBDNny93s-PWu96gy_0MHnw_peRJQd-73XIWJreUkrlWWonGrzSxw5EFRT0E-Y4iBYcj1nW9xeYEo_FT_qdeA9aZ-ShBH-q9_Q0GDGcSLZWblpUBewDQwnIOcRi2MW9gxNAVtc9Q0" />
-                                 <div class="mandor-reno-photo-overlay">
-                                     <p class="mandor-reno-photo-caption">Sink Leakage Area</p>
+                             <span class="mandor-reno-subtitle">{{ count($renovationData['photos'] ?? []) }} Attachments</span>
+                          </div>
+                          <div class="mandor-reno-gallery-grid">
+                             @foreach ($renovationData['photos'] ?? [] as $photoUrl)
+                                 <div class="mandor-reno-photo-card">
+                                     <img class="mandor-reno-photo" src="{{ $photoUrl }}" alt="Foto kerusakan renovasi" />
+                                     <div class="mandor-reno-photo-overlay">
+                                         <p class="mandor-reno-photo-caption">Dokumentasi Customer</p>
+                                     </div>
                                  </div>
-                             </div>
-                             <div class="mandor-reno-photo-card">
-                                 <img class="mandor-reno-photo"
-                                     data-alt="interior wall with peeling white paint and dark grey mold patches near the floor line"
-                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAa2gyfu7SgrVHFVsLtuU1L4jB_jd338Rjo28x73jyQZHsg5VP2mhzCWxTerx1S-Frp2G8_FohhwxCfGKgMUP6G7qtNK3aMqdBbzkUisHVTjwFuLxuy1BygJmZNGdIFdXUBsRNVrGK1Baoo5xC-46vnX5w0gJsI5gxhD1uJMFr77_MRHJTadyPBwHFekCu5e5--nR8_Vzf2qnGqTuDa5I1F6x2Ykd6jsjvXd4yY8OK6JJCS-9Tfw72hkgIUmqcg4rsUC-LagCvwCM" />
-                                 <div class="mandor-reno-photo-overlay">
-                                     <p class="mandor-reno-photo-caption">Damp Wall &amp; Mold</p>
-                                 </div>
-                             </div>
-                             <div class="mandor-reno-photo-card">
-                                 <img class="mandor-reno-photo"
-                                     data-alt="cracked ceramic floor tiles in a shower area with dark grout and standing water"
-                                     src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQCSlnMO4np0RLB2JFmJaFOu9i_GpXR_FOjlE0BPSwkObwFu9gWjCKWXmGMsCFlvLdYnTPgNV3p_qcuvXNID8Ru4AEMCBjWkDP4xOuqK9hFnPs0yAwhPofwrgpabXTsiDy2AQF3xi1sZ7RNVCTuOz_iCUSXE_G9UYz2GJ3dAbGnYqJ3NVKtUMBc6FQWMLqMOCfaZAwFRLM3XD9N9m-HyyNtB83iqfb4wBepebSQJ0JJ9oIWDoSHMP7OwXm1rQUPu1FliWLEphYhbg" />
-                                 <div class="mandor-reno-photo-overlay">
-                                     <p class="mandor-reno-photo-caption">Cracked Shower Tiles</p>
-                                 </div>
-                             </div>
-                         </div>
-                     </section>
+                             @endforeach
+                          </div>
+                      </section>
                      <!-- Analisis Mandor (Technical Assessment) -->
                      <section class="mandor-reno-card mandor-reno-card-analysis">
                          <div class="mandor-reno-head">
@@ -127,30 +102,23 @@
                              <h2 class="mandor-reno-title">Analisis Mandor (Technical Assessment)
                              </h2>
                          </div>
-                         <div class="mandor-reno-analysis-wrap">
-                             <div class="mandor-reno-textarea">
-                                 Berdasarkan inspeksi lapangan, kebocoran terjadi pada sambungan pipa PVC 1/2 inch yang
-                                 sudah
-                                 aus. Rembesan air telah mencapai lapisan bata, sehingga diperlukan pengupasan plesteran
-                                 seluas
-                                 1m2 untuk proses pengeringan sebelum dicat ulang menggunakan cat anti-bocor
-                                 (waterproofing).
-                                 Untuk area shower, ubin terangkat akibat 'popping' karena pemuaian. Diperlukan pembongkaran
-                                 ubin lama dan pemasangan ubin baru dengan perekat ubin berkualitas tinggi untuk mencegah
-                                 kejadian serupa.
-                             </div>
-                         </div>
+                          <div class="mandor-reno-analysis-wrap">
+                              <div class="mandor-reno-textarea">
+                                 {{ $renovationData['analisis'] ?? '-' }}
+                              </div>
+                          </div>
                      </section>
                  </div>
                  <!-- Footer Action -->
-                 <div class="mandor-reno-footer-action">
-                     <div class="mandor-reno-btn-wrap">
-                         <button class="mandor-reno-action-btn">
-                             Tandai Renovasi Selesai
-                         </button>
-                     </div>
-                 </div>
-             </section>
+                  <div class="mandor-reno-footer-action">
+                      <div class="mandor-reno-btn-wrap">
+                         <button class="mandor-reno-action-btn" id="mark-renovation-done-btn"
+                             data-request-id="{{ $renovationData['request_db_id'] ?? '' }}">
+                              Tandai Renovasi Selesai
+                          </button>
+                      </div>
+                  </div>
+              </section>
          @endif
      @else
          <header class="mandor-project-head">
@@ -337,3 +305,43 @@
      @endif
      </section>
  @endsection
+ @push('scripts')
+     <script>
+         (function() {
+             const doneButton = document.getElementById('mark-renovation-done-btn');
+             const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+             const csrfToken = tokenMeta ? tokenMeta.getAttribute('content') : '';
+
+             if (!doneButton) {
+                 return;
+             }
+
+             doneButton.addEventListener('click', async function() {
+                 const requestId = doneButton.getAttribute('data-request-id');
+                 if (!requestId) {
+                     return;
+                 }
+
+                 const response = await fetch(`/mandor/renovation/${requestId}/done`, {
+                     method: 'POST',
+                     headers: {
+                         'Accept': 'application/json',
+                         'Content-Type': 'application/json',
+                         'X-CSRF-TOKEN': csrfToken
+                     },
+                     body: JSON.stringify({})
+                 });
+
+                 const data = await response.json().catch(() => ({}));
+
+                 if (!response.ok) {
+                     alert(data.message || 'Gagal menandai renovasi selesai.');
+                     return;
+                 }
+
+                 alert(data.message || 'Renovasi berhasil ditandai selesai.');
+                 window.location.reload();
+             });
+         })();
+     </script>
+ @endpush
