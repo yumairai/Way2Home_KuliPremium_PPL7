@@ -17,18 +17,22 @@
                 <p class="rf-form-subtitle">Ajukan permohonan renovasi rumah Anda dengan mudah.</p>
             </div>
             <!-- The Form -->
-            <form action="#" class="rf-form-body">
+            <form action="{{ route('customer.renovation.store') }}" method="POST" enctype="multipart/form-data"
+                class="rf-form-body">
+                @csrf
                 <!-- Row 1: Personal Info -->
                 <div class="rf-grid-2">
                     <div class="rf-field-group">
                         <label class="rf-label">Nama
                             Lengkap</label>
-                        <input class="rf-input rf-input-readonly" readonly="" type="text" value="Budi Arsitek" />
+                        <input class="rf-input rf-input-readonly" readonly="" type="text"
+                            value="{{ Auth::user()->name ?? '-' }}" />
                     </div>
                     <div class="rf-field-group">
                         <label class="rf-label">Nomor
                             HP</label>
-                        <input class="rf-input rf-input-readonly" readonly="" type="text" value="0812-3456-7890" />
+                        <input class="rf-input rf-input-readonly" readonly="" type="text"
+                            value="{{ Auth::user()->phone_number ?? '-' }}" />
                     </div>
                 </div>
                 <!-- Row 2: Budget -->
@@ -38,14 +42,20 @@
                     <div class="rf-input-wrap">
                         <div class="rf-input-prefix">
                             Rp</div>
-                        <input class="rf-input rf-input-budget" placeholder="0" type="number" />
+                        <input class="rf-input rf-input-budget" placeholder="0" type="number" name="budget_estimasi"
+                            min="100000" value="{{ old('budget_estimasi') }}" required />
                     </div>
+                </div>
+                <div class="rf-field-group">
+                    <label class="rf-label">Alamat Renovasi</label>
+                    <textarea class="rf-textarea" name="alamat" rows="2" placeholder="Alamat lengkap lokasi renovasi" required>{{ old('alamat') }}</textarea>
                 </div>
                 <!-- Row 3: Description -->
                 <div class="rf-field-group">
                     <label class="rf-label">Deskripsi
                         Kerusakan / Keinginan</label>
-                    <textarea class="rf-textarea" placeholder="Deskripsikan kerusakan atau keinginan renovasi Anda." rows="4"></textarea>
+                    <textarea class="rf-textarea" placeholder="Deskripsikan kerusakan atau keinginan renovasi Anda." rows="4"
+                        name="deskripsi_renovasi" required>{{ old('deskripsi_renovasi') }}</textarea>
                 </div>
                 <!-- Row 4: Photo Upload -->
                 <div class="rf-upload-section">
@@ -55,6 +65,7 @@
                         <span class="material-symbols-outlined rf-upload-icon" data-icon="cloud_upload">cloud_upload</span>
                         <p class="rf-upload-title">Drag and drop files or <span class="rf-upload-link">browse</span></p>
                         <p class="rf-upload-subtitle">PNG, JPG up to 10MB</p>
+                        <input type="file" name="foto_detail" accept="image/png,image/jpeg,image/jpg" />
                     </div>
                     <!-- Previews -->
                     <div class="rf-preview-grid">

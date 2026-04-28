@@ -12,8 +12,6 @@
         </header>
         <!-- Requests List -->
         @php
-            $isHaveRequest = true;
-
             $statusConfig = [
                 'waiting' => [
                     'label' => 'Menunggu Review',
@@ -40,110 +38,6 @@
                     'budgetIcon' => 'analytics',
                 ],
             ];
-
-            // Dummy data sementara untuk simulasi 4 state.
-            $requests = [
-                [
-                    'id' => 'REV-1',
-                    'status' => 'waiting',
-                    'location' => 'Bandung, Jawa Barat',
-                    'budget_user' => 'Rp 150.000.000',
-                    'feedback' =>
-                        'Pengajuan Anda sedang dalam antrean tim verifikasi teknis. Kami akan segera memberikan analisis material dan jasa berdasarkan spesifikasi lokasi di Bandung.',
-                    'budget_needed' => '-',
-                    'mandor_contact' => null,
-                    'mandor_name' => null,
-                    'materials' => [],
-                ],
-                [
-                    'id' => 'REV-2',
-                    'status' => 'on-progress',
-                    'location' => 'Bandung, Jawa Barat',
-                    'budget_user' => 'Rp 150.000.000',
-                    'feedback' =>
-                        'Berdasarkan survei visual dan data teknis, area renovasi memerlukan perkuatan struktur pada bagian atap. Penggunaan material baja ringan standar SNI sangat disarankan. Kami telah menghitung efisiensi tenaga kerja lokal untuk menekan biaya jasa tanpa mengurangi kualitas finishing.',
-                    'budget_needed' => 'Rp 190.000.000',
-                    'mandor_contact' => '6281384310179',
-                    'mandor_name' => 'Mandor Budi',
-                    'materials' => [
-                        [
-                            'nama_material' => 'Besi Beton 19mm',
-                            'harga' => 320000,
-                            'satuan' => 'btg',
-                            'jumlah' => 4,
-                            'deskripsi' => 'Perwira • 19mm • 27kg',
-                        ],
-                        [
-                            'nama_material' => 'Semen Portland 50kg',
-                            'harga' => 76000,
-                            'satuan' => 'zak',
-                            'jumlah' => 8,
-                            'deskripsi' => 'Mutu K-225 • Kuat tekan stabil',
-                        ],
-                    ],
-                ],
-                [
-                    'id' => 'REV-3',
-                    'status' => 'reviewed',
-                    'location' => 'Jakarta Selatan, DKI Jakarta',
-                    'budget_user' => 'Rp 250.000.000',
-                    'feedback' =>
-                        'Berdasarkan survei visual dan data teknis, area renovasi memerlukan perkuatan struktur pada bagian atap. Penggunaan material baja ringan standar SNI sangat disarankan. Kami telah menghitung efisiensi tenaga kerja lokal untuk menekan biaya jasa tanpa mengurangi kualitas finishing.',
-                    'budget_needed' => 'Rp 274.500.000',
-                    'mandor_contact' => '6281384310179',
-                    'mandor_name' => 'Mandor Budi',
-                    'materials' => [
-                        [
-                            'nama_material' => 'Semen Portland 50kg',
-                            'harga' => 76000,
-                            'satuan' => 'zak',
-                            'jumlah' => 5,
-                            'deskripsi' => 'Tahan lembab • Mutu K-225',
-                        ],
-                        [
-                            'nama_material' => 'Pasir Cor Halus',
-                            'harga' => 285000,
-                            'satuan' => 'm3',
-                            'jumlah' => 2,
-                            'deskripsi' => 'Butiran halus • Bersih dari lumpur',
-                        ],
-                        [
-                            'nama_material' => 'Batu Split 1/2',
-                            'harga' => 340000,
-                            'satuan' => 'm3',
-                            'jumlah' => 1,
-                            'deskripsi' => 'Agregat struktur • Kering',
-                        ],
-                    ],
-                ],
-                [
-                    'id' => 'REV-4',
-                    'status' => 'completed',
-                    'location' => 'Jakarta Selatan, DKI Jakarta',
-                    'budget_user' => 'Rp 250.000.000',
-                    'feedback' =>
-                        'Berdasarkan survei visual dan data teknis, area renovasi memerlukan perkuatan struktur pada bagian atap. Penggunaan material baja ringan standar SNI sangat disarankan. Kami telah menghitung efisiensi tenaga kerja lokal untuk menekan biaya jasa tanpa mengurangi kualitas finishing.',
-                    'budget_needed' => 'Rp 274.500.000',
-                    'mandor_contact' => '6281384310179',
-                    'mandor_name' => 'Mandor Budi',
-                    'materials' => [
-                        [
-                            'nama_material' => 'Cat Eksterior Weatherproof',
-                            'harga' => 295000,
-                            'satuan' => 'pail',
-                            'jumlah' => 5,
-                            'deskripsi' => '20L • Tahan UV & hujan',
-                        ],
-                        [
-                            'nama_material' => 'Acrylic Sealer Primer',
-                            'harga' => 185000,
-                            'satuan' => 'pail',
-                            'jumlah' => 2,
-                            'deskripsi' => 'Daya rekat tinggi • Anti jamur',
-                        ],
-                    ],
-                ],
-            ];
         @endphp
         @if (!$isHaveRequest)
             <p class="rv-no-requests">Anda belum memiliki request renovasi. Silahkan ajukan request renovasi baru.</p>
@@ -162,6 +56,12 @@
                         $isProgressLikeState = in_array($status, ['on-progress', 'completed'], true);
                         $isWaitingStatus = $status === 'waiting';
                         $showMaterialInfo = in_array($status, ['reviewed', 'on-progress', 'completed'], true);
+                        $damageDescription = trim(
+                            (string) ($request['damage_description'] ?? 'Deskripsi belum tersedia.'),
+                        );
+                        $damagePhotos = array_values(array_filter((array) ($request['damage_photos'] ?? [])));
+                        $previewPhotos = array_slice($damagePhotos, 0, 2);
+                        $remainingPhotosCount = max(count($damagePhotos) - count($previewPhotos), 0);
                         $materials = $request['materials'] ?? [];
                         $materialTotalPrice = 0;
                         $materialAlertLines = [];
@@ -198,7 +98,8 @@
                             $mandorContactForDisplay,
                         );
                     @endphp
-                    <article class="rv-request-card" data-request-status="{{ $status }}">
+                    <article class="rv-request-card" data-request-status="{{ $status }}"
+                        data-request-id="{{ $request['db_id'] ?? '' }}">
                         <div class="rv-request-content">
                             <div class="rv-request-top">
                                 <div>
@@ -232,11 +133,40 @@
                                 </div>
                             </div>
 
+                            <section class="rv-user-detail-preview">
+                                <div class="rv-user-detail-head">
+                                    <h3 class="rv-user-detail-title">Deskripsi Kerusakan</h3>
+                                    <button type="button"
+                                        class="rv-action-btn rv-action-btn-outline js-open-request-detail"
+                                        data-request-id="{{ $request['id'] }}"
+                                        data-request-description="{{ e($damageDescription) }}"
+                                        data-request-photos='@json($damagePhotos)'
+                                        data-request-materials='@json($materials)'>Lihat Detail</button>
+                                </div>
+                                <p class="rv-user-desc-clamp">{{ $damageDescription }}</p>
+                                <div class="rv-damage-photo-preview">
+                                    @if (count($previewPhotos) > 0)
+                                        @foreach ($previewPhotos as $photoIndex => $photoPath)
+                                            <div class="rv-damage-photo-thumb-wrap">
+                                                <img src="{{ $photoPath }}"
+                                                    alt="Foto kerusakan {{ $photoIndex + 1 }} request {{ $request['id'] }}"
+                                                    class="rv-damage-photo-thumb">
+                                                @if ($loop->last && $remainingPhotosCount > 0)
+                                                    <div class="rv-damage-photo-more">+{{ $remainingPhotosCount }}</div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <p class="rv-damage-photo-empty">Belum ada foto kerusakan yang diunggah.</p>
+                                    @endif
+                                </div>
+                            </section>
+
                             <details class="rv-review-details {{ $isWaitingStatus ? 'rv-review-details-disabled' : '' }}">
                                 <summary class="rv-review-summary"
                                     aria-disabled="{{ $isWaitingStatus ? 'true' : 'false' }}">
                                     <span class="material-symbols-outlined rv-review-summary-icon">notes</span>
-                                    <span>Detail Review Mandor</span>
+                                    <span>Lihat Hasil Review & Detail Renovasi</span>
                                 </summary>
 
                                 @if ($showMandorSection)
@@ -246,35 +176,73 @@
                                             <div class="rv-feedback-box {{ $config['feedbackClass'] }}" data-feedback-box>
                                                 {{ $request['feedback'] }}
                                             </div>
+                                            @if (!empty($request['negotiation_messages']) && count($request['negotiation_messages']) > 0)
+                                                <div class="rv-material-box" style="margin-top:1rem;">
+                                                    <div class="rv-material-title-wrap">
+                                                        <span class="material-symbols-outlined rv-material-icon">forum</span>
+                                                        <span class="rv-material-label">Riwayat Negosiasi</span>
+                                                    </div>
+                                                    @foreach ($request['negotiation_messages'] as $message)
+                                                        <div class="rv-material-content">
+                                                            <p class="rv-material-name">
+                                                                {{ ucfirst($message['pengirim']) }}
+                                                                @if (!empty($message['waktu']))
+                                                                    <span class="rv-material-meta"
+                                                                        style="font-weight:500;">• {{ $message['waktu'] }}</span>
+                                                                @endif
+                                                            </p>
+                                                            <p class="rv-material-meta">{{ $message['pesan'] }}</p>
+                                                            @if (!empty($message['nominal_tawaran']))
+                                                                <p class="rv-material-price">Nominal Tawaran:
+                                                                    {{ $message['nominal_tawaran'] }}</p>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                            @if (!empty($request['offer_expires_at']) && $status === 'reviewed')
+                                                <p class="rv-info-label" style="margin-top:0.75rem;">
+                                                    Penawaran berlaku sampai {{ $request['offer_expires_at'] }}
+                                                </p>
+                                            @endif
                                         </div>
 
                                         @if ($showMaterialInfo && count($materials) > 0)
                                             <div class="rv-material-box">
                                                 <div class="rv-material-title-wrap">
-                                                    <span
-                                                        class="material-symbols-outlined rv-material-icon">inventory_2</span>
-                                                    <span class="rv-material-label">Kebutuhan Material</span>
-                                                </div>
-                                                @foreach ($materials as $material)
-                                                    <div class="rv-material-content">
-                                                        <p class="rv-material-name">{{ $material['nama_material'] }}</p>
-                                                        <p class="rv-material-meta">Kebutuhan: {{ $material['jumlah'] }}
-                                                            {{ $material['satuan'] }}</p>
-                                                        <p class="rv-material-meta">{{ $material['deskripsi'] }}</p>
-                                                        <p class="rv-material-price">Harga Satuan: Rp
-                                                            {{ number_format((int) $material['harga'], 0, ',', '.') }}</p>
-                                                    </div>
-                                                @endforeach
-                                                <div class="rv-material-total">
-                                                    <p class="rv-material-total-label">Total Harga Material</p>
-                                                    <p class="rv-material-total-value">Rp
-                                                        {{ number_format($materialTotalPrice, 0, ',', '.') }}</p>
-                                                </div>
-                                                <div class="rv-material-actions">
+
                                                     <button type="button"
-                                                        class="rv-action-btn rv-action-btn-primary js-alert-btn"
-                                                        data-alert-message="{{ e($materialAlertMessage) }}">Material
-                                                        Saja</button>
+                                                        class="rv-action-btn rv-action-btn-outline js-toggle-material-details"
+                                                        aria-expanded="false"><span
+                                                            class="material-symbols-outlined rv-material-icon">inventory_2</span>
+                                                        <span class="rv-material-label">Kebutuhan Material</span></button>
+                                                </div>
+
+                                                <div class="rv-material-details" style="display: none;">
+                                                    @foreach ($materials as $material)
+                                                        <div class="rv-material-content">
+                                                            <p class="rv-material-name">{{ $material['nama_material'] }}
+                                                            </p>
+                                                            <p class="rv-material-meta">Kebutuhan:
+                                                                {{ $material['jumlah'] }}
+                                                                {{ $material['satuan'] }}</p>
+                                                            <p class="rv-material-meta">{{ $material['deskripsi'] }}</p>
+                                                            <p class="rv-material-price">Harga Satuan: Rp
+                                                                {{ number_format((int) $material['harga'], 0, ',', '.') }}
+                                                            </p>
+                                                        </div>
+                                                    @endforeach
+                                                    <div class="rv-material-total">
+                                                        <p class="rv-material-total-label">Total Harga Material</p>
+                                                        <p class="rv-material-total-value">Rp
+                                                            {{ number_format($materialTotalPrice, 0, ',', '.') }}</p>
+                                                    </div>
+                                                    <div class="rv-material-actions">
+                                                        <button type="button"
+                                                            class="rv-action-btn rv-action-btn-primary js-alert-btn"
+                                                            data-alert-message="{{ e($materialAlertMessage) }}">Pesan
+                                                            Material Saja</button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endif
@@ -290,11 +258,24 @@
 
                                         <div class="rv-actions rv-state-panel {{ $isReviewedState ? '' : 'rv-hidden' }}"
                                             data-state-panel="reviewed">
-                                            <button type="button" class="rv-action-btn rv-action-btn-primary"
-                                                data-transition-state="on-progress">Jasa Renovasi</button>
-                                            <div class="rv-actions-spacer"></div>
-                                            <button type="button" class="rv-done-btn"
-                                                data-transition-state="completed">Selesai</button>
+                                            <div
+                                                style="display:flex;gap:0.5rem;align-items:center;justify-content:flex-start">
+                                                <button type="button" class="rv-action-btn rv-action-btn-primary"
+                                                    data-transition-state="on-progress"
+                                                    data-service-action="{{ !empty($request['is_service_actionable']) ? '1' : '0' }}"
+                                                    {{ !empty($request['is_service_actionable']) ? '' : 'disabled' }}>Jasa Renovasi</button>
+                                                <button type="button" class="rv-done-btn js-reject-offer-btn">Tolak
+                                                    Penawaran</button>
+                                            </div>
+                                            <div style="margin-top:0.75rem;display:grid;gap:0.5rem;">
+                                                <input type="number" class="rf-input js-negotiation-price"
+                                                    placeholder="Nominal nego (opsional)">
+                                                <textarea class="rf-textarea js-negotiation-message" rows="2"
+                                                    placeholder="Tulis pesan negosiasi ke mandor"></textarea>
+                                                <button type="button"
+                                                    class="rv-action-btn rv-action-btn-outline js-negotiate-btn"
+                                                    style="width:max-content;">Kirim Negosiasi</button>
+                                            </div>
                                         </div>
 
                                         <div class="rv-actions rv-state-panel {{ $isProgressLikeState ? '' : 'rv-hidden' }}"
@@ -339,6 +320,50 @@
     <div class="rv-background" aria-hidden="true">
         <div class="rv-bg-orb rv-bg-orb-right"></div>
         <div class="rv-bg-orb rv-bg-orb-left"></div>
+    </div>
+
+    <div class="rv-modal" id="requestDetailModal" aria-hidden="true">
+        <div class="rv-modal-backdrop js-close-request-detail"></div>
+        <div class="rv-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="rvDetailModalTitle">
+            <div class="rv-modal-header">
+                <div>
+                    <p class="rv-modal-kicker">Detail Request Renovasi</p>
+                    <h2 class="rv-modal-title" id="rvDetailModalTitle">Request #<span data-modal-request-id>-</span></h2>
+                </div>
+                <button type="button" class="rv-modal-close-btn js-close-request-detail"
+                    aria-label="Tutup detail request">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="rv-modal-body">
+                <section class="rv-modal-section">
+                    <h3 class="rv-modal-section-title">Deskripsi Kerusakan / Keinginan</h3>
+                    <p class="rv-modal-description" data-modal-description>-</p>
+                </section>
+                <section class="rv-modal-section">
+                    <h3 class="rv-modal-section-title">Foto Kerusakan</h3>
+                    <div class="rv-modal-gallery">
+                        <button type="button" class="rv-gallery-nav rv-gallery-prev" data-gallery-nav="prev"
+                            aria-label="Foto sebelumnya">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                        <img src="" alt="Foto detail kerusakan" class="rv-modal-main-photo"
+                            data-modal-main-photo>
+                        <button type="button" class="rv-gallery-nav rv-gallery-next" data-gallery-nav="next"
+                            aria-label="Foto berikutnya">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    </div>
+                    <p class="rv-gallery-counter">Foto <span data-gallery-index>0</span>/<span data-gallery-total>0</span>
+                    </p>
+                    <div class="rv-gallery-thumbs" data-gallery-thumbs></div>
+                </section>
+                <section class="rv-modal-section">
+                    <h3 class="rv-modal-section-title">List Material & Harga</h3>
+                    <div data-modal-material-list></div>
+                </section>
+            </div>
+        </div>
     </div>
 @endsection
 @push('scripts')
