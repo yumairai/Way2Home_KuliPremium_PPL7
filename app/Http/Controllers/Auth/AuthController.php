@@ -62,7 +62,6 @@ class AuthController extends Controller
 
             $user = Auth::user();
 
-            // Logika Pengalihan Berdasarkan Role
             if ($user->role === 'admin') {
                 return response()->json([
                     'message'  => 'Login Admin Berhasil',
@@ -70,10 +69,16 @@ class AuthController extends Controller
                 ], 200);
             }
 
-            // Default ke Dashboard Customer
+            if ($user->role === 'mandor') {
+                return response()->json([
+                    'message'  => 'Login Mandor Berhasil',
+                    'redirect' => route('customer-layouts.dashboard')
+                ], 200);
+            }
+
             return response()->json([
                 'message'  => 'Login Berhasil',
-                'redirect' => route('customer-layouts.dashboard') // Ke Dashboard Customer
+                'redirect' => route('customer-layouts.dashboard')
             ], 200);
         }
 

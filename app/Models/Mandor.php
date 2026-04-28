@@ -31,4 +31,9 @@ class Mandor extends Model
                     ->where('status_proyek', 'Pengalokasian Mandor');
         // Ganti status sesuai flow kamu saat mandor sudah diassign
     }
+
+    public function penawaranRenovasi()
+    {
+        return $this->hasMany(PenawaranRenovasi::class, 'mandor_id');
+    }
 }

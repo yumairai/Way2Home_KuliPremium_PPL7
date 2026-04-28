@@ -38,4 +38,9 @@ class User extends Authenticatable
     {
         return $this->hasOne(Customer::class, 'user_id');
     }
+
+    public function mandor()
+    {
+        return $this->hasOne(Mandor::class, 'user_id');
+    }
 }

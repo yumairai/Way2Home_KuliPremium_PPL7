@@ -8,8 +8,10 @@ use App\Http\Controllers\Customer\CartController;
 use App\Http\Controllers\Customer\PreferensiController;
 use App\Http\Controllers\Customer\PaymentMaterialController;
 use App\Http\Controllers\Customer\PaymentProyekController;
+use App\Http\Controllers\Customer\RenovasiController as CustomerRenovasiController;
 use App\Http\Controllers\Admin\VerifikasiProyekController;
 use App\Http\Controllers\Admin\ManageMandorController;
+use App\Http\Controllers\Mandor\RenovasiController as MandorRenovasiController;
 
 
 /*
@@ -52,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard & Logout
     Route::get('/dashboard', function () {
+        if (auth()->user()?->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
         return view('customer-layouts.dashboard');
     })->name('customer-layouts.dashboard');
 
@@ -72,28 +77,22 @@ Route::middleware(['auth'])->group(function () {
         return view('customer-layouts.form_pembangunan_rumah');
     })->name('proyek.form');
 
-    // FItur renovasi
-    Route::get('/renovation', function () {
-        return view('customer-layouts.renovation');
-    })->name('customer.renovation');
-
-    Route::get('/renovation-form', function () {
-        return view('customer-layouts.renovation_form');
-    })->name('customer.renovation_form');
+    // Fitur renovasi
+    Route::get('/renovation', [CustomerRenovasiController::class, 'index'])->name('customer.renovation');
+    Route::get('/renovation-form', [CustomerRenovasiController::class, 'create'])->name('customer.renovation_form');
+    Route::post('/renovation', [CustomerRenovasiController::class, 'store'])->name('customer.renovation.store');
+    Route::post('/renovation/{requestRenovasi}/accept-offer', [CustomerRenovasiController::class, 'acceptOffer'])
+        ->name('customer.renovation.accept');
+    Route::post('/renovation/{requestRenovasi}/negotiate', [CustomerRenovasiController::class, 'negotiate'])
+        ->name('customer.renovation.negotiate');
+    Route::post('/renovation/{requestRenovasi}/reject-offer', [CustomerRenovasiController::class, 'rejectOffer'])
+        ->name('customer.renovation.reject');
 
     // Fitur order history
     Route::get('/order', function () {
         return view('customer-layouts.order');
     })->name('customer.order');
     Route::get('/recommendation/result', [PreferensiController::class, 'result']);
-
-    Route::get('/renovation', function () {
-        return view('customer-layouts.renovation');
-    })->name('customer.renovation');
-
-    Route::get('/renovation-form', function () {
-        return view('customer-layouts.renovation_form');
-    })->name('customer.renovation_form');
 
     Route::get('/house-build-form', [ProyekController::class, 'create'])->name('proyek.form_bangun');
 
@@ -183,10 +182,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
 
 // nanti buatkan auth middleware khusus mandor, biar bisa akses route mandor ini, sekarang sementara dibiarkan aja untuk testing
-Route::get('/mandor/tracking', function () {
-    return view('mandor.mandor_tracking');
-})->name('mandor.tracking');
-
-Route::get('/mandor/dashboard', function () {
-    return view('mandor.mandor_dashboard');
-})->name('mandor.dashboard');
+Route::get('/mandor/tracking', [MandorRenovasiController::class, 'tracking'])->name('mandor.tracking');
+Route::post('/mandor/renovation/{requestRenovasi}/done', [MandorRenovasiController::class, 'markDone'])
+    ->name('mandor.renovation.done');
+Route::get('/mandor/dashboard', [MandorRenovasiController::class, 'dashboard'])->name('mandor.dashboard');
+Route::post('/mandor/renovation/{requestRenovasi}/offer', [MandorRenovasiController::class, 'submitOffer'])
+    ->name('mandor.renovation.offer');

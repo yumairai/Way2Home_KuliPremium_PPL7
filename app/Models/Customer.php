@@ -26,4 +26,9 @@ class Customer extends Model
     {
         return $this->hasMany(Proyek::class, 'customer_id');
     }
+
+    public function requestRenovasi()
+    {
+        return $this->hasMany(RequestRenovasi::class, 'customer_id');
+    }
 }
