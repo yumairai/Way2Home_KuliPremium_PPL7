@@ -85,10 +85,10 @@
                                         data-documents="{{ json_encode(
                                             $dokumen->map(function ($d) {
                                                 return [
-                                                    'id' => $d->id,
-                                                    'nama_dokumen' => $d->jenis_dokumen,
-                                                    'file_url' => asset('storage/' . $d->file_path),
-                                                    'status_verifikasi' => $d->status_verifikasi,
+                                                    'id'                 => $d->id,
+                                                    'nama_dokumen'       => $d->jenis_dokumen,
+                                                    'file_url'           => $d->signed_url,  // ← ubah ini
+                                                    'status_verifikasi'  => $d->status_verifikasi,
                                                 ];
                                             }),
                                         ) }}">

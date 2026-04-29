@@ -11,15 +11,43 @@ use Illuminate\Support\Facades\DB;
 class VerifikasiProyekController extends Controller
 {
 
-    public function index()
+    public function index(\App\Services\SupabaseStorageService $storageService)
     {
         $proyek = Proyek::with(['customer.user', 'detailBangun.dokumenProyek'])->get();
+
+        // Generate signed URL untuk semua dokumen di semua proyek
+        foreach ($proyek as $item) {
+            $paths = $item->detailBangun->dokumenProyek->pluck('file_path')->toArray();
+
+            if (!empty($paths)) {
+                $signedUrls = $storageService->getAdminSignedUrls($paths);
+
+                $item->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
+                    $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                    return $dokumen;
+                });
+            }
+        }
+
         return view('admin.verifikasi_dokumen', compact('proyek'));
     }
 
-    public function show($id)
+    public function show($id, \App\Services\SupabaseStorageService $storageService)
     {
         $proyek = Proyek::with(['customer.user', 'detailBangun.dokumenProyek'])->findOrFail($id);
+
+        // Generate signed URL untuk semua dokumen sekaligus (1 request)
+        $paths = $proyek->detailBangun->dokumenProyek->pluck('file_path')->toArray();
+
+        if (!empty($paths)) {
+            $signedUrls = $storageService->getAdminSignedUrls($paths);
+
+            $proyek->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
+                $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                return $dokumen;
+            });
+        }
+
         return view('admin.verifikasi.show', compact('proyek'));
     }
 
