@@ -75,6 +75,7 @@ const AuthApp = {
         const response = await fetch('/logout', {
             method: 'POST',
             headers: {
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }
         });

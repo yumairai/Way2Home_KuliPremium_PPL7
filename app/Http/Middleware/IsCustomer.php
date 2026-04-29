@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class IsAdmin
+class IsCustomer
 {
     /**
      * Handle an incoming request.
@@ -16,10 +16,10 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role === 'admin') {
+        if (Auth::check() && Auth::user()->role === 'customer') {
             return $next($request);
         }
 
-        return redirect()->route('home')->with('error', 'Anda tidak punya akses ke halaman admin.');
+        return redirect()->route('home')->with('error', 'Anda tidak punya akses ke halaman customer.');
     }
 }

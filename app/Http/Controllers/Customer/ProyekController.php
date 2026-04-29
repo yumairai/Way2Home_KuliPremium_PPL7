@@ -73,12 +73,19 @@ class ProyekController extends Controller
             'ktp_pemilik'      => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
             'imb_pbg'          => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
             'surat_kuasa'      => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        ], [
+            'sertifikat_tanah.uploaded' => 'File Sertifikat Tanah terlalu besar. Maksimal 2 MB per file.',
+            'ktp_pemilik.uploaded' => 'File KTP Pemilik terlalu besar. Maksimal 2 MB per file.',
+            'imb_pbg.uploaded' => 'File IMB/PBG terlalu besar. Maksimal 2 MB per file.',
+            'surat_kuasa.uploaded' => 'File Surat Kuasa terlalu besar. Maksimal 2 MB per file.',
         ]);
 
         DB::beginTransaction();
 
         try {
-            $customerId = Auth::user()->customer->id;
+            $customerId = Auth::user()?->customer?->id;
+            abort_if(!$customerId, 403, 'Akun customer tidak ditemukan.');
+
             $proyek = Proyek::create([
                 'customer_id'   => $customerId,
                 'jenis_proyek' => 'Bangun Rumah',
@@ -120,7 +127,7 @@ class ProyekController extends Controller
                 'message_2' => 'Pengajuan pemesanan material berhasil dikirim!',
                 'data' => $proyek
             ], 201);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollback();
             return response()->json([
                 'status' => 'error',

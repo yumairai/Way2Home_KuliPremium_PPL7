@@ -23,10 +23,13 @@
                 @csrf
             </form>
             <button class="mandor-logout-btn" type="button"
-                onclick="event.preventDefault(); if(confirm('Yakin ingin keluar?')) { document.getElementById('mandor-logout-form').submit(); }">
+                onclick="window.W2HLogout.submit('mandor-logout-form', 'Yakin ingin keluar?')">
                 <span class="material-symbols-outlined">logout</span>
                 <span>Logout</span>
             </button>
         </div>
     </div>
 </nav>
+@push('scripts')
+    <script src="{{ asset('js/logout.js') }}"></script>
+@endpush

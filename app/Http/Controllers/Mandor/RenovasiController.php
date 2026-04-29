@@ -21,8 +21,7 @@ class RenovasiController extends Controller
     public function dashboard()
     {
         $this->renovasiService->expirePendingOffers();
-        $mandor = $this->resolveMandor();
-        abort_if(!$mandor, 403, 'Data mandor tidak ditemukan.');
+        $mandor = $this->currentMandor();
 
         $renovationRequests = RequestRenovasi::with([
             'customer.user',
@@ -36,12 +35,10 @@ class RenovasiController extends Controller
                     $offerQuery->whereIn('status_penawaran', ['pending', 'diterima']);
                 });
 
-                if ($mandor) {
-                    $query->orWhereHas('penawaran', function ($offerQuery) use ($mandor) {
-                        $offerQuery->where('mandor_id', $mandor->id)
-                            ->where('status_penawaran', 'pending');
-                    });
-                }
+                $query->orWhereHas('penawaran', function ($offerQuery) use ($mandor) {
+                    $offerQuery->where('mandor_id', $mandor->id)
+                        ->where('status_penawaran', 'pending');
+                });
             })
             ->latest()
             ->get()
@@ -114,8 +111,7 @@ class RenovasiController extends Controller
     public function submitOffer(Request $request, RequestRenovasi $requestRenovasi)
     {
         $this->renovasiService->expirePendingOffers();
-        $mandor = $this->resolveMandor();
-        abort_if(!$mandor, 403, 'Data mandor tidak ditemukan.');
+        $mandor = $this->currentMandor();
 
         $validated = $request->validate([
             'feedback' => 'required|string|min:20',
@@ -197,23 +193,20 @@ class RenovasiController extends Controller
     public function tracking()
     {
         $this->renovasiService->expirePendingOffers();
-        $mandor = $this->resolveMandor();
-        abort_if(!$mandor, 403, 'Data mandor tidak ditemukan.');
+        $mandor = $this->currentMandor();
 
         $acceptedOffer = PenawaranRenovasi::with(['requestRenovasi.customer.user', 'materialRenovasi.material'])
             ->where('mandor_id', $mandor->id)
             ->where('status_penawaran', 'diterima')
             ->whereHas('requestRenovasi', fn($query) => $query->where('status_request', '!=', 'selesai'))
             ->latest()
-            ->first()
-            ;
+            ->first();
 
         $pendingOffer = PenawaranRenovasi::with('requestRenovasi.customer.user')
             ->where('mandor_id', $mandor->id)
             ->where('status_penawaran', 'pending')
             ->latest()
-            ->first()
-            ;
+            ->first();
 
         $isHaveProject = false;
         $isHaveRenovation = (bool) ($acceptedOffer || $pendingOffer);
@@ -253,8 +246,7 @@ class RenovasiController extends Controller
 
     public function markDone(RequestRenovasi $requestRenovasi)
     {
-        $mandor = $this->resolveMandor();
-        abort_if(!$mandor, 403, 'Data mandor tidak ditemukan.');
+        $mandor = $this->currentMandor();
 
         $acceptedOffer = PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
             ->where('mandor_id', $mandor->id)
@@ -280,13 +272,13 @@ class RenovasiController extends Controller
         ]);
     }
 
-    private function resolveMandor(): ?Mandor
+    private function currentMandor(): Mandor
     {
         $user = Auth::user();
         if ($user && method_exists($user, 'mandor') && $user->mandor) {
             return $user->mandor;
         }
 
-        return null;
+        abort(403, 'Data mandor tidak ditemukan.');
     }
 }

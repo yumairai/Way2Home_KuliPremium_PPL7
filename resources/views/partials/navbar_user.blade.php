@@ -10,7 +10,8 @@
             <a href="/">Beranda</a>
             <a href="/recommendation">Desain</a>
             <a href="/material">Material</a>
-            <a href="{{ Auth::user()?->role === 'mandor' ? route('mandor.dashboard') : route('customer.renovation') }}">Renovasi</a>
+            <a
+                href="{{ Auth::user()?->role === 'mandor' ? route('mandor.dashboard') : route('customer.renovation') }}">Renovasi</a>
         </div>
         <!-- user bisa klik dropdown -->
         <div class="nav-actions">
@@ -69,7 +70,7 @@
                     </form>
 
                     <button type="button" class="dropdown-logout-btn"
-                        onclick="event.preventDefault(); if(confirm('Yakin ingin keluar?')) { document.getElementById('logout-form').submit(); }">
+                        onclick="window.W2HLogout.submit('logout-form', 'Yakin ingin keluar?')">
                         <span class="material-symbols-outlined">logout</span>
                         Logout
                     </button>
@@ -79,6 +80,7 @@
     </div>
 </nav>
 @push('scripts')
+    <script src="{{ asset('js/logout.js') }}"></script>
     <script src="{{ asset('js/dropdown.js') }}"></script>
     <script>
         // Fungsi global untuk update cart badge

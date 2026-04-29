@@ -21,10 +21,6 @@ class RenovasiController extends Controller
     {
         $this->renovasiService->expirePendingOffers();
 
-        if (Auth::user()?->role === 'mandor') {
-            return redirect()->route('mandor.dashboard');
-        }
-
         $customer = Auth::user()?->customer;
         abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
 
@@ -97,10 +93,6 @@ class RenovasiController extends Controller
 
     public function create()
     {
-        if (Auth::user()?->role === 'mandor') {
-            return redirect()->route('mandor.dashboard');
-        }
-
         $customer = Auth::user()?->customer;
         abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
 
@@ -109,48 +101,47 @@ class RenovasiController extends Controller
 
     public function store(Request $request)
     {
-        if (Auth::user()?->role === 'mandor') {
-            return redirect()->route('mandor.dashboard');
+        try {
+            $customer = Auth::user()?->customer;
+            abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
+
+            $validated = $request->validate([
+                'budget_estimasi' => 'required|integer|min:100000',
+                'deskripsi_renovasi' => 'required|string|min:20',
+                'alamat' => 'required|string|min:10',
+                'foto_detail' => 'nullable|image|max:2048',
+            ], [
+                'foto_detail.uploaded' => 'Ukuran foto kerusakan terlalu besar. Maksimal 2 MB per file.',
+                'foto_detail.image' => 'Foto kerusakan harus berupa gambar yang valid.',
+                'foto_detail.max' => 'Ukuran foto kerusakan terlalu besar. Maksimal 2 MB per file.',
+            ]);
+
+            $photoPath = $request->hasFile('foto_detail')
+                ? $request->file('foto_detail')->store('renovasi/request', 'public')
+                : null;
+
+            RequestRenovasi::create([
+                'customer_id' => $customer->id,
+                'deskripsi_renovasi' => $validated['deskripsi_renovasi'],
+                'budget_estimasi' => $validated['budget_estimasi'],
+                'alamat' => $validated['alamat'],
+                'path_foto_detail' => $photoPath,
+                'tanggal_request' => now()->toDateString(),
+                'status_request' => 'pending',
+            ]);
+
+            return redirect()
+                ->route('customer.renovation')
+                ->with('success', 'Request renovasi berhasil dikirim.');
+        } catch (\Throwable $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal mengirim request renovasi: ' . $e->getMessage());
         }
-
-        $customer = Auth::user()?->customer;
-        abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
-
-        $validated = $request->validate([
-            'budget_estimasi' => 'required|integer|min:100000',
-            'deskripsi_renovasi' => 'required|string|min:20',
-            'alamat' => 'required|string|min:10',
-            'foto_detail' => 'nullable|image|max:10240',
-        ]);
-
-        $photoPath = $request->hasFile('foto_detail')
-            ? $request->file('foto_detail')->store('renovasi/request', 'public')
-            : null;
-
-        RequestRenovasi::create([
-            'customer_id' => $customer->id,
-            'deskripsi_renovasi' => $validated['deskripsi_renovasi'],
-            'budget_estimasi' => $validated['budget_estimasi'],
-            'alamat' => $validated['alamat'],
-            'path_foto_detail' => $photoPath,
-            'tanggal_request' => now()->toDateString(),
-            'status_request' => 'pending',
-        ]);
-
-        return redirect()
-            ->route('customer.renovation')
-            ->with('success', 'Request renovasi berhasil dikirim.');
     }
 
     public function acceptOffer(RequestRenovasi $requestRenovasi)
     {
-        if (Auth::user()?->role === 'mandor') {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Akses khusus customer.',
-            ], 403);
-        }
-
         $this->renovasiService->expirePendingOffers();
 
         $customer = Auth::user()?->customer;

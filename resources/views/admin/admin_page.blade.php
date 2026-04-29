@@ -85,7 +85,7 @@
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
-            <button class="logout-button" type="button" onclick="document.getElementById('logout-form').submit()">
+            <button class="logout-button" type="button" onclick="window.W2HLogout.submit('logout-form')">
                 <span>Keluar</span>
                 <span class="material-symbols-outlined">logout</span>
             </button>
@@ -102,6 +102,7 @@
             @yield('content')
         </section>
     </main>
+    <script src="{{ asset('js/logout.js') }}"></script>
     @stack('scripts')
 </body>
 

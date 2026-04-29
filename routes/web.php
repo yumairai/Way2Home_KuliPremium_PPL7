@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Customer\ProyekController;
 use App\Http\Controllers\Customer\MaterialController;
@@ -52,92 +53,90 @@ Route::prefix('material')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard & Logout
-    Route::get('/dashboard', function () {
-        if (auth()->user()?->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        return view('customer-layouts.dashboard');
-    })->name('customer-layouts.dashboard');
-
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::middleware(['customer'])->group(function () {
+        // Dashboard & Customer Home
+        Route::get('/dashboard', function () {
+            return view('customer-layouts.dashboard');
+        })->name('customer-layouts.dashboard');
 
-    Route::post('/preferensi/simpan', [PreferensiController::class, 'store'])->name('proyek.preferensi.simpan');
+        Route::post('/preferensi/simpan', [PreferensiController::class, 'store'])->name('proyek.preferensi.simpan');
 
-    // Fitur Rekomendasi & Form Pembangunan
-    Route::get('/recommendation', function () {
-        return view('customer-layouts.input_preferensi_ai');
-    })->name('recommendation.input');
+        // Fitur Rekomendasi & Form Pembangunan
+        Route::get('/recommendation', function () {
+            return view('customer-layouts.input_preferensi_ai');
+        })->name('recommendation.input');
 
-    Route::get('/recommendation/result', function () {
-        return view('customer-layouts.rekomendasi_rumah');
-    })->name('recommendation.result');
+        Route::get('/recommendation/result', function () {
+            return view('customer-layouts.rekomendasi_rumah');
+        })->name('recommendation.result');
 
-    Route::get('/house-build-form', function () {
-        return view('customer-layouts.form_pembangunan_rumah');
-    })->name('proyek.form');
+        Route::get('/house-build-form', function () {
+            return view('customer-layouts.form_pembangunan_rumah');
+        })->name('proyek.form');
 
-    // Fitur renovasi
-    Route::get('/renovation', [CustomerRenovasiController::class, 'index'])->name('customer.renovation');
-    Route::get('/renovation-form', [CustomerRenovasiController::class, 'create'])->name('customer.renovation_form');
-    Route::post('/renovation', [CustomerRenovasiController::class, 'store'])->name('customer.renovation.store');
-    Route::post('/renovation/{requestRenovasi}/accept-offer', [CustomerRenovasiController::class, 'acceptOffer'])
-        ->name('customer.renovation.accept');
-    Route::post('/renovation/{requestRenovasi}/negotiate', [CustomerRenovasiController::class, 'negotiate'])
-        ->name('customer.renovation.negotiate');
-    Route::post('/renovation/{requestRenovasi}/reject-offer', [CustomerRenovasiController::class, 'rejectOffer'])
-        ->name('customer.renovation.reject');
+        // Fitur renovasi
+        Route::get('/renovation', [CustomerRenovasiController::class, 'index'])->name('customer.renovation');
+        Route::get('/renovation-form', [CustomerRenovasiController::class, 'create'])->name('customer.renovation_form');
+        Route::post('/renovation', [CustomerRenovasiController::class, 'store'])->name('customer.renovation.store');
+        Route::post('/renovation/{requestRenovasi}/accept-offer', [CustomerRenovasiController::class, 'acceptOffer'])
+            ->name('customer.renovation.accept');
+        Route::post('/renovation/{requestRenovasi}/negotiate', [CustomerRenovasiController::class, 'negotiate'])
+            ->name('customer.renovation.negotiate');
+        Route::post('/renovation/{requestRenovasi}/reject-offer', [CustomerRenovasiController::class, 'rejectOffer'])
+            ->name('customer.renovation.reject');
 
-    // Fitur order history
-    Route::get('/order', function () {
-        return view('customer-layouts.order');
-    })->name('customer.order');
-    Route::get('/recommendation/result', [PreferensiController::class, 'result']);
+        // Fitur order history
+        Route::get('/order', function () {
+            return view('customer-layouts.order');
+        })->name('customer.order');
+        Route::get('/recommendation/result', [PreferensiController::class, 'result']);
 
-    Route::get('/house-build-form', [ProyekController::class, 'create'])->name('proyek.form_bangun');
+        Route::get('/house-build-form', [ProyekController::class, 'create'])->name('proyek.form_bangun');
 
-    Route::prefix('project')->group(function () {
-        Route::redirect('/', '/project/1');
-        Route::get('/{id}/tracking', function () {
-            return view('customer-layouts.customer_tracking');
-        })->where('id', '[1-5]');
-        Route::get('/{id}', [ProyekController::class, 'show'])->where('id', '[1-5]');
+        Route::prefix('project')->group(function () {
+            Route::redirect('/', '/project/1');
+            Route::get('/{id}/tracking', function () {
+                return view('customer-layouts.customer_tracking');
+            })->where('id', '[1-5]');
+            Route::get('/{id}', [ProyekController::class, 'show'])->where('id', '[1-5]');
+        });
+
+        // Fitur profile
+        Route::get('/profile', function () {
+            return view('customer-layouts.profile');
+        })->name('customer.profile');
+
+        // Manajemen Proyek
+        Route::prefix('proyek')->group(function () {
+            Route::get('/', [ProyekController::class, 'index'])->name('proyek.index');
+            Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
+
+            // Action Ajax
+            Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
+            Route::post('/bayar-dp', [PaymentProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
+        });
+
+        // Material & Shopping Cart
+        Route::prefix('material')->group(function () {
+            Route::view('/cart', 'customer-layouts.cart')->name('cart.view');
+        });
+
+
+        // Operasi Keranjang (AJAX)
+        Route::prefix('cart')->group(function () {
+            Route::get('/', [CartController::class, 'index']);
+            Route::post('/add', [CartController::class, 'addToCart']);
+            Route::put('/update/{id}', [CartController::class, 'updateQuantity']);
+            Route::delete('/delete/{id}', [CartController::class, 'removeFromCart']);
+            Route::delete('/remove-material/{id}', [CartController::class, 'removeByMaterial']);
+        });
+
+        // Checkout Material
+        Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout']);
+        Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
+        Route::post('/proyek/payment-success', [PaymentProyekController::class, 'handleSuccess']);
     });
-
-    // Fitur profile
-    Route::get('/profile', function () {
-        return view('customer-layouts.profile');
-    })->name('customer.profile');
-
-    // Manajemen Proyek
-    Route::prefix('proyek')->group(function () {
-        Route::get('/', [ProyekController::class, 'index'])->name('proyek.index');
-        Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
-
-        // Action Ajax
-        Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
-        Route::post('/bayar-dp', [PaymentProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
-    });
-
-    // Material & Shopping Cart
-    Route::prefix('material')->group(function () {
-        Route::view('/cart', 'customer-layouts.cart')->name('cart.view');
-    });
-
-
-    // Operasi Keranjang (AJAX)
-    Route::prefix('cart')->group(function () {
-        Route::get('/', [CartController::class, 'index']);
-        Route::post('/add', [CartController::class, 'addToCart']);
-        Route::put('/update/{id}', [CartController::class, 'updateQuantity']);
-        Route::delete('/delete/{id}', [CartController::class, 'removeFromCart']);
-        Route::delete('/remove-material/{id}', [CartController::class, 'removeByMaterial']);
-    });
-
-    // Checkout Material
-    Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout']);
-    Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
-    Route::post('/proyek/payment-success', [PaymentProyekController::class, 'handleSuccess']);
 });
 
 /*
@@ -181,10 +180,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 });
 
 
-// nanti buatkan auth middleware khusus mandor, biar bisa akses route mandor ini, sekarang sementara dibiarkan aja untuk testing
-Route::get('/mandor/tracking', [MandorRenovasiController::class, 'tracking'])->name('mandor.tracking');
-Route::post('/mandor/renovation/{requestRenovasi}/done', [MandorRenovasiController::class, 'markDone'])
-    ->name('mandor.renovation.done');
-Route::get('/mandor/dashboard', [MandorRenovasiController::class, 'dashboard'])->name('mandor.dashboard');
-Route::post('/mandor/renovation/{requestRenovasi}/offer', [MandorRenovasiController::class, 'submitOffer'])
-    ->name('mandor.renovation.offer');
+/*
+|--------------------------------------------------------------------------
+| Mandor Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'mandor'])->prefix('mandor')->group(function () {
+    Route::get('/tracking', [MandorRenovasiController::class, 'tracking'])->name('mandor.tracking');
+    Route::post('/renovation/{requestRenovasi}/done', [MandorRenovasiController::class, 'markDone'])
+        ->name('mandor.renovation.done');
+    Route::get('/dashboard', [MandorRenovasiController::class, 'dashboard'])->name('mandor.dashboard');
+    Route::post('/renovation/{requestRenovasi}/offer', [MandorRenovasiController::class, 'submitOffer'])
+        ->name('mandor.renovation.offer');
+});

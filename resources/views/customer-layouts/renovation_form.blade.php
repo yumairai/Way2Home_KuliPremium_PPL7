@@ -16,6 +16,22 @@
                 <h1 class="rf-form-title">Form Pengajuan Renovasi</h1>
                 <p class="rf-form-subtitle">Ajukan permohonan renovasi rumah Anda dengan mudah.</p>
             </div>
+            @if (session('success'))
+                <div class="rf-form-alert rf-form-alert-success">{{ session('success') }}</div>
+            @endif
+            @if (session('error'))
+                <div class="rf-form-alert rf-form-alert-error">{{ session('error') }}</div>
+            @endif
+            @if ($errors->any())
+                <div class="rf-form-alert rf-form-alert-error">
+                    <strong>Mohon periksa kembali isian form.</strong>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <!-- The Form -->
             <form action="{{ route('customer.renovation.store') }}" method="POST" enctype="multipart/form-data"
                 class="rf-form-body">
@@ -64,28 +80,31 @@
                     <div class="rf-upload-box">
                         <span class="material-symbols-outlined rf-upload-icon" data-icon="cloud_upload">cloud_upload</span>
                         <p class="rf-upload-title">Drag and drop files or <span class="rf-upload-link">browse</span></p>
-                        <p class="rf-upload-subtitle">PNG, JPG up to 10MB</p>
+                        <p class="rf-upload-subtitle">PNG, JPG up to 2MB</p>
                         <input type="file" name="foto_detail" accept="image/png,image/jpeg,image/jpg" />
                     </div>
                     <!-- Previews -->
                     <div class="rf-preview-grid">
                         <!-- Preview -->
                         <div class="rf-preview-item">
-                            <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Preview 1" class="rf-preview-image" />
+                            <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Preview 1"
+                                class="rf-preview-image" />
                             <button class="rf-preview-remove-btn" type="button">
                                 <span class="material-symbols-outlined rf-preview-remove-icon"
                                     data-icon="close">close</span>
                             </button>
                         </div>
                         <div class="rf-preview-item">
-                            <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Preview 2" class="rf-preview-image" />
+                            <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Preview 2"
+                                class="rf-preview-image" />
                             <button class="rf-preview-remove-btn" type="button">
                                 <span class="material-symbols-outlined rf-preview-remove-icon"
                                     data-icon="close">close</span>
                             </button>
                         </div>
                         <div class="rf-preview-item">
-                            <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Preview 3" class="rf-preview-image" />
+                            <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Preview 3"
+                                class="rf-preview-image" />
                             <button class="rf-preview-remove-btn" type="button">
                                 <span class="material-symbols-outlined rf-preview-remove-icon"
                                     data-icon="close">close</span>
