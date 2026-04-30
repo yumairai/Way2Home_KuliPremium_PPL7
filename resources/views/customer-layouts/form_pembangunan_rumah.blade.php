@@ -128,10 +128,11 @@
             <div class="form-group">
                 <label class="form-label" id="label-alamat">Alamat Lengkap Proyek</label>
                 <textarea id="alamatProyek" placeholder="Masukkan alamat lengkap di wilayah Jawa Barat" rows="3"></textarea>
+                <p class="field-error" id="alamat-error" aria-live="polite"></p>
             </div>
             <!-- dokumen kebutuhan pembangunan rumah -->
             <div class="form-group" id="sectionDokumen">
-                <label class="form-label">Dokumen Pendukung</label>
+                <label class="form-label">Dokumen Pendukung (1 file Max 2MB)</label>
                 <div class="upload-grid">
                     <!-- dokumen sertif tanah -->
                     <label class="upload-item" for="sertifikat_tanah" id="drop-zone-sertifikat">
@@ -146,6 +147,7 @@
 
                         <p class="upload-title">Sertifikat Tanah (SHM/HGB)</p>
                         <p class="upload-subtitle">Pilih file atau drag & drop</p>
+                        <p class="field-error" aria-live="polite"></p>
                     </label>
 
                     <!-- dokumen ktp -->
@@ -159,6 +161,7 @@
                         </div>
                         <p class="upload-title">KTP Pemilik</p>
                         <p class="upload-subtitle" id="label-ktp">Pilih file atau drag &amp; drop</p>
+                        <p class="field-error" aria-live="polite"></p>
                     </label>
 
                     <!-- dokumen imb/pbg -->
@@ -172,6 +175,7 @@
                         </div>
                         <p class="upload-title">IMB/PBG</p>
                         <p class="upload-subtitle">Pilih file atau drag &amp; drop</p>
+                        <p class="field-error" aria-live="polite"></p>
                     </label>
 
                     <!-- dokumen surat kuasa -->
@@ -185,6 +189,7 @@
                         </div>
                         <p class="upload-title">Surat Kuasa (Jika Ada)</p>
                         <p class="upload-subtitle">Pilih file atau drag &amp; drop</p>
+                        <p class="field-error" aria-live="polite"></p>
                     </label>
                 </div>
             </div>
@@ -197,9 +202,6 @@
                     (IMB/PBG) tidak termasuk dalam cakupan layanan platform.
                 </p>
             </div>
-
-
-
             <!-- Submit Button -->
             <div class="submit-section">
                 <button type="button" class="submit-button" id="mainSubmitBtn">
