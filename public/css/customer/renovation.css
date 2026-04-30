@@ -442,8 +442,232 @@ body {
     border-radius: 0.75rem;
     padding: 1.25rem;
     margin-bottom: 1rem;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 242, 255, 0.96));
+    border: 1px solid rgba(194, 198, 213, 0.3);
+    box-shadow: 0 20px 40px rgba(14, 23, 68, 0.06);
+    backdrop-filter: blur(8px);
+}
+
+.rv-material-box .rv-material-title-wrap {
+    margin-bottom: 1rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid rgba(194, 198, 213, 0.24);
+}
+
+.rv-material-box .rv-material-label {
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+.rv-negotiation-empty {
+    margin: 0;
+    padding: 0.85rem 1rem;
+    border-radius: 0.7rem;
+    background: var(--surface-container-low);
+    color: var(--on-surface-variant);
+    border: 1px dashed rgba(114, 119, 132, 0.28);
+}
+
+.rv-negotiation-history {
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.rv-negotiation-message {
+    position: relative;
+    display: grid;
+    gap: 0.55rem;
+    padding: 0.95rem 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(194, 198, 213, 0.3);
+    box-shadow: 0 10px 24px rgba(14, 23, 68, 0.05);
+}
+
+.rv-negotiation-message-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.rv-negotiation-message-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: fit-content;
+    border-radius: 9999px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.rv-negotiation-message-time {
+    color: var(--on-surface-variant);
+    font-size: 0.76rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.rv-negotiation-message-text {
+    margin: 0;
+    color: var(--on-background);
+    line-height: 1.7;
+    white-space: pre-line;
+}
+
+.rv-negotiation-message-price {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.rv-negotiation-message-customer {
+    margin-left: auto;
+    width: min(100%, 42rem);
+    background: linear-gradient(180deg, rgba(229, 241, 255, 0.9), rgba(255, 255, 255, 0.98));
+}
+
+
+.rv-negotiation-message-customer .rv-negotiation-message-badge {
+    color: var(--primary);
+    background: rgba(4, 94, 194, 0.1);
+}
+
+.rv-negotiation-message-customer .rv-negotiation-message-price {
+    color: var(--primary-container);
+}
+
+.rv-negotiation-message-mandor {
+    margin-right: auto;
+    width: min(100%, 42rem);
+    background: linear-gradient(180deg, rgba(255, 221, 177, 0.45), rgba(255, 255, 255, 0.98));
+}
+
+.rv-negotiation-message-mandor .rv-negotiation-message-badge {
+    color: var(--tertiary);
+    background: rgba(255, 186, 74, 0.18);
+}
+
+.rv-negotiation-message-mandor .rv-negotiation-message-price {
+    color: var(--tertiary);
+}
+
+.rv-negotiation-form {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    background:
+        radial-gradient(circle at top right, rgba(4, 94, 194, 0.12), transparent 35%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(244, 242, 255, 0.96));
+    border: 1px solid rgba(4, 94, 194, 0.14);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 14px 28px rgba(14, 23, 68, 0.06);
+    display: grid;
+    gap: 0.9rem;
+}
+
+.rv-negotiation-fields {
+    display: grid;
+    gap: 0.7rem;
+}
+
+.rv-negotiation-label {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.rv-negotiation-input,
+.rv-negotiation-textarea {
+    width: 100%;
+    border: 1px solid rgba(194, 198, 213, 0.45);
+    border-radius: 0.85rem;
     background: var(--surface-container-lowest);
-    border: 2px solid rgba(0, 71, 150, 0.08);
+    box-shadow: none;
+}
+
+.rv-negotiation-input {
+    min-height: 3rem;
+    padding: 0.75rem 0.95rem;
+    font-size: 0.95rem;
+}
+
+.rv-negotiation-textarea {
+    min-height: 6.5rem;
+    padding: 0.9rem 3.2rem 0.9rem 0.95rem;
+    font-size: 0.95rem;
+    resize: vertical;
+}
+
+.rv-textarea-wrapper {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+}
+
+.rv-textarea-wrapper .rv-negotiation-textarea {
+    width: 100%;
+    flex: 1;
+}
+
+.rv-textarea-wrapper .rv-negotiation-submit {
+    position: absolute;
+    bottom: 0.6rem;
+    right: 0.6rem;
+    width: auto;
+    padding: 0.5rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-container));
+    color: var(--on-primary);
+    border: none;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(4, 94, 194, 0.15);
+}
+
+.rv-textarea-wrapper .rv-negotiation-submit:hover {
+    transform: scale(1.01);
+    background-color: #001a40;
+    box-shadow: 0 8px 20px rgba(4, 94, 194, 0.25);
+}
+
+.rv-textarea-wrapper .rv-negotiation-submit:active {
+    transform: scale(0.95);
+}
+
+.rv-textarea-wrapper .rv-negotiation-submit-icon {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.rv-negotiation-input:focus,
+.rv-negotiation-textarea:focus {
+    border-color: rgba(0, 71, 150, 0.55);
+    box-shadow: 0 0 0 3px rgba(0, 71, 150, 0.12);
+    outline: 0;
+}
+
+.rv-material-box .rv-material-content {
+    padding: 0.85rem 0;
+    margin-bottom: 0;
+}
+
+.rv-material-box .rv-material-content:first-of-type {
+    padding-top: 0;
+}
+
+.rv-material-box .rv-material-content:last-of-type {
+    padding-bottom: 0;
 }
 
 .rv-material-details {
@@ -854,6 +1078,20 @@ body {
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
+    .rv-negotiation-form {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+    }
+
+    .rv-negotiation-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .rv-negotiation-submit {
+        width: auto;
+        min-width: 10rem;
+    }
+
     .rv-budget-box {
         flex-direction: row;
     }
@@ -895,5 +1133,16 @@ body {
 
     .rv-modal-main-photo {
         height: 13rem;
+    }
+
+    .rv-textarea-wrapper .rv-negotiation-submit {
+        bottom: 0.5rem;
+        right: 0.5rem;
+        padding: 0.45rem 0.5rem;
+        font-size: 1rem;
+    }
+
+    .rv-textarea-wrapper .rv-negotiation-submit-icon {
+        font-size: 1.1rem;
     }
 }

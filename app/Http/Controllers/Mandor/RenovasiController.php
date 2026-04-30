@@ -189,6 +189,74 @@ class RenovasiController extends Controller
         ]);
     }
 
+    public function negotiate(Request $request, RequestRenovasi $requestRenovasi)
+    {
+        $this->renovasiService->expirePendingOffers();
+        $mandor = $this->currentMandor();
+
+        $validated = $request->validate([
+            'pesan' => 'required|string|min:5',
+            'estimasi_biaya' => 'required|integer|min:100000',
+            'materials' => 'required|array|min:1',
+            'materials.*.material_id' => 'required|exists:materials,id',
+            'materials.*.jumlah' => 'required|integer|min:1',
+        ]);
+
+        $offer = PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
+            ->where('mandor_id', $mandor->id)
+            ->latest()
+            ->first();
+
+        if (!$offer) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Penawaran renovasi untuk request ini belum tersedia.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($validated, $requestRenovasi, $mandor, $offer) {
+            $offer->update([
+                'estimasi_biaya' => $validated['estimasi_biaya'],
+            ]);
+
+            MaterialRenovasi::where('penawaran_renovasi_id', $offer->id)->delete();
+
+            foreach ($validated['materials'] as $materialInput) {
+                $material = Material::find($materialInput['material_id']);
+                if (!$material) {
+                    continue;
+                }
+
+                MaterialRenovasi::create([
+                    'penawaran_renovasi_id' => $offer->id,
+                    'material_id' => $material->id,
+                    'jumlah' => $materialInput['jumlah'],
+                    'satuan' => $material->satuan,
+                ]);
+            }
+
+            NegosiasiRenovasi::create([
+                'request_renovasi_id' => $requestRenovasi->id,
+                'penawaran_renovasi_id' => $offer->id,
+                'pengirim' => 'mandor',
+                'tipe' => 'tanggapan',
+                'pesan' => $validated['pesan'],
+                'nominal_tawaran' => $validated['estimasi_biaya'],
+            ]);
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Negosiasi berhasil dikirim.',
+            'negotiation' => [
+                'pengirim' => 'mandor',
+                'pesan' => $validated['pesan'],
+                'nominal_tawaran' => $this->renovasiService->formatRupiah((int) $validated['estimasi_biaya']),
+                'waktu' => now()->format('d M Y H:i'),
+            ],
+        ]);
+    }
+
     public function tracking()
     {
         $this->renovasiService->expirePendingOffers();

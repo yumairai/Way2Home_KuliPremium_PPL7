@@ -131,9 +131,23 @@
                 </div>
 
                 <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Feedback Mandor</span>
+                    <div class="dashboard-review-note dashboard-review-feedback-wrap">
+                        <textarea class="dashboard-review-feedback-readonly" readonly placeholder="Feedback mandor akan tampil di sini."></textarea>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-block">
                     <span class="dashboard-review-label">Riwayat Negosiasi Customer</span>
                     <div class="dashboard-review-note">
                         <div id="dashboard-review-negotiation-list"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Balas Negosiasi</span>
+                    <div class="dashboard-review-note dashboard-review-negotiation-compose">
+                        <textarea class="dashboard-review-negotiation-message" placeholder="Tulis balasan negosiasi untuk customer..."></textarea>
                     </div>
                 </div>
 
@@ -143,21 +157,32 @@
                     <div class="dashboard-review-gallery" id="dashboard-review-gallery">
                     </div>
                 </div>
-                <div class="dashboard-review-block">
-                    <span class="dashboard-review-label">Feedback Mandor</span>
-                    <div class="dashboard-review-note">
-                        <textarea class="dashboard-review-feedback"
-                            placeholder="Tulis feedback dan material yang dibutuhkan secara lengkap untuk renovasi klien..."></textarea>
-                    </div>
-                </div>
 
                 <div class="dashboard-review-block">
                     <span class="dashboard-review-label">Material Renovasi</span>
                     <div class="dashboard-review-material-wrap">
-                        <div class="dashboard-review-material-list" id="dashboard-review-material-list"></div>
-                        <div class="dashboard-review-material-total">
-                            <p class="dashboard-review-material-total-label">Total Harga Material</p>
-                            <p class="dashboard-review-material-total-value" id="dashboard-review-material-total">Rp 0</p>
+                        <div class="dashboard-review-material-panel dashboard-review-material-panel-left">
+                            <label class="dashboard-review-material-search-label"
+                                for="dashboard-review-material-search">Cari
+                                Material</label>
+                            <input class="dashboard-review-material-search" id="dashboard-review-material-search"
+                                type="text" placeholder="Cari nama material..." autocomplete="off" />
+                            <div class="dashboard-review-material-source-list" id="dashboard-review-material-source-list">
+                            </div>
+                        </div>
+                        <div class="dashboard-review-material-panel dashboard-review-material-panel-right">
+                            <p class="dashboard-review-material-selected-title">Material Dipilih</p>
+                            <p class="dashboard-review-material-empty" id="dashboard-review-material-empty">Belum ada
+                                material
+                                ditambah</p>
+                            <div class="dashboard-review-material-selected-list"
+                                id="dashboard-review-material-selected-list">
+                            </div>
+                            <div class="dashboard-review-material-total">
+                                <p class="dashboard-review-material-total-label">Total Harga Material</p>
+                                <p class="dashboard-review-material-total-value" id="dashboard-review-material-total">Rp 0
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -176,7 +201,12 @@
 
                 <div class="dashboard-review-actions">
                     <button class="dashboard-review-action-btn dashboard-review-action-btn-primary" type="button"
-                        data-tracking-url="{{ route('mandor.tracking') }}" id="dashboard-review-take-btn">
+                        id="dashboard-review-negotiate-btn">
+                        Kirim Negosiasi
+                    </button>
+                    <button class="dashboard-review-action-btn dashboard-review-action-btn-secondary" type="button"
+                        data-tracking-url="{{ route('mandor.tracking') }}" id="dashboard-review-take-btn" disabled
+                        aria-disabled="true">
                         Ambil Renovasi
                     </button>
                 </div>

@@ -190,6 +190,8 @@ Route::middleware(['auth', 'mandor'])->prefix('mandor')->group(function () {
     Route::post('/renovation/{requestRenovasi}/done', [MandorRenovasiController::class, 'markDone'])
         ->name('mandor.renovation.done');
     Route::get('/dashboard', [MandorRenovasiController::class, 'dashboard'])->name('mandor.dashboard');
+    Route::post('/renovation/{requestRenovasi}/negotiate', [MandorRenovasiController::class, 'negotiate'])
+        ->name('mandor.renovation.negotiate');
     Route::post('/renovation/{requestRenovasi}/offer', [MandorRenovasiController::class, 'submitOffer'])
         ->name('mandor.renovation.offer');
 });

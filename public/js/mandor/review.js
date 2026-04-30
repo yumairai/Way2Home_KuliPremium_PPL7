@@ -11,21 +11,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const openButtons = document.querySelectorAll('[data-review-open]');
     const closeButtons = modal.querySelectorAll('[data-review-close]');
-    const feedbackInput = modal.querySelector('.dashboard-review-feedback');
+    const negotiationMessageInput = modal.querySelector('.dashboard-review-negotiation-message');
     const costInput = modal.querySelector('#dashboard-review-cost');
+    const negotiateButton = modal.querySelector('#dashboard-review-negotiate-btn');
     const takeRenovationButton = modal.querySelector('#dashboard-review-take-btn');
+    const feedbackInput = modal.querySelector('.dashboard-review-feedback-readonly');
     const requestIdEl = modal.querySelector('#dashboard-review-request-id');
     const applicantEl = modal.querySelector('#dashboard-review-applicant');
     const locationEl = modal.querySelector('#dashboard-review-location');
     const descriptionEl = modal.querySelector('#dashboard-review-description');
     const photoCountEl = modal.querySelector('#dashboard-review-photo-count');
     const galleryEl = modal.querySelector('#dashboard-review-gallery');
-    const materialListEl = modal.querySelector('#dashboard-review-material-list');
+    const materialSearchInput = modal.querySelector('#dashboard-review-material-search');
+    const materialSourceListEl = modal.querySelector('#dashboard-review-material-source-list');
+    const materialSelectedListEl = modal.querySelector('#dashboard-review-material-selected-list');
+    const materialEmptyEl = modal.querySelector('#dashboard-review-material-empty');
     const materialTotalEl = modal.querySelector('#dashboard-review-material-total');
     const negotiationListEl = modal.querySelector('#dashboard-review-negotiation-list');
     const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
     let lastTrigger = null;
     let selectedRequestId = null;
+    let selectedRequestDbId = null;
     const selectedMaterialQty = {};
 
     const formatRupiah = (value) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
@@ -43,6 +49,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json().catch(() => ({}));
             return { ok: response.ok, data };
         });
+
+    const buildNegotiationItem = (message) => {
+        const sender = message.pengirim === 'mandor' ? 'Mandor' : 'Customer';
+        const nominal = message.nominal_tawaran
+            ? `<p class="dashboard-review-material-price">Nominal: ${message.nominal_tawaran}</p>`
+            : '';
+        const time = message.waktu ? `<p class="dashboard-review-material-meta">${message.waktu}</p>` : '';
+
+        return `
+            <div class="dashboard-review-material-item">
+                <div class="dashboard-review-material-main">
+                    <p class="dashboard-review-material-name">${sender}</p>
+                    ${time}
+                    <p class="dashboard-review-material-meta">${message.pesan || '-'}</p>
+                    ${nominal}
+                </div>
+            </div>
+        `;
+    };
 
     const getMaterialSummary = () => {
         const selectedMaterials = materialCatalog
@@ -67,16 +92,81 @@ document.addEventListener('DOMContentLoaded', () => {
         return { selectedMaterials, total, itemCount };
     };
 
-    const renderMaterialList = () => {
-        if (!materialListEl) {
+    const getMaterialSearchQuery = () =>
+        materialSearchInput instanceof HTMLInputElement
+            ? materialSearchInput.value.trim().toLowerCase()
+            : '';
+
+    const getFilteredMaterials = () => {
+        const query = getMaterialSearchQuery();
+
+        if (!query) {
+            return materialCatalog.slice(0, 3);
+        }
+
+        return materialCatalog.filter((material) => {
+            const name = String(material.nama_material || '').toLowerCase();
+            const description = String(material.deskripsi || '').toLowerCase();
+            const category = String(material.kategori || '').toLowerCase();
+            return name.includes(query) || description.includes(query) || category.includes(query);
+        });
+    };
+
+    const renderMaterialSourceList = () => {
+        if (!materialSourceListEl) {
             return;
         }
 
-        materialListEl.innerHTML = '';
+        const filteredMaterials = getFilteredMaterials();
+        materialSourceListEl.innerHTML = '';
 
-        materialCatalog.forEach((material) => {
+        if (!filteredMaterials.length) {
+            materialSourceListEl.innerHTML =
+                '<p class="dashboard-review-material-not-found">Material tidak ditemukan.</p>';
+            return;
+        }
+
+        filteredMaterials.forEach((material) => {
             const qty = Number(selectedMaterialQty[material.id] || 0);
+            const itemEl = document.createElement('button');
+            itemEl.type = 'button';
+            itemEl.className = `dashboard-review-material-source-item${qty > 0 ? ' is-selected' : ''}`;
+            itemEl.dataset.materialPick = String(material.id);
+            itemEl.innerHTML = `
+                <div class="dashboard-review-material-main">
+                    <p class="dashboard-review-material-name">${material.nama_material || '-'}</p>
+                    <p class="dashboard-review-material-meta">${material.deskripsi || '-'}</p>
+                    <p class="dashboard-review-material-price">${formatRupiah(material.harga || 0)} / ${material.satuan || '-'}</p>
+                </div>
+                <span class="dashboard-review-material-source-badge">${qty > 0 ? 'Dipilih' : 'Tambah'}</span>
+            `;
 
+            materialSourceListEl.appendChild(itemEl);
+        });
+    };
+
+    const renderSelectedMaterialList = () => {
+        if (!materialSelectedListEl) {
+            return;
+        }
+
+        const { selectedMaterials } = getMaterialSummary();
+        materialSelectedListEl.innerHTML = '';
+
+        if (!selectedMaterials.length) {
+            if (materialEmptyEl) {
+                materialEmptyEl.hidden = false;
+            }
+            materialSelectedListEl.hidden = true;
+            return;
+        }
+
+        if (materialEmptyEl) {
+            materialEmptyEl.hidden = true;
+        }
+        materialSelectedListEl.hidden = false;
+
+        selectedMaterials.forEach((material) => {
             const itemEl = document.createElement('div');
             itemEl.className = 'dashboard-review-material-item';
 
@@ -84,22 +174,28 @@ document.addEventListener('DOMContentLoaded', () => {
             metaEl.className = 'dashboard-review-material-main';
             metaEl.innerHTML = `
                 <p class="dashboard-review-material-name">${material.nama_material || '-'}</p>
-                <p class="dashboard-review-material-meta">${material.deskripsi || '-'}</p>
-                <p class="dashboard-review-material-price">Harga: ${formatRupiah(material.harga || 0)} / ${material.satuan || '-'}</p>
+                <p class="dashboard-review-material-price">${formatRupiah(material.harga || 0)} / ${material.satuan || '-'}</p>
+                <p class="dashboard-review-material-meta">Subtotal: ${formatRupiah(material.subtotal || 0)}</p>
             `;
 
             const counterEl = document.createElement('div');
             counterEl.className = 'dashboard-review-material-counter';
             counterEl.innerHTML = `
                 <button type="button" class="dashboard-review-material-counter-btn" data-material-action="decrease" data-material-id="${material.id}">-</button>
-                <span class="dashboard-review-material-counter-value" data-material-qty="${material.id}">${qty}</span>
+                <span class="dashboard-review-material-counter-value" data-material-qty="${material.id}">${material.qty}</span>
                 <button type="button" class="dashboard-review-material-counter-btn" data-material-action="increase" data-material-id="${material.id}">+</button>
             `;
 
             itemEl.appendChild(metaEl);
             itemEl.appendChild(counterEl);
-            materialListEl.appendChild(itemEl);
+            materialSelectedListEl.appendChild(itemEl);
         });
+    };
+
+    const refreshMaterialUI = () => {
+        renderMaterialSourceList();
+        renderSelectedMaterialList();
+        updateMaterialTotals();
     };
 
     const updateMaterialTotals = () => {
@@ -109,15 +205,19 @@ document.addEventListener('DOMContentLoaded', () => {
             materialTotalEl.textContent = formatRupiah(total);
         }
 
-        updateTakeRenovationButtonState();
+        updateActionButtonsState();
     };
 
     const resetMaterialSelection = () => {
         materialCatalog.forEach((material) => {
             selectedMaterialQty[material.id] = 0;
         });
-        renderMaterialList();
-        updateMaterialTotals();
+
+        if (materialSearchInput instanceof HTMLInputElement) {
+            materialSearchInput.value = '';
+        }
+
+        refreshMaterialUI();
     };
 
     const renderNegotiationList = (messages) => {
@@ -132,22 +232,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         negotiationListEl.innerHTML = safeMessages
-            .map((message) => {
-                const sender = message.pengirim === 'customer' ? 'Customer' : 'Mandor';
-                const nominal = message.nominal_tawaran ? `<p class="dashboard-review-material-price">Nominal: ${message.nominal_tawaran}</p>` : '';
-                const time = message.waktu ? `<p class="dashboard-review-material-meta">${message.waktu}</p>` : '';
-                return `
-                    <div class="dashboard-review-material-item">
-                        <div class="dashboard-review-material-main">
-                            <p class="dashboard-review-material-name">${sender}</p>
-                            ${time}
-                            <p class="dashboard-review-material-meta">${message.pesan || '-'}</p>
-                            ${nominal}
-                        </div>
-                    </div>
-                `;
-            })
+            .map((message) => buildNegotiationItem(message))
             .join('');
+    };
+
+    const appendNegotiationMessage = (message) => {
+        if (!negotiationListEl) {
+            return;
+        }
+
+        const emptyState = negotiationListEl.querySelector('p');
+        if (emptyState && negotiationListEl.childElementCount === 1) {
+            negotiationListEl.innerHTML = '';
+        }
+
+        negotiationListEl.insertAdjacentHTML('beforeend', buildNegotiationItem(message));
     };
 
     const populateModal = (requestId) => {
@@ -158,6 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         selectedRequestId = request.id;
+        selectedRequestDbId = request.db_id ? String(request.db_id) : null;
 
         if (requestIdEl) {
             requestIdEl.textContent = `#${request.id}`;
@@ -173,6 +273,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (descriptionEl) {
             descriptionEl.textContent = request.description || '-';
+        }
+
+        if (feedbackInput instanceof HTMLTextAreaElement) {
+            feedbackInput.value = request.existing_offer_feedback || 'Belum ada feedback mandor.';
         }
 
         const photos = Array.isArray(request.photos) ? request.photos : [];
@@ -197,8 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        if (feedbackInput instanceof HTMLTextAreaElement) {
-            feedbackInput.value = request.existing_offer_feedback || '';
+        if (negotiationMessageInput instanceof HTMLTextAreaElement) {
+            negotiationMessageInput.value = '';
         }
 
         if (costInput instanceof HTMLInputElement) {
@@ -206,8 +310,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (takeRenovationButton instanceof HTMLButtonElement) {
+            takeRenovationButton.disabled = true;
+            takeRenovationButton.setAttribute('aria-disabled', 'true');
             takeRenovationButton.dataset.requestId = request.id;
             takeRenovationButton.dataset.requestDbId = String(request.db_id || '');
+        }
+
+        if (negotiateButton instanceof HTMLButtonElement) {
+            negotiateButton.dataset.requestId = request.id;
+            negotiateButton.dataset.requestDbId = String(request.db_id || '');
         }
 
         resetMaterialSelection();
@@ -218,28 +329,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 selectedMaterialQty[String(item.material_id)] = Number(item.jumlah || 0);
             });
-            renderMaterialList();
-            updateMaterialTotals();
+            refreshMaterialUI();
         }
         renderNegotiationList(request.negotiation_messages);
-        updateTakeRenovationButtonState();
+        updateActionButtonsState();
     };
 
-    const updateTakeRenovationButtonState = () => {
-        if (!(takeRenovationButton instanceof HTMLButtonElement)) {
+    const updateActionButtonsState = () => {
+        if (takeRenovationButton instanceof HTMLButtonElement) {
+            takeRenovationButton.disabled = true;
+            takeRenovationButton.setAttribute('aria-disabled', 'true');
+        }
+
+        if (!(negotiateButton instanceof HTMLButtonElement)) {
             return;
         }
 
-        const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
+        const messageValue = negotiationMessageInput instanceof HTMLTextAreaElement ? negotiationMessageInput.value.trim() : '';
         const costValue = costInput instanceof HTMLInputElement ? costInput.value.trim() : '';
         const isCostValid = Number(costValue) > 0;
         const { itemCount } = getMaterialSummary();
         const hasMaterialSelected = itemCount > 0;
-        const hasRequestSelected = typeof selectedRequestId === 'string' && selectedRequestId.length > 0;
-        const isFormComplete = feedbackValue.length > 0 && isCostValid && hasMaterialSelected && hasRequestSelected;
+        const hasRequestSelected = typeof selectedRequestDbId === 'string' && selectedRequestDbId.length > 0;
+        const isFormComplete = messageValue.length > 0 && isCostValid && hasMaterialSelected && hasRequestSelected;
 
-        takeRenovationButton.disabled = !isFormComplete;
-        takeRenovationButton.setAttribute('aria-disabled', String(!isFormComplete));
+        negotiateButton.disabled = !isFormComplete;
+        negotiateButton.setAttribute('aria-disabled', String(!isFormComplete));
     };
 
     const setModalState = (isOpen) => {
@@ -285,34 +400,38 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', closeModal);
     });
 
-    if (feedbackInput instanceof HTMLTextAreaElement) {
-        feedbackInput.addEventListener('input', updateTakeRenovationButtonState);
-    }
-
     if (costInput instanceof HTMLInputElement) {
-        costInput.addEventListener('input', updateTakeRenovationButtonState);
+        costInput.addEventListener('input', updateActionButtonsState);
     }
 
-    if (takeRenovationButton instanceof HTMLButtonElement) {
-        takeRenovationButton.addEventListener('click', async () => {
-            const requestId = takeRenovationButton.dataset.requestId;
-            const requestDbId = takeRenovationButton.dataset.requestDbId;
+    if (negotiationMessageInput instanceof HTMLTextAreaElement) {
+        negotiationMessageInput.addEventListener('input', updateActionButtonsState);
+    }
+
+    if (negotiateButton instanceof HTMLButtonElement) {
+        negotiateButton.addEventListener('click', async () => {
+            const requestId = negotiateButton.dataset.requestId;
+            const requestDbId = negotiateButton.dataset.requestDbId;
             const mandorCost = Number(costInput instanceof HTMLInputElement ? costInput.value : 0);
-            const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
+            const negotiationMessage = negotiationMessageInput instanceof HTMLTextAreaElement ? negotiationMessageInput.value.trim() : '';
             const { selectedMaterials, total: materialTotal } = getMaterialSummary();
 
             if (!requestId || !requestDbId) {
                 return;
             }
 
-            const materialLines = selectedMaterials.map((material) => {
-                return `- ${material.nama_material}: ${material.qty} ${material.satuan} (${formatRupiah(material.subtotal)})`;
-            });
+            if (!negotiationMessage) {
+                alert('Pesan negosiasi tidak boleh kosong.');
+                return;
+            }
 
-            const grandTotal = materialTotal + mandorCost;
+            if (!selectedMaterials.length || mandorCost <= 0) {
+                alert('Pilih material dan isi nominal renovasi terlebih dahulu.');
+                return;
+            }
 
             const payload = {
-                feedback: feedbackValue,
+                pesan: negotiationMessage,
                 estimasi_biaya: mandorCost,
                 materials: selectedMaterials.map((material) => ({
                     material_id: Number(material.id),
@@ -320,32 +439,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 })),
             };
 
-            const result = await postJson(`/mandor/renovation/${requestDbId}/offer`, payload);
+            const result = await postJson(`/mandor/renovation/${requestDbId}/negotiate`, payload);
 
             if (!result.ok) {
-                alert(result.data.message || 'Gagal menyimpan penawaran renovasi.');
+                alert(result.data.message || 'Gagal mengirim negosiasi.');
                 return;
             }
 
-            const messageLines = [
-                `Ringkasan Biaya untuk #${requestId}`,
-                '',
-                'Material:',
-                ...(materialLines.length ? materialLines : ['- Belum ada material']),
-                `Total Material: ${formatRupiah(materialTotal)}`,
-                `Biaya Renovasi Mandor: ${formatRupiah(mandorCost)}`,
-                `Total Keseluruhan: ${formatRupiah(grandTotal)}`,
-                '',
-                result.data.message || 'Penawaran berhasil dikirim.',
-            ];
+            const createdMessage = result.data.negotiation || {
+                pengirim: 'mandor',
+                pesan: negotiationMessage,
+                nominal_tawaran: formatRupiah(mandorCost),
+                waktu: result.data.waktu || '',
+            };
 
-            alert(messageLines.join('\n'));
-            window.location.href = takeRenovationButton.dataset.trackingUrl || '/mandor/tracking';
+            appendNegotiationMessage(createdMessage);
+            if (negotiationMessageInput instanceof HTMLTextAreaElement) {
+                negotiationMessageInput.value = '';
+            }
+            updateActionButtonsState();
+            alert(result.data.message || 'Negosiasi berhasil dikirim.');
         });
     }
 
-    if (materialListEl) {
-        materialListEl.addEventListener('click', (event) => {
+    if (materialSearchInput instanceof HTMLInputElement) {
+        materialSearchInput.addEventListener('input', renderMaterialSourceList);
+    }
+
+    if (materialSourceListEl) {
+        materialSourceListEl.addEventListener('click', (event) => {
+            const button = event.target.closest('[data-material-pick]');
+            if (!button) {
+                return;
+            }
+
+            const materialId = button.getAttribute('data-material-pick');
+            if (!materialId || !(materialId in selectedMaterialQty)) {
+                return;
+            }
+
+            if (Number(selectedMaterialQty[materialId] || 0) <= 0) {
+                selectedMaterialQty[materialId] = 1;
+            }
+
+            refreshMaterialUI();
+        });
+    }
+
+    if (materialSelectedListEl) {
+        materialSelectedListEl.addEventListener('click', (event) => {
             const button = event.target.closest('[data-material-action]');
             if (!button) {
                 return;
@@ -368,18 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedMaterialQty[materialId] = Math.max(0, currentQty - 1);
             }
 
-            const qtyEl = materialListEl.querySelector(`[data-material-qty="${materialId}"]`);
-            if (qtyEl) {
-                qtyEl.textContent = String(selectedMaterialQty[materialId]);
-            }
-
-            updateMaterialTotals();
+            refreshMaterialUI();
         });
     }
 
-    renderMaterialList();
+    renderMaterialSourceList();
     resetMaterialSelection();
-    updateTakeRenovationButtonState();
+    updateActionButtonsState();
 
     modal.addEventListener('click', (event) => {
         if (event.target === modal || event.target.hasAttribute('data-review-close')) {
