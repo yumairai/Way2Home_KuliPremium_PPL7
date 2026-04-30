@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('request_renovasi', function (Blueprint $table) 
-        {
+        Schema::create('request_renovasi', function (Blueprint $table) {
             $table->id();
             $table->foreignId('customer_id')->constrained('customers')->cascadeOnDelete();
             $table->text('deskripsi_renovasi');
             $table->bigInteger('budget_estimasi');
-            $table->string('path_foto_detail')->nullable();
+            $table->text('path_foto_detail')->nullable();
             $table->text('alamat');
             $table->enum('status_request', ['pending', 'disetujui', 'ditolak', 'selesai'])->default('pending');
             $table->date('tanggal_request');

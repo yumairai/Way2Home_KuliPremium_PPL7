@@ -28,6 +28,34 @@ class RequestRenovasi extends Model
         ];
     }
 
+    public function getFotoDetailPaths(): array
+    {
+        $rawValue = $this->path_foto_detail;
+
+        if (blank($rawValue)) {
+            return [];
+        }
+
+        if (is_array($rawValue)) {
+            return array_values(array_filter($rawValue));
+        }
+
+        $decodedValue = json_decode($rawValue, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decodedValue)) {
+            return array_values(array_filter($decodedValue));
+        }
+
+        return [$rawValue];
+    }
+
+    public function getFotoDetailUrls(): array
+    {
+        return array_map(
+            fn(string $path) => asset('storage/' . $path),
+            $this->getFotoDetailPaths()
+        );
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');

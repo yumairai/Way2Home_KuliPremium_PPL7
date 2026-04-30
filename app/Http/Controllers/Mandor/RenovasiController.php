@@ -53,9 +53,8 @@ class RenovasiController extends Controller
                     'phone' => $request->customer?->user?->phone_number ?? '-',
                     'location' => $request->alamat,
                     'description' => $request->deskripsi_renovasi,
-                    'photos' => $request->path_foto_detail
-                        ? [asset('storage/' . $request->path_foto_detail)]
-                        : [asset('images/aset/user-dummy.jpg')],
+                    'photos' => $request->getFotoDetailUrls()
+                        ?: [asset('images/aset/user-dummy.jpg')],
                     'existing_offer_cost' => $currentOffer ? (int) $currentOffer->estimasi_biaya : 0,
                     'existing_offer_feedback' => $currentOffer?->analisis_dari_mandor,
                     'existing_offer_materials' => $offerMaterials->map(fn($item) => [
@@ -229,9 +228,8 @@ class RenovasiController extends Controller
                 'tanggal_mulai' => optional($offer->updated_at ?? $offer->created_at)->format('d M Y'),
                 'deskripsi' => $offer->requestRenovasi->deskripsi_renovasi,
                 'analisis' => $offer->analisis_dari_mandor,
-                'photos' => $offer->requestRenovasi->path_foto_detail
-                    ? [asset('storage/' . $offer->requestRenovasi->path_foto_detail)]
-                    : [asset('images/aset/user-dummy.jpg')],
+                'photos' => $offer->requestRenovasi->getFotoDetailUrls()
+                    ?: [asset('images/aset/user-dummy.jpg')],
                 'request_db_id' => $offer->requestRenovasi->id,
             ];
         }

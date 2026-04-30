@@ -229,6 +229,12 @@ body {
     letter-spacing: 0.16em;
 }
 
+.field-error {
+    color: var(--danger);
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
 .rf-input,
 .rf-textarea {
     width: 100%;
@@ -302,6 +308,20 @@ body {
 
 .rf-upload-box:hover .rf-upload-icon {
     transform: scale(1.1);
+}
+
+.rf-file-input-hidden {
+    display: none !important;
+}
+
+.rf-upload-box.is-dragging {
+    border-color: var(--soft-orange);
+    background: rgba(255, 250, 235, 0.9);
+}
+
+.rf-upload-box.has-error {
+    border-color: var(--danger);
+    background: rgba(255, 245, 245, 0.9);
 }
 
 .rf-upload-icon {

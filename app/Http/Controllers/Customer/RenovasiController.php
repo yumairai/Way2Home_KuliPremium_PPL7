@@ -55,9 +55,7 @@ class RenovasiController extends Controller
                 'location' => $requestRenovasi->alamat,
                 'budget_user' => $this->renovasiService->formatRupiah((int) $requestRenovasi->budget_estimasi),
                 'damage_description' => $requestRenovasi->deskripsi_renovasi,
-                'damage_photos' => $requestRenovasi->path_foto_detail
-                    ? [asset('storage/' . $requestRenovasi->path_foto_detail)]
-                    : [],
+                'damage_photos' => $requestRenovasi->getFotoDetailUrls(),
                 'feedback' => $latestOffer?->analisis_dari_mandor
                     ?? 'Pengajuan Anda sedang dalam antrean review mandor.',
                 'budget_needed' => $latestOffer
@@ -109,23 +107,31 @@ class RenovasiController extends Controller
                 'budget_estimasi' => 'required|integer|min:100000',
                 'deskripsi_renovasi' => 'required|string|min:20',
                 'alamat' => 'required|string|min:10',
-                'foto_detail' => 'nullable|image|max:2048',
+                'foto_detail' => 'nullable|array|max:6',
+                'foto_detail.*' => 'image|mimes:jpg,jpeg,png|max:2048',
             ], [
-                'foto_detail.uploaded' => 'Ukuran foto kerusakan terlalu besar. Maksimal 2 MB per file.',
-                'foto_detail.image' => 'Foto kerusakan harus berupa gambar yang valid.',
-                'foto_detail.max' => 'Ukuran foto kerusakan terlalu besar. Maksimal 2 MB per file.',
+                'foto_detail.array' => 'Foto kerusakan harus dikirim sebagai daftar file gambar.',
+                'foto_detail.max' => 'Maksimal 6 gambar kerusakan.',
+                'foto_detail.*.image' => 'Foto kerusakan harus berupa gambar yang valid.',
+                'foto_detail.*.mimes' => 'Foto kerusakan harus berupa gambar JPG, JPEG, atau PNG.',
+                'foto_detail.*.max' => 'Ukuran foto kerusakan terlalu besar. Maksimal 2 MB per file.',
             ]);
 
-            $photoPath = $request->hasFile('foto_detail')
-                ? $request->file('foto_detail')->store('renovasi/request', 'public')
-                : null;
+            $photoPaths = [];
+            if ($request->hasFile('foto_detail')) {
+                foreach ((array) $request->file('foto_detail') as $photoFile) {
+                    if ($photoFile && $photoFile->isValid()) {
+                        $photoPaths[] = $photoFile->store('renovasi/request', 'public');
+                    }
+                }
+            }
 
             RequestRenovasi::create([
                 'customer_id' => $customer->id,
                 'deskripsi_renovasi' => $validated['deskripsi_renovasi'],
                 'budget_estimasi' => $validated['budget_estimasi'],
                 'alamat' => $validated['alamat'],
-                'path_foto_detail' => $photoPath,
+                'path_foto_detail' => $photoPaths ? json_encode($photoPaths) : null,
                 'tanggal_request' => now()->toDateString(),
                 'status_request' => 'pending',
             ]);
