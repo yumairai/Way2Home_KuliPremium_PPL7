@@ -41,7 +41,12 @@
 
                     <div class="input-group">
                         <label>Password</label>
-                        <input type="password" id="password" placeholder="Masukkan password" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" placeholder="Masukkan password" required>
+                            <!-- Ikon Mata untuk Login -->
+                            <img src="{{ asset('images/icon/tutup.png') }}" id="eye-icon-login" class="toggle-password"
+                                onclick="togglePassword('password', 'eye-icon-login')" width="20">
+                        </div>
                     </div>
 
                     <div class="options">
@@ -70,6 +75,23 @@
     </div>
     <script src="{{ asset('js/auth.js') }}"></script>
     <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const eyeIcon = document.getElementById(iconId);
+
+            // Path gambar (sesuaikan dengan nama file kamu)
+            const iconBuka = "{{ asset('images/icon/tutup.png') }}";
+            const iconTutup = "{{ asset('images/icon/buka.png') }}";
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.src = iconTutup; // Ganti ke gambar mata tertutup
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.src = iconBuka; // Balik ke gambar mata terbuka
+            }
+        }
+
         // Inisialisasi Remember Me
         const savedEmail = localStorage.getItem('remembered_email');
         if (savedEmail) {

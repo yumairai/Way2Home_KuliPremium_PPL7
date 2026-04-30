@@ -148,6 +148,25 @@ body {
     text-decoration: none;
 }
 
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+    /* Beri ruang agar teks tidak tertutup ikon */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
 /* RIGHT SIDE CONTENT */
 .branding h1 {
     font-size: 36px;

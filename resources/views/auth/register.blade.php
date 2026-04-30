@@ -28,10 +28,10 @@
                 <p>Silakan isi data di bawah ini untuk mendaftar</p>
 
                 <form id="registerForm">
-                    <!-- Input Username -->
+                    <!-- Input Nama Lengkap -->
                     <div class="input-group">
-                        <label>Username</label>
-                        <input type="text" id="name" placeholder="Pilih username" required>
+                        <label>Nama Lengkap</label>
+                        <input type="text" id="name" placeholder="Masukkan nama lengkap" required>
                         <span id="error-name" class="error-text"></span>
                     </div>
 
@@ -53,14 +53,25 @@
                     <!-- Input Password -->
                     <div class="input-group">
                         <label>Password</label>
-                        <input type="password" id="password" placeholder="Buat password" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" placeholder="Buat password" required>
+                            <!-- Ikon Mata -->
+                            <img src="{{ asset('images/icon/tutup.png') }}" id="eye-icon-password"
+                                class="toggle-password" onclick="togglePassword('password', 'eye-icon-password')"
+                                width="20">
+                        </div>
                         <span id="error-password" class="error-text"></span>
                     </div>
 
-                    <!-- Input Konfirmasi Password -->
+                    <!-- Konfirmasi Password -->
                     <div class="input-group">
                         <label>Konfirmasi Password</label>
-                        <input type="password" id="password_confirmation" placeholder="Ulangi password" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="password_confirmation" placeholder="Ulangi password" required>
+                            <img src="{{ asset('images/icon/tutup.png') }}" id="eye-icon-confirm"
+                                class="toggle-password"
+                                onclick="togglePassword('password_confirmation', 'eye-icon-confirm')" width="20">
+                        </div>
                         <span id="error-password_confirmation" class="error-text"></span>
                     </div>
 
@@ -91,6 +102,23 @@
     </div>
     <script src="{{ asset('js/auth.js') }}"></script>
     <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const eyeIcon = document.getElementById(iconId);
+
+            // Path gambar (sesuaikan dengan nama file kamu)
+            const iconBuka = "{{ asset('images/icon/tutup.png') }}";
+            const iconTutup = "{{ asset('images/icon/buka.png') }}";
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.src = iconTutup; // Ganti ke gambar mata tertutup
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.src = iconBuka; // Balik ke gambar mata terbuka
+            }
+        }
+
         const showError = (id, msg) => {
             const el = document.getElementById(`error-${id}`);
             if (el) el.innerText = msg;
