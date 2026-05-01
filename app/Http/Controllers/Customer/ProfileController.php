@@ -13,7 +13,9 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        return view('customer.profile', compact('user'));
+        return view('customer-layouts.profile', [
+            'user' => auth()->user()
+        ]);
     }
 
     // update data profile

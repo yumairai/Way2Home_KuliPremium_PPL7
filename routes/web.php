@@ -56,8 +56,7 @@ Route::middleware(['auth'])->group(function () {
         return view('customer-layouts.dashboard', [
             'user' => auth()->user()
         ]);
-    });
-    
+    })->name('customer-layouts.dashboard');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -118,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/profile', [ProfileController::class, 'update'])
     ->name('customer.profile.update');
+    
 
     // Manajemen Proyek
     Route::prefix('proyek')->group(function () {

@@ -33,7 +33,7 @@
                                 <img alt="avatar" src="{{ asset('images/aset/avatar.jpg') }}" />
                             </div>
                             <div class="user-details">
-                                <h3>{{ $user?->name }}</h3>
+                                <h3>{{ auth()->user()?->name }}</h3>
                                 <p>Customer</p>
                             </div>
                         </div>
