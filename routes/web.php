@@ -10,6 +10,7 @@ use App\Http\Controllers\Customer\PaymentMaterialController;
 use App\Http\Controllers\Customer\PaymentProyekController;
 use App\Http\Controllers\Admin\VerifikasiProyekController;
 use App\Http\Controllers\Admin\ManageMandorController;
+use App\Http\Controllers\Customer\ProfileController;
 
 
 /*
@@ -52,8 +53,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Dashboard & Logout
     Route::get('/dashboard', function () {
-        return view('customer-layouts.dashboard');
-    })->name('customer-layouts.dashboard');
+        return view('customer-layouts.dashboard', [
+            'user' => auth()->user()
+        ]);
+    });
+    
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -107,8 +111,13 @@ Route::middleware(['auth'])->group(function () {
 
     // Fitur profile
     Route::get('/profile', function () {
-        return view('customer-layouts.profile');
+        return view('customer-layouts.profile', [
+            'user' => auth()->user()
+        ]);
     })->name('customer.profile');
+
+    Route::post('/profile', [ProfileController::class, 'update'])
+    ->name('customer.profile.update');
 
     // Manajemen Proyek
     Route::prefix('proyek')->group(function () {
