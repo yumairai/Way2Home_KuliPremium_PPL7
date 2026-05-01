@@ -179,7 +179,7 @@ class RenovasiController extends Controller
                 'penawaran_renovasi_id' => $offer->id,
                 'pengirim' => 'customer',
                 'tipe' => 'setuju',
-                'pesan' => 'Customer menyetujui penawaran jasa dan material.',
+                'pesan' => 'Anda menyetujui penawaran renovasi ini. Mandor akan segera menghubungi Anda untuk koordinasi.',
             ]);
 
             $offer->mandor?->update(['status' => 'nonaktif']);
@@ -268,6 +268,7 @@ class RenovasiController extends Controller
 
         DB::transaction(function () use ($offer, $requestRenovasi, $validated) {
             $offer->update(['status_penawaran' => 'ditolak']);
+            $requestRenovasi->update(['status_request' => 'dibatalkan']);
             NegosiasiRenovasi::create([
                 'request_renovasi_id' => $requestRenovasi->id,
                 'penawaran_renovasi_id' => $offer->id,
@@ -291,6 +292,10 @@ class RenovasiController extends Controller
     {
         if ($request->status_request === 'selesai') {
             return 'completed';
+        }
+
+        if ($request->status_request === 'dibatalkan') {
+            return 'cancelled';
         }
 
         if (!$offer) {

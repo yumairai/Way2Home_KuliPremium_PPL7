@@ -10,33 +10,112 @@
             tentang status proyek dan permintaan klien untuk memastikan semua berjalan lancar.
         </p>
     </header>
-    <section class="dashboard-stats">
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon dashboard-stat-icon-primary">
-                <span class="material-symbols-outlined">architecture</span>
+    <section class="dashboard-summary-wrapper">
+        <section class="dashboard-stats">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon dashboard-stat-icon-primary">
+                    <span class="material-symbols-outlined">architecture</span>
+                </div>
+                <div class="dashboard-stat-copy">
+                    <p class="dashboard-stat-label">Project Saat Ini</p>
+                    <p class="dashboard-stat-value">{{ $activeProjects }}</p>
+                </div>
             </div>
-            <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Project Saat Ini</p>
-                <p class="dashboard-stat-value">{{ $activeProjects }}</p>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon dashboard-stat-icon-secondary">
+                    <span class="material-symbols-outlined">task_alt</span>
+                </div>
+                <div class="dashboard-stat-copy">
+                    <p class="dashboard-stat-label">Project Diselesaikan</p>
+                    <p class="dashboard-stat-value">{{ $completedProjects }}</p>
+                </div>
             </div>
-        </div>
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon dashboard-stat-icon-secondary">
-                <span class="material-symbols-outlined">task_alt</span>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon dashboard-stat-icon-tertiary">
+                    <span class="material-symbols-outlined">assignment_late</span>
+                </div>
+                <div class="dashboard-stat-copy">
+                    <p class="dashboard-stat-label">Request Renovasi</p>
+                    <p class="dashboard-stat-value">{{ $requestCount }}</p>
+                </div>
             </div>
-            <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Project Diselesaikan</p>
-                <p class="dashboard-stat-value">{{ $completedProjects }}</p>
+        </section>
+        <div class="dashboard-activity-history">
+            <div class="dashboard-activity-header">
+                <h3 class="dashboard-activity-title">History Aktivitas</h3>
             </div>
-        </div>
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon dashboard-stat-icon-tertiary">
-                <span class="material-symbols-outlined">assignment_late</span>
+            <div class="dashboard-activity-list dashboard-activity-list-collapsed" id="dashboard-activity-list">
+                <div class="dashboard-activity-track">
+                    <article class="dashboard-activity-item">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Diassign proyek pembangunan oleh admin</p>
+                            <span class="dashboard-activity-timestamp">1 Mei 2026 14:30</span>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-activity-item">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Menyelesaikan proyek pembangunan tertentu</p>
+                            <span class="dashboard-activity-timestamp">29 April 2026 11:15</span>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-activity-item">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Mengambil dan mereview renovasi tertentu</p>
+                            <span class="dashboard-activity-timestamp">28 April 2026 09:45</span>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-activity-item">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Melakukan negosiasi dengan renovasi tertentu</p>
+                            <span class="dashboard-activity-timestamp">27 April 2026 16:20</span>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Tawaran renovasi diterima customer</p>
+                            <span class="dashboard-activity-timestamp">26 April 2026 13:50</span>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Tawaran + negosiasi renovasi diterima customer</p>
+                            <span class="dashboard-activity-timestamp">25 April 2026 10:30</span>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Tawaran renovasi ditolak customer</p>
+                            <span class="dashboard-activity-timestamp">24 April 2026 15:05</span>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
+                        <div class="dashboard-activity-connector"></div>
+                        <div class="dashboard-activity-content">
+                            <p class="dashboard-activity-title">Telah menyelesaikan renovasi tertentu</p>
+                            <span class="dashboard-activity-timestamp">23 April 2026 12:00</span>
+                        </div>
+                    </article>
+                </div>
             </div>
-            <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Request Renovasi</p>
-                <p class="dashboard-stat-value">{{ $requestCount }}</p>
+            <div class="dashboard-activity-empty" id="dashboard-activity-empty" style="display: none;">
+                <p>Belum ada aktivitas</p>
             </div>
+            <button class="dashboard-activity-expand-btn" id="dashboard-activity-expand-btn" type="button">Lihat
+                keseluruhan</button>
         </div>
     </section>
     <section class="dashboard-list-section">
@@ -84,7 +163,8 @@
                     <div class="dashboard-request-meta">
                         <div>
                             <p class="dashboard-meta-label">Info</p>
-                            <p class="dashboard-meta-value">Belum ada request renovasi yang perlu direview saat ini.</p>
+                            <p class="dashboard-meta-value">Belum ada request renovasi yang perlu direview saat ini.
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -100,8 +180,8 @@
                     <p class="dashboard-review-subtitle">Detail pengajuan renovasi <strong
                             id="dashboard-review-request-id">-</strong> dari klien.</p>
                 </div>
-                <button class="dashboard-review-close-btn material-symbols-outlined" type="button" aria-label="Close modal"
-                    data-review-close>close</button>
+                <button class="dashboard-review-close-btn material-symbols-outlined" type="button"
+                    aria-label="Close modal" data-review-close>close</button>
             </div>
 
             <div class="dashboard-review-body">
@@ -133,7 +213,7 @@
                 <div class="dashboard-review-block">
                     <span class="dashboard-review-label">Feedback Mandor</span>
                     <div class="dashboard-review-note dashboard-review-feedback-wrap">
-                        <textarea class="dashboard-review-feedback-readonly" readonly placeholder="Feedback mandor akan tampil di sini."></textarea>
+                        <textarea class="dashboard-review-feedback-readonly" placeholder="Tulis feedback mandor untuk customer..."></textarea>
                     </div>
                 </div>
 
@@ -180,7 +260,8 @@
                             </div>
                             <div class="dashboard-review-material-total">
                                 <p class="dashboard-review-material-total-label">Total Harga Material</p>
-                                <p class="dashboard-review-material-total-value" id="dashboard-review-material-total">Rp 0
+                                <p class="dashboard-review-material-total-value" id="dashboard-review-material-total">
+                                    Rp 0
                                 </p>
                             </div>
                         </div>
@@ -221,4 +302,5 @@
 @endsection
 @push('scripts')
     <script src="{{ asset('js/mandor/review.js') }}"></script>
+    <script src="{{ asset('js/mandor/activity-history.js') }}"></script>
 @endpush

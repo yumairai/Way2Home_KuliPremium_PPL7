@@ -37,6 +37,12 @@
                     'feedbackClass' => 'rv-feedback-reviewed',
                     'budgetIcon' => 'analytics',
                 ],
+                'cancelled' => [
+                    'label' => 'Request Dibatalkan',
+                    'icon' => 'cancel',
+                    'feedbackClass' => 'rv-feedback-cancelled',
+                    'budgetIcon' => 'calculate',
+                ],
             ];
         @endphp
         @if (!$isHaveRequest)
@@ -54,8 +60,14 @@
                         $showMandorSection = $status !== 'waiting';
                         $isReviewedState = $status === 'reviewed';
                         $isProgressLikeState = in_array($status, ['on-progress', 'completed'], true);
+                        $isCancelledState = $status === 'cancelled';
                         $isWaitingStatus = $status === 'waiting';
-                        $showMaterialInfo = in_array($status, ['reviewed', 'on-progress', 'completed'], true);
+                        $showMaterialInfo = in_array(
+                            $status,
+                            ['reviewed', 'on-progress', 'completed', 'cancelled'],
+                            true,
+                        );
+                        $hideNegotiationForm = in_array($status, ['on-progress', 'completed', 'cancelled'], true);
                         $damageDescription = trim(
                             (string) ($request['damage_description'] ?? 'Deskripsi belum tersedia.'),
                         );
@@ -136,12 +148,12 @@
                             <section class="rv-user-detail-preview">
                                 <div class="rv-user-detail-head">
                                     <h3 class="rv-user-detail-title">Deskripsi Kerusakan</h3>
-                                    <button type="button"
-                                        class="rv-action-btn rv-action-btn-outline js-open-request-detail"
+                                    <button type="button" class="js-open-request-detail"
                                         data-request-id="{{ $request['id'] }}"
                                         data-request-description="{{ e($damageDescription) }}"
                                         data-request-photos='@json($damagePhotos)'
-                                        data-request-materials='@json($materials)'>Lihat Detail</button>
+                                        data-request-materials='@json($materials)'><span
+                                            class="material-symbols-outlined">gallery_thumbnail</span></button>
                                 </div>
                                 <p class="rv-user-desc-clamp">{{ $damageDescription }}</p>
                                 <div class="rv-damage-photo-preview">
@@ -176,88 +188,7 @@
                                             <div class="rv-feedback-box {{ $config['feedbackClass'] }}" data-feedback-box>
                                                 {{ $request['feedback'] }}
                                             </div>
-                                            <div class="rv-material-box" style="margin-top:1rem;">
-                                                <div class="rv-material-title-wrap">
-                                                    <span class="material-symbols-outlined rv-material-icon">forum</span>
-                                                    <span class="rv-material-label">Riwayat Negosiasi</span>
-                                                </div>
-                                                @if (!empty($request['negotiation_messages']) && count($request['negotiation_messages']) > 0)
-                                                    <div class="rv-negotiation-history">
-                                                        @foreach ($request['negotiation_messages'] as $message)
-                                                            @php
-                                                                $messageSender = strtolower(
-                                                                    (string) ($message['pengirim'] ?? 'customer'),
-                                                                );
-                                                                $messageType = strtolower(
-                                                                    (string) ($message['tipe'] ?? ''),
-                                                                );
-                                                                $messageClass =
-                                                                    $messageSender === 'mandor'
-                                                                        ? 'rv-negotiation-message-mandor'
-                                                                        : 'rv-negotiation-message-customer';
-                                                                $messageText =
-                                                                    $messageSender === 'mandor' &&
-                                                                    $messageType === 'penawaran'
-                                                                        ? 'Penawaran awal dari mandor.'
-                                                                        : (string) ($message['pesan'] ?? '-');
-                                                            @endphp
-                                                            <div class="rv-negotiation-message {{ $messageClass }}">
-                                                                <div class="rv-negotiation-message-head">
-                                                                    <span class="rv-negotiation-message-badge">
-                                                                        {{ ucfirst($message['pengirim']) }}
-                                                                    </span>
-                                                                    @if (!empty($message['waktu']))
-                                                                        <span class="rv-negotiation-message-time">
-                                                                            {{ $message['waktu'] }}
-                                                                        </span>
-                                                                    @endif
-                                                                </div>
-                                                                <p class="rv-negotiation-message-text">
-                                                                    {{ $messageText }}</p>
-                                                                @if (!empty($message['nominal_tawaran']))
-                                                                    <p class="rv-negotiation-message-price">Nominal Tawaran:
-                                                                        {{ $message['nominal_tawaran'] }}</p>
-                                                                @endif
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                @else
-                                                    <p class="rv-material-meta rv-negotiation-empty">Belum ada riwayat
-                                                        negosiasi.</p>
-                                                @endif
 
-                                                <div class="rv-negotiation-form">
-                                                    <div class="rv-negotiation-fields">
-                                                        <label class="rv-negotiation-label"
-                                                            for="rv-negotiation-price-{{ $request['id'] }}">
-                                                            Nominal Nego
-                                                        </label>
-                                                        <input id="rv-negotiation-price-{{ $request['id'] }}"
-                                                            type="number"
-                                                            class="rf-input js-negotiation-price rv-negotiation-input"
-                                                            placeholder="Nominal nego (opsional)">
-                                                        <label class="rv-negotiation-label"
-                                                            for="rv-negotiation-message-{{ $request['id'] }}">
-                                                            Pesan Negosiasi
-                                                        </label>
-                                                        <div class="rv-textarea-wrapper">
-                                                            <textarea id="rv-negotiation-message-{{ $request['id'] }}"
-                                                                class="rf-textarea js-negotiation-message rv-negotiation-textarea" rows="3"
-                                                                placeholder="Tulis pesan negosiasi ke mandor"></textarea>
-                                                            <button type="button"
-                                                                class="rv-action-btn rv-action-btn-outline js-negotiate-btn rv-negotiation-submit">
-                                                                <span
-                                                                    class="material-symbols-outlined rv-negotiation-submit-icon">send</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            @if (!empty($request['offer_expires_at']) && $status === 'reviewed')
-                                                <p class="rv-info-label" style="margin-top:0.75rem;">
-                                                    Penawaran berlaku sampai {{ $request['offer_expires_at'] }}
-                                                </p>
-                                            @endif
                                         </div>
 
                                         @if ($showMaterialInfo && count($materials) > 0)
@@ -267,8 +198,9 @@
                                                     <button type="button"
                                                         class="rv-action-btn rv-action-btn-outline js-toggle-material-details"
                                                         aria-expanded="false"><span
-                                                            class="material-symbols-outlined rv-material-icon">inventory_2</span>
-                                                        <span class="rv-material-label">Kebutuhan Material</span></button>
+                                                            class="material-symbols-outlined rv-material-icon">list</span>
+                                                        <span class="rv-material-label">Lihat Kebutuhan
+                                                            Material</span></button>
                                                 </div>
 
                                                 <div class="rv-material-details" style="display: none;">
@@ -304,11 +236,96 @@
                                             <div class="rv-budget-title-wrap">
                                                 <span class="material-symbols-outlined rv-budget-icon"
                                                     data-budget-icon>{{ $config['budgetIcon'] }}</span>
-                                                <span class="rv-budget-label">Informasi Budget Dibutuhkan</span>
+                                                <div class="rv-budget-wrap">
+                                                    <span class="rv-budget-label">Biaya Renovasi</span>
+                                                    <span class="rv-budget-description">Biaya renovasi tidak termasuk biaya
+                                                        material.</span>
+                                                </div>
                                             </div>
                                             <div class="rv-budget-value">{{ $request['budget_needed'] }}</div>
                                         </div>
+                                        <div class="rv-material-box">
+                                            <div class="rv-material-title-wrap">
+                                                <span class="material-symbols-outlined rv-material-icon">forum</span>
+                                                <span class="rv-material-label">Riwayat Negosiasi</span>
+                                            </div>
+                                            @if (!empty($request['negotiation_messages']) && count($request['negotiation_messages']) > 0)
+                                                <div class="rv-negotiation-history">
+                                                    @foreach ($request['negotiation_messages'] as $message)
+                                                        @php
+                                                            $messageSender = strtolower(
+                                                                (string) ($message['pengirim'] ?? 'customer'),
+                                                            );
+                                                            $messageType = strtolower(
+                                                                (string) ($message['tipe'] ?? ''),
+                                                            );
+                                                            $messageClass =
+                                                                $messageSender === 'mandor'
+                                                                    ? 'rv-negotiation-message-mandor'
+                                                                    : 'rv-negotiation-message-customer';
+                                                            $messageText =
+                                                                $messageSender === 'mandor' &&
+                                                                $messageType === 'penawaran'
+                                                                    ? 'Penawaran awal dari mandor.'
+                                                                    : (string) ($message['pesan'] ?? '-');
+                                                        @endphp
+                                                        <div class="rv-negotiation-message {{ $messageClass }}">
+                                                            <div class="rv-negotiation-message-head">
+                                                                <span class="rv-negotiation-message-badge">
+                                                                    {{ ucfirst($message['pengirim']) }}
+                                                                </span>
+                                                                @if (!empty($message['waktu']))
+                                                                    <span class="rv-negotiation-message-time">
+                                                                        {{ $message['waktu'] }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                            <p class="rv-negotiation-message-text">
+                                                                {{ $messageText }}</p>
+                                                            @if (!empty($message['nominal_tawaran']))
+                                                                <p class="rv-negotiation-message-price">Nominal Tawaran:
+                                                                    {{ $message['nominal_tawaran'] }}</p>
+                                                            @endif
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <p class="rv-material-meta rv-negotiation-empty">Belum ada riwayat
+                                                    negosiasi.</p>
+                                            @endif
 
+                                            <div class="rv-negotiation-form {{ $hideNegotiationForm ? 'rv-hidden' : '' }}"
+                                                data-negotiation-form>
+                                                <div class="rv-negotiation-fields">
+                                                    <label class="rv-negotiation-label"
+                                                        for="rv-negotiation-price-{{ $request['id'] }}">
+                                                        Nominal Nego
+                                                    </label>
+                                                    <input id="rv-negotiation-price-{{ $request['id'] }}" type="number"
+                                                        class="rf-input js-negotiation-price rv-negotiation-input"
+                                                        placeholder="Nominal nego (opsional)">
+                                                    <label class="rv-negotiation-label"
+                                                        for="rv-negotiation-message-{{ $request['id'] }}">
+                                                        Pesan Negosiasi
+                                                    </label>
+                                                    <div class="rv-textarea-wrapper">
+                                                        <textarea id="rv-negotiation-message-{{ $request['id'] }}"
+                                                            class="rf-textarea js-negotiation-message rv-negotiation-textarea" rows="3"
+                                                            placeholder="Tulis pesan negosiasi ke mandor"></textarea>
+                                                        <button type="button"
+                                                            class="rv-action-btn rv-action-btn-outline js-negotiate-btn rv-negotiation-submit">
+                                                            <span
+                                                                class="material-symbols-outlined rv-negotiation-submit-icon">send</span>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @if (!empty($request['offer_expires_at']) && $status === 'reviewed')
+                                            <p class="rv-info-label" style="margin-top:0.75rem;">
+                                                Penawaran berlaku sampai {{ $request['offer_expires_at'] }}
+                                            </p>
+                                        @endif
                                         <div class="rv-actions rv-state-panel {{ $isReviewedState ? '' : 'rv-hidden' }}"
                                             data-state-panel="reviewed">
                                             <div
@@ -316,10 +333,10 @@
                                                 <button type="button" class="rv-action-btn rv-action-btn-primary"
                                                     data-transition-state="on-progress"
                                                     data-service-action="{{ !empty($request['is_service_actionable']) ? '1' : '0' }}"
-                                                    {{ !empty($request['is_service_actionable']) ? '' : 'disabled' }}>Jasa
-                                                    Renovasi</button>
+                                                    {{ !empty($request['is_service_actionable']) ? '' : 'disabled' }}>Terima
+                                                    Tawaran</button>
                                                 <button type="button" class="rv-done-btn js-reject-offer-btn">Tolak
-                                                    Penawaran</button>
+                                                    Penawaran & Batalkan Renovasi</button>
                                             </div>
                                         </div>
 

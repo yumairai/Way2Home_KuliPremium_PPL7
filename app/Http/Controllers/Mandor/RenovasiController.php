@@ -23,6 +23,20 @@ class RenovasiController extends Controller
         $this->renovasiService->expirePendingOffers();
         $mandor = $this->currentMandor();
 
+        $activeProjectOffersQuery = PenawaranRenovasi::where('mandor_id', $mandor->id)
+            ->where('status_penawaran', 'diterima');
+
+        $activeProjects = (clone $activeProjectOffersQuery)
+            ->whereHas('requestRenovasi', fn($query) => $query->where('status_request', '!=', 'selesai'))
+            ->count();
+
+        $completedProjects = (clone $activeProjectOffersQuery)
+            ->whereHas('requestRenovasi', fn($query) => $query->where('status_request', 'selesai'))
+            ->count();
+
+        $hasActiveProject = $activeProjects > 0;
+        $isMandorAvailable = !$hasActiveProject;
+
         $renovationRequests = RequestRenovasi::with([
             'customer.user',
             'penawaran' => fn($q) => $q->latest(),
@@ -42,9 +56,12 @@ class RenovasiController extends Controller
             })
             ->latest()
             ->get()
-            ->map(function (RequestRenovasi $request) {
+            ->map(function (RequestRenovasi $request) use ($isMandorAvailable) {
                 $currentOffer = $request->penawaran->first();
                 $offerMaterials = $currentOffer?->materialRenovasi ?? collect();
+                $negotiationMessages = $currentOffer?->negosiasi?->values() ?? collect();
+                $hasCustomerNegotiation = $negotiationMessages->contains(fn($message) => $message->pengirim === 'customer');
+
                 return [
                     'id' => sprintf('REV-%03d', $request->id),
                     'db_id' => $request->id,
@@ -57,11 +74,12 @@ class RenovasiController extends Controller
                         ?: [asset('images/aset/user-dummy.jpg')],
                     'existing_offer_cost' => $currentOffer ? (int) $currentOffer->estimasi_biaya : 0,
                     'existing_offer_feedback' => $currentOffer?->analisis_dari_mandor,
+                    'existing_offer_status' => $currentOffer?->status_penawaran,
                     'existing_offer_materials' => $offerMaterials->map(fn($item) => [
                         'material_id' => (string) $item->material_id,
                         'jumlah' => (int) $item->jumlah,
                     ])->values(),
-                    'negotiation_messages' => $currentOffer?->negosiasi?->map(function ($message) {
+                    'negotiation_messages' => $negotiationMessages->map(function ($message) {
                         return [
                             'pengirim' => $message->pengirim,
                             'tipe' => $message->tipe,
@@ -72,6 +90,9 @@ class RenovasiController extends Controller
                             'waktu' => optional($message->created_at)->format('d M Y H:i'),
                         ];
                     })->values(),
+                    'has_customer_negotiation' => $hasCustomerNegotiation,
+                    'can_send_negotiation' => $isMandorAvailable && $hasCustomerNegotiation,
+                    'can_take_renovation' => $isMandorAvailable && !$hasCustomerNegotiation && !$currentOffer,
                 ];
             })
             ->values();

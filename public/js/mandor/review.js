@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let lastTrigger = null;
     let selectedRequestId = null;
     let selectedRequestDbId = null;
+    let selectedRequestCanSendNegotiation = false;
+    let selectedRequestCanTakeRenovation = false;
     const selectedMaterialQty = {};
 
     const formatRupiah = (value) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
@@ -258,6 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectedRequestId = request.id;
         selectedRequestDbId = request.db_id ? String(request.db_id) : null;
+        selectedRequestCanSendNegotiation = Boolean(request.can_send_negotiation);
+        selectedRequestCanTakeRenovation = Boolean(request.can_take_renovation);
 
         if (requestIdEl) {
             requestIdEl.textContent = `#${request.id}`;
@@ -276,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (feedbackInput instanceof HTMLTextAreaElement) {
-            feedbackInput.value = request.existing_offer_feedback || 'Belum ada feedback mandor.';
+            feedbackInput.value = request.existing_offer_feedback || '';
         }
 
         const photos = Array.isArray(request.photos) ? request.photos : [];
@@ -303,6 +307,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (negotiationMessageInput instanceof HTMLTextAreaElement) {
             negotiationMessageInput.value = '';
+            negotiationMessageInput.disabled = !selectedRequestCanSendNegotiation;
+            negotiationMessageInput.placeholder = selectedRequestCanSendNegotiation
+                ? 'Tulis balasan negosiasi untuk customer...'
+                : 'Balasan negosiasi aktif jika customer sudah mengirim nego.';
         }
 
         if (costInput instanceof HTMLInputElement) {
@@ -310,13 +318,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (takeRenovationButton instanceof HTMLButtonElement) {
-            takeRenovationButton.disabled = true;
-            takeRenovationButton.setAttribute('aria-disabled', 'true');
+            takeRenovationButton.disabled = !selectedRequestCanTakeRenovation;
+            takeRenovationButton.setAttribute('aria-disabled', String(!selectedRequestCanTakeRenovation));
             takeRenovationButton.dataset.requestId = request.id;
             takeRenovationButton.dataset.requestDbId = String(request.db_id || '');
         }
 
         if (negotiateButton instanceof HTMLButtonElement) {
+            negotiateButton.disabled = !selectedRequestCanSendNegotiation;
+            negotiateButton.setAttribute('aria-disabled', String(!selectedRequestCanSendNegotiation));
             negotiateButton.dataset.requestId = request.id;
             negotiateButton.dataset.requestDbId = String(request.db_id || '');
         }
@@ -336,25 +346,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const updateActionButtonsState = () => {
-        if (takeRenovationButton instanceof HTMLButtonElement) {
-            takeRenovationButton.disabled = true;
-            takeRenovationButton.setAttribute('aria-disabled', 'true');
-        }
-
-        if (!(negotiateButton instanceof HTMLButtonElement)) {
-            return;
-        }
-
+        const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
         const messageValue = negotiationMessageInput instanceof HTMLTextAreaElement ? negotiationMessageInput.value.trim() : '';
         const costValue = costInput instanceof HTMLInputElement ? costInput.value.trim() : '';
         const isCostValid = Number(costValue) > 0;
         const { itemCount } = getMaterialSummary();
         const hasMaterialSelected = itemCount > 0;
         const hasRequestSelected = typeof selectedRequestDbId === 'string' && selectedRequestDbId.length > 0;
-        const isFormComplete = messageValue.length > 0 && isCostValid && hasMaterialSelected && hasRequestSelected;
+        const canTakeRenovation = selectedRequestCanTakeRenovation && feedbackValue.length > 0 && isCostValid && hasMaterialSelected && hasRequestSelected;
+        const canSendNegotiation = selectedRequestCanSendNegotiation && messageValue.length > 0 && isCostValid && hasMaterialSelected && hasRequestSelected;
 
-        negotiateButton.disabled = !isFormComplete;
-        negotiateButton.setAttribute('aria-disabled', String(!isFormComplete));
+        if (takeRenovationButton instanceof HTMLButtonElement) {
+            takeRenovationButton.disabled = !canTakeRenovation;
+            takeRenovationButton.setAttribute('aria-disabled', String(!canTakeRenovation));
+        }
+
+        if (negotiateButton instanceof HTMLButtonElement) {
+            negotiateButton.disabled = !canSendNegotiation;
+            negotiateButton.setAttribute('aria-disabled', String(!canSendNegotiation));
+        }
     };
 
     const setModalState = (isOpen) => {
@@ -454,11 +464,89 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             appendNegotiationMessage(createdMessage);
+            const request = requestMap[requestId];
+            if (request) {
+                request.negotiation_messages = Array.isArray(request.negotiation_messages)
+                    ? [...request.negotiation_messages, createdMessage]
+                    : [createdMessage];
+            }
             if (negotiationMessageInput instanceof HTMLTextAreaElement) {
                 negotiationMessageInput.value = '';
             }
             updateActionButtonsState();
             alert(result.data.message || 'Negosiasi berhasil dikirim.');
+        });
+    }
+
+    if (takeRenovationButton instanceof HTMLButtonElement) {
+        takeRenovationButton.addEventListener('click', async () => {
+            const requestId = takeRenovationButton.dataset.requestId;
+            const requestDbId = takeRenovationButton.dataset.requestDbId;
+            const mandorCost = Number(costInput instanceof HTMLInputElement ? costInput.value : 0);
+            const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
+            const { selectedMaterials } = getMaterialSummary();
+
+            if (!requestId || !requestDbId) {
+                return;
+            }
+
+            if (!feedbackValue) {
+                alert('Feedback mandor tidak boleh kosong.');
+                return;
+            }
+
+            if (!selectedMaterials.length || mandorCost <= 0) {
+                alert('Pilih material dan isi nominal renovasi terlebih dahulu.');
+                return;
+            }
+
+            const payload = {
+                feedback: feedbackValue,
+                estimasi_biaya: mandorCost,
+                materials: selectedMaterials.map((material) => ({
+                    material_id: Number(material.id),
+                    jumlah: Number(material.qty),
+                })),
+            };
+
+            const result = await postJson(`/mandor/renovation/${requestDbId}/offer`, payload);
+
+            if (!result.ok) {
+                alert(result.data.message || 'Gagal mengambil renovasi.');
+                return;
+            }
+
+            const createdMessage = {
+                pengirim: 'mandor',
+                pesan: feedbackValue,
+                nominal_tawaran: formatRupiah(mandorCost),
+                waktu: new Intl.DateTimeFormat('id-ID', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                }).format(new Date()),
+            };
+
+            appendNegotiationMessage(createdMessage);
+            const request = requestMap[requestId];
+            if (request) {
+                request.existing_offer_feedback = feedbackValue;
+                request.existing_offer_cost = mandorCost;
+                request.existing_offer_materials = selectedMaterials.map((material) => ({
+                    material_id: String(material.id),
+                    jumlah: Number(material.qty),
+                }));
+                request.existing_offer_status = 'pending';
+                request.negotiation_messages = Array.isArray(request.negotiation_messages)
+                    ? [...request.negotiation_messages, createdMessage]
+                    : [createdMessage];
+                request.can_take_renovation = false;
+            }
+            selectedRequestCanTakeRenovation = false;
+            updateActionButtonsState();
+            alert(result.data.message || 'Renovasi berhasil diambil.');
         });
     }
 

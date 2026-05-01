@@ -187,6 +187,11 @@ body {
     color: var(--on-secondary);
 }
 
+.rv-status.cancelled {
+    background: var(--error-container);
+    color: var(--on-error-container);
+}
+
 .rv-info-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -252,6 +257,21 @@ body {
     justify-content: start;
     gap: 0.75rem;
     margin-bottom: 0.75rem;
+}
+
+.js-open-request-detail {
+    padding: .1rem .6rem;
+    cursor: pointer;
+    border: none;
+    background: var(--primary);
+    color: var(--on-primary);
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.js-open-request-detail:hover {
+    background: var(--primary-container);
+    transform: scale(1.03);
 }
 
 .rv-user-detail-title {
@@ -396,7 +416,7 @@ body {
 .rv-budget-box {
     border-radius: 0.75rem;
     padding: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -417,15 +437,28 @@ body {
 
 .rv-budget-icon {
     color: var(--primary);
+    font-size: 3rem;
 }
 
 .rv-budget .rv-budget-icon {
     color: var(--on-primary-container);
 }
 
-.rv-budget-label {
+.rv-budget-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.rv-budget-wrap .rv-budget-label {
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--on-background);
+}
+
+.rv-budget-wrap .rv-budget-description {
+    margin: 0;
+    font-size: .875rem;
+    color: var(--on-primary-container);
 }
 
 .rv-budget .rv-budget-label {
@@ -782,6 +815,8 @@ body {
 }
 
 .rv-action-btn-primary {
+    font-size: 1rem;
+    font-weight: 600;
     padding: 0.75rem 2rem;
     color: var(--on-primary);
     background: linear-gradient(135deg, var(--primary), var(--primary-container));
@@ -824,7 +859,7 @@ body {
     color: var(--on-surface-variant);
     font-size: 1rem;
     font-weight: 600;
-    transition: color 0.2s ease;
+    transition: color 0.3s ease;
     border-radius: 9999px;
 }
 
@@ -1124,7 +1159,7 @@ body {
     }
 
     .rv-user-detail-head {
-        flex-direction: column;
+        flex-direction: row;
     }
 
     .rv-action-btn-outline {

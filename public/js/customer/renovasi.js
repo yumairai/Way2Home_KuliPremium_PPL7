@@ -26,11 +26,18 @@ document.addEventListener('DOMContentLoaded', function () {
             feedbackClass: 'rv-feedback-reviewed',
             budgetIcon: 'analytics',
         },
+        cancelled: {
+            label: 'Request Dibatalkan',
+            icon: 'cancel',
+            feedbackClass: 'rv-feedback-cancelled',
+            budgetIcon: 'calculate',
+        },
     };
 
     function setPanelVisibility(cardEl, nextState) {
         var reviewedPanel = cardEl.querySelector('[data-state-panel="reviewed"]');
         var progressPanel = cardEl.querySelector('[data-state-panel="progress"]');
+        var negotiationForm = cardEl.querySelector('[data-negotiation-form]');
 
         if (reviewedPanel) {
             reviewedPanel.classList.toggle('rv-hidden', nextState !== 'reviewed');
@@ -39,6 +46,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (progressPanel) {
             var isProgressLikeState = nextState === 'on-progress' || nextState === 'completed';
             progressPanel.classList.toggle('rv-hidden', !isProgressLikeState);
+        }
+
+        if (negotiationForm) {
+            var shouldHideNegotiationForm = nextState === 'on-progress' || nextState === 'completed' || nextState === 'cancelled';
+            negotiationForm.classList.toggle('rv-hidden', shouldHideNegotiationForm);
         }
     }
 
@@ -73,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var statusPill = cardEl.querySelector('[data-state-pill]');
         if (statusPill) {
-            statusPill.classList.remove('waiting', 'reviewed', 'on-progress', 'completed');
+            statusPill.classList.remove('waiting', 'reviewed', 'on-progress', 'completed', 'cancelled');
             statusPill.classList.add(nextState);
         }
 
