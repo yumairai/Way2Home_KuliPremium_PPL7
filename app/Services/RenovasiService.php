@@ -9,14 +9,34 @@ use Illuminate\Support\Facades\DB;
 
 class RenovasiService
 {
+    private function getLastMandorReply(PenawaranRenovasi $offer)
+    {
+        return $offer->negosiasi()
+            ->where('pengirim', 'mandor')
+            ->latest()
+            ->first();
+    }
     public const OFFER_VALID_DAYS = 3;
 
     public function expirePendingOffers(): void
     {
-        $expiredOffers = PenawaranRenovasi::with(['mandor', 'requestRenovasi'])
+        $expiredOffers = PenawaranRenovasi::with(['mandor', 'requestRenovasi', 'negosiasi'])
             ->where('status_penawaran', 'pending')
-            ->where('created_at', '<', now()->subDays(self::OFFER_VALID_DAYS))
-            ->get();
+            ->get()
+            ->filter(function ($offer) {
+                $lastReply = $offer->negosiasi()
+                    ->where('pengirim', 'mandor')
+                    ->latest()
+                    ->first();
+
+                if (!$lastReply) {
+                    return false; // belum dibalas mandor = tidak expired
+                }
+
+                return Carbon::parse($lastReply->created_at)
+                    ->addDay()
+                    ->lt(now());
+            });
 
         foreach ($expiredOffers as $offer) {
             DB::transaction(function () use ($offer) {
@@ -35,14 +55,27 @@ class RenovasiService
 
     public function isOfferExpired(PenawaranRenovasi $offer): bool
     {
-        return $offer->status_penawaran === 'pending'
-            && $offer->created_at instanceof Carbon
-            && $offer->created_at->lt(now()->subDays(self::OFFER_VALID_DAYS));
+        $expiresAt = $this->offerExpiresAt($offer);
+
+        // kalau belum ada expiry → belum expired
+        if (!$expiresAt) {
+            return false;
+        }
+
+        return now()->greaterThan($expiresAt);
     }
 
     public function offerExpiresAt(PenawaranRenovasi $offer): ?Carbon
     {
-        return $offer->created_at ? $offer->created_at->copy()->addDays(self::OFFER_VALID_DAYS) : null;
+        $lastReply = $this->getLastMandorReply($offer);
+
+        // belum ada balasan mandor → TIDAK ADA EXPIRY
+        if (!$lastReply) {
+            return null;
+        }
+
+        // expiry = 1 hari setelah balasan terakhir mandor
+        return Carbon::parse($lastReply->created_at)->addDay();
     }
 
     public function syncMandorStatus(Mandor $mandor): void

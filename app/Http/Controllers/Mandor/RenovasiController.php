@@ -314,6 +314,7 @@ class RenovasiController extends Controller
                 'customer_name' => $offer->requestRenovasi->customer?->user?->name ?? 'Customer',
                 'customer_phone' => $offer->requestRenovasi->customer?->user?->phone_number ?? '-',
                 'biaya_total' => $this->renovasiService->formatRupiah((int) $offer->estimasi_biaya + $materialsTotal),
+                'biaya_renovasi' => $this->renovasiService->formatRupiah((int) $offer->estimasi_biaya),
                 'tanggal_mulai' => optional($offer->updated_at ?? $offer->created_at)->format('d M Y'),
                 'deskripsi' => $offer->requestRenovasi->deskripsi_renovasi,
                 'analisis' => $offer->analisis_dari_mandor,
