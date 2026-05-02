@@ -47,4 +47,25 @@ class Proyek extends Model
             ->where('tipe_pembayaran', 'DP')
             ->where('status_pembayaran', 'berhasil');
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(ProyekTask::class, 'proyek_id')->orderBy('urutan');
+    }
+
+    public function aktivitas()
+    {
+        return $this->hasMany(ProyekAktivitas::class, 'proyek_id')->latest();
+    }
+
+    public function dokumentasi()
+    {
+        return $this->hasMany(ProyekDokumentasi::class, 'proyek_id')->latest();
+    }
+
+    public function progress()
+    {
+        return $this->hasOne(ProgressProyek::class, 'proyek_id')->latest();
+    }
+
 }

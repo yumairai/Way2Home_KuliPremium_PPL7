@@ -263,9 +263,7 @@
 }
 
 .mandor-main-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    align-items: start;
 }
 
 .mandor-progress-column {
@@ -448,6 +446,60 @@
 
 .mandor-complete-btn:active {
     transform: scale(0.95);
+}
+
+.mandor-task-item.completed {
+    opacity: 0.5;
+}
+
+.mandor-task-item.completed .mandor-task-item-text {
+    text-decoration: line-through;
+    color: var(--on-surface-variant);
+}
+
+.mandor-task-done-label {
+    color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.5rem 1.5rem;
+}
+
+.mandor-show-more-btn {
+    width: 100%;
+    border: 2px dashed rgba(194, 198, 213, 0.4);
+    border-radius: 1rem;
+    padding: 1rem;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mandor-show-more-btn:hover {
+    background: var(--surface-container);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.mandor-activity-card {
+    height: auto;
+}
+
+.mandor-activity-list {
+    flex-grow: 0;
+    min-height: 0;
+}
+
+.mandor-activity-empty {
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+    font-style: italic;
 }
 
 .mandor-activity-card {

@@ -13,7 +13,8 @@ use App\Http\Controllers\Customer\RenovasiController as CustomerRenovasiControll
 use App\Http\Controllers\Admin\VerifikasiProyekController;
 use App\Http\Controllers\Admin\ManageMandorController;
 use App\Http\Controllers\Mandor\RenovasiController as MandorRenovasiController;
-
+use App\Http\Controllers\Mandor\TrackingProyekController as MandorTrackingProyekController;
+use App\Http\Controllers\Customer\TrackingProyekController as CustomerTrackingProyekController;
 
 /*
 |--------------------------------------------------------------------------
@@ -114,7 +115,7 @@ Route::middleware(['auth'])->group(function () {
                 return view('customer-layouts.customer_tracking');
             })->name('proyek.tracking');
             Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
-
+            Route::get('/{id}/tracking', [CustomerTrackingProyekController::class, 'tracking'])->name('proyek.tracking');
             // Action Ajax
             Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
             Route::post('/bayar-dp', [PaymentProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
@@ -197,4 +198,8 @@ Route::middleware(['auth', 'mandor'])->prefix('mandor')->group(function () {
         ->name('mandor.renovation.negotiate');
     Route::post('/renovation/{requestRenovasi}/offer', [MandorRenovasiController::class, 'submitOffer'])
         ->name('mandor.renovation.offer');
+    Route::get('/proyek/tracking', [MandorTrackingProyekController::class, 'tracking'])->name('mandor.proyek.tracking');
+    Route::post('/task/{task}/complete', [MandorTrackingProyekController::class, 'completeTask'])->name('mandor.task.complete');
+    Route::post('/proyek/{proyek}/aktivitas', [MandorTrackingProyekController::class, 'tambahAktivitas'])->name('mandor.proyek.aktivitas');
+    Route::post('/proyek/{proyek}/dokumentasi', [MandorTrackingProyekController::class, 'uploadDokumentasi'])->name('mandor.proyek.dokumentasi');
 });

@@ -18,27 +18,27 @@
                     <div class="tracking-hero-header">
                         <div>
                             <span class="tracking-kicker">Proyek</span>
-                            <h1 class="tracking-page-title">Rumah Modern Minimalist Bandung</h1>
+                            <h1 class="tracking-page-title">{{ $proyek->detailBangun->desainRumah->tipe_rumah ?? 'Proyek Pembangunan' }}</h1>
                         </div>
-                        <span class="tracking-status-badge tracking-status-badge-active">Proyek Aktif</span>
+                        <span class="tracking-status-badge tracking-status-badge-active">{{ $proyek->status_proyek }}</span>
                     </div>
 
                     <div class="tracking-metrics">
                         <div class="tracking-metric">
                             <p class="tracking-label">Tanggal Mulai</p>
-                            <p class="tracking-value">12 Oktober 2023</p>
+                            <p class="tracking-value">{{ $proyek->tanggal_mulai ? \Carbon\Carbon::parse($proyek->tanggal_mulai)->format('d F Y') : '-' }}</p>
                         </div>
                         <div class="tracking-metric">
                             <p class="tracking-label">Estimasi Selesai</p>
-                            <p class="tracking-value">28 Agustus 2024</p>
+                            <p class="tracking-value">{{ $estimasiSelesai ?? '-' }}</p>
                         </div>
                         <div class="tracking-metric tracking-metric-progress">
                             <p class="tracking-label">Progress Pembangunan</p>
                             <div class="tracking-progress-row">
                                 <div class="tracking-progress-track">
-                                    <div class="tracking-progress-fill"></div>
+                                    <div class="tracking-progress-fill" style="width: {{ $persentase }}%"></div>
                                 </div>
-                                <span class="tracking-progress-text">50%</span>
+                                <span class="tracking-progress-text">{{ $persentase }}%</span>
                             </div>
                         </div>
                     </div>
@@ -50,7 +50,7 @@
                             style="font-variation-settings: 'FILL' 1;">foundation</span>
                         <div>
                             <p class="tracking-meta-label">Milestone Tercapai</p>
-                            <p class="tracking-meta-value">Struktur</p>
+                            <p class="tracking-meta-value">{{ $milestoneSelesai }}</p>
                         </div>
                     </div>
                     <div class="tracking-highlight-card">
@@ -58,7 +58,7 @@
                             style="font-variation-settings: 'FILL' 1;">calendar_today</span>
                         <div>
                             <p class="tracking-meta-label">Pengerjaan Saat Ini</p>
-                            <p class="tracking-meta-value">Pemasangan Atap</p>
+                            <p class="tracking-meta-value">{{ $milestoneAktif }}</p>
                         </div>
                     </div>
                     <div class="tracking-highlight-card">
@@ -66,7 +66,7 @@
                             style="font-variation-settings: 'FILL' 1;">foundation</span>
                         <div>
                             <p class="tracking-meta-label">Milestone Berikutnya</p>
-                            <p class="tracking-meta-value">Instalasi MEP</p>
+                            <p class="tracking-meta-value">{{ $proyek->tasks->where('is_selesai', false)->skip(1)->first()?->nama_task ?? '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -78,11 +78,10 @@
                     <div class="tracking-contact-item">
                         <div class="tracking-avatar-wrap">
                             <img alt="Project Manager" class="tracking-avatar-image"
-                                data-alt="professional male project manager with a calm expression wearing a navy polo shirt"
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCmXrJn6unRVBl_IqApiWBt273puoByO6mlWpIcr113y09EyWIOUyrCdAFmRmsFrkxswDOId9qDG5VFZ6t5tm5zcMaFRIyGM09yWvH9EJP-WNFtsGHoOP2b_FV8WCE2C4T65jpeA_iQNTjJNG1wfxCKcaF64SiUg8VyaYWgZV9M02-4MiQ1YmqHtH47k2-hHJ9cijKtyVqkvxRUYrlIq0fCDlmhBBNinUH4IIYs04t7GAyw2cIhu6JRA8rBgrMkXy1UaPqVBj-6Js" />
+                                src="{{ isset($proyek->mandor->user->avatar) ? asset('storage/'.$proyek->mandor->user->avatar) : 'https://ui-avatars.com/api/?name='.urlencode($proyek->mandor->user->name ?? 'Mandor') }}" />
                         </div>
                         <div>
-                            <p class="tracking-contact-name">Asep Jalaluddin</p>
+                            <p class="tracking-contact-name">{{ $proyek->mandor->user->name ?? 'Belum Ditentukan' }}</p>
                             <p class="tracking-contact-role">Mandor Proyek</p>
                         </div>
                         <button
@@ -111,35 +110,22 @@
                 <div class="tracking-timeline">
                     <div class="tracking-timeline-line"></div>
 
-                    <div class="tracking-timeline-item">
-                        <div class="tracking-timeline-dot tracking-timeline-dot-active"></div>
+                    @forelse($proyek->aktivitas->sortByDesc('created_at')->values() as $index => $aktivitas)
+                    <div class="tracking-timeline-item {{ $loop->last ? 'tracking-timeline-item-last' : '' }}">
+                        <div class="tracking-timeline-dot {{ $index === 0 ? 'tracking-timeline-dot-active' : 'tracking-timeline-dot-inactive' }}"></div>
                         <div>
-                            <p class="tracking-timeline-date">14 April 2024</p>
-                            <h4 class="tracking-timeline-title">Pengerjaan Rangka Atap</h4>
-                            <p class="tracking-timeline-desc">Memasang rangka atap bagian kamar, ruang tengah, dan kamar
-                                mandi.</p>
+                            <p class="tracking-timeline-date">{{ \Carbon\Carbon::parse($aktivitas->created_at)->format('d F Y') }}</p>
+                            <h4 class="tracking-timeline-title">{{ $aktivitas->judul }}</h4>
+                            <p class="tracking-timeline-desc">{{ $aktivitas->deskripsi }}</p>
                         </div>
                     </div>
-
-                    <div class="tracking-timeline-item">
-                        <div class="tracking-timeline-dot tracking-timeline-dot-inactive"></div>
-                        <div>
-                            <p class="tracking-timeline-date">10 April 2024</p>
-                            <h4 class="tracking-timeline-title">Pengiriman Material Atap</h4>
-                            <p class="tracking-timeline-desc">Pengiriman atap dari gudang sampai di tempat pengerjaan proyek
-                                dan siap dipakai</p>
-                        </div>
-                    </div>
-
+                    @empty
                     <div class="tracking-timeline-item tracking-timeline-item-last">
-                        <div class="tracking-timeline-dot tracking-timeline-dot-inactive"></div>
                         <div>
-                            <p class="tracking-timeline-date">1 Maret 2024</p>
-                            <h4 class="tracking-timeline-title">Pembangunan Struktur Selesai</h4>
-                            <p class="tracking-timeline-desc">Struktur rumah selesai, seperti tiang penyangga, bla bla bla.
-                            </p>
+                            <p class="tracking-timeline-desc">Belum ada aktivitas.</p>
                         </div>
                     </div>
+                    @endforelse
                 </div>
             </div>
 
@@ -148,53 +134,33 @@
                 <div class="tracking-milestone-wrap">
                     <div class="tracking-milestone-connector"></div>
                     <div class="tracking-milestone-grid">
+                        @foreach($proyek->tasks as $task)
                         <div class="tracking-milestone-item">
+                            @if($task->is_selesai)
                             <div class="tracking-milestone-icon tracking-milestone-icon-complete">
-                                <span class="material-symbols-outlined tracking-icon-sm"
-                                    style="font-variation-settings: 'FILL' 1;">check</span>
+                                <span class="material-symbols-outlined tracking-icon-sm" style="font-variation-settings: 'FILL' 1;">check</span>
                             </div>
                             <div>
-                                <p class="tracking-milestone-name">Fondasi</p>
+                                <p class="tracking-milestone-name">{{ $task->nama_task }}</p>
                                 <span class="tracking-milestone-state tracking-state-muted">Selesai</span>
                             </div>
-                        </div>
-                        <div class="tracking-milestone-item">
-                            <div class="tracking-milestone-icon tracking-milestone-icon-complete">
-                                <span class="material-symbols-outlined tracking-icon-sm"
-                                    style="font-variation-settings: 'FILL' 1;">check</span>
-                            </div>
-                            <div>
-                                <p class="tracking-milestone-name">Struktur</p>
-                                <span class="tracking-milestone-state tracking-state-muted">Selesai</span>
-                            </div>
-                        </div>
-                        <div class="tracking-milestone-item">
-                            <div class="tracking-milestone-icon tracking-milestone-icon-active">
+                            @else
+                            <div class="tracking-milestone-icon {{ $task->nama_task === $milestoneAktif ? 'tracking-milestone-icon-active' : 'tracking-milestone-icon-pending' }}">
+                                @if($task->nama_task === $milestoneAktif)
                                 <span class="tracking-milestone-dot"></span>
-                            </div>
-                            <div>
-                                <p class="tracking-milestone-name">Atap</p>
-                                <span class="tracking-milestone-state tracking-state-primary">In Progress</span>
-                            </div>
-                        </div>
-                        <div class="tracking-milestone-item">
-                            <div class="tracking-milestone-icon tracking-milestone-icon-pending">
+                                @else
                                 <span class="material-symbols-outlined tracking-icon-sm">hourglass_empty</span>
+                                @endif
                             </div>
                             <div>
-                                <p class="tracking-milestone-name tracking-state-pending">MEP</p>
-                                <span class="tracking-milestone-state tracking-state-pending">Pending</span>
+                                <p class="tracking-milestone-name {{ $task->nama_task !== $milestoneAktif ? 'tracking-state-pending' : '' }}">{{ $task->nama_task }}</p>
+                                <span class="tracking-milestone-state {{ $task->nama_task === $milestoneAktif ? 'tracking-state-primary' : 'tracking-state-pending' }}">
+                                    {{ $task->nama_task === $milestoneAktif ? 'In Progress' : 'Pending' }}
+                                </span>
                             </div>
+                            @endif
                         </div>
-                        <div class="tracking-milestone-item">
-                            <div class="tracking-milestone-icon tracking-milestone-icon-pending">
-                                <span class="material-symbols-outlined tracking-icon-sm">hourglass_empty</span>
-                            </div>
-                            <div>
-                                <p class="tracking-milestone-name tracking-state-pending">Finishing</p>
-                                <span class="tracking-milestone-state tracking-state-pending">Pending</span>
-                            </div>
-                        </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -209,24 +175,22 @@
                             </tr>
                         </thead>
                         <tbody class="tracking-subtable-body">
+                            @forelse($proyek->tasks as $task)
                             <tr class="tracking-subtable-row">
-                                <td class="tracking-subtable-cell tracking-subtable-cell-strong">Rangka Atap</td>
-                                <td class="tracking-subtable-cell tracking-subtable-cell-muted">-</td>
-                                <td class="tracking-subtable-cell"><span class="tracking-pill tracking-pill-progress">On
-                                        Progress</span></td>
+                                <td class="tracking-subtable-cell tracking-subtable-cell-strong">{{ $task->nama_task }}</td>
+                                <td class="tracking-subtable-cell tracking-subtable-cell-muted">{{ $task->updated_at && $task->is_selesai ? \Carbon\Carbon::parse($task->updated_at)->format('d M Y') : '-' }}</td>
+                                <td class="tracking-subtable-cell">
+                                    <span class="tracking-pill {{ $task->is_selesai ? 'tracking-pill-complete' : ($task->nama_task === $milestoneAktif ? 'tracking-pill-progress' : '') }}">
+                                        {{ $task->is_selesai ? 'Selesai' : ($task->nama_task === $milestoneAktif ? 'On Progress' : 'Menunggu') }}
+                                    </span>
+                                </td>
+                                <td class="tracking-subtable-cell tracking-text-right"></td>
                             </tr>
-                            <tr class="tracking-subtable-row">
-                                <td class="tracking-subtable-cell tracking-subtable-cell-strong">Pemasangan Genteng</td>
-                                <td class="tracking-subtable-cell tracking-subtable-cell-muted">-</td>
-                                <td class="tracking-subtable-cell"><span
-                                        class="tracking-pill tracking-pill-progress">Menunggu</span></td>
-                            </tr>
+                            @empty
                             <tr>
-                                <td class="tracking-subtable-cell tracking-subtable-cell-strong">Plafon & Lipslang</td>
-                                <td class="tracking-subtable-cell tracking-subtable-cell-muted">-</td>
-                                <td class="tracking-subtable-cell"><span
-                                        class="tracking-pill tracking-pill-progress">Menunggu</span></td>
+                                <td colspan="4" class="tracking-subtable-cell text-center" style="text-align: center; padding: 20px;">Belum ada task.</td>
                             </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -240,62 +204,18 @@
                     </h2>
                 </div>
                 <div class="tracking-docs-grid">
+                    @forelse($proyek->dokumentasi as $doc)
                     <div class="tracking-doc-item">
-                        <img alt="Construction Site" class="tracking-doc-image"
-                            data-alt="construction workers pouring concrete for a large foundation slab at dawn with dramatic orange sky"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQoJEqI8qrZxzjHMzg6kmtWDapqTnFZ_ztCqRoj0E-vAtxO21i8eWTVMNs_0CXVN3aSPRKCND7GnnCQtkLWPux7-6oNEz6avX6LL5f33lFSSshRG0wlQpYMY8zZViDkALnN7Grv-ve0_fW0JxEGM8xFD7WhuBiDEYhWU7jStjArbEZWAAzV8TpnxUpHoR2tmwnDw1Zv9crptLPWbgOHnXFvLkxnChS64KPsxIn4XrtKTt6jL0sQE8i1o6GScSyex3QjOSoFZL2mPI" />
+                        <img alt="Dokumentasi Proyek" class="tracking-doc-image"
+                            src="{{ asset('storage/' . $doc->path_foto) }}" />
                         <div class="tracking-doc-overlay"><span
                                 class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
                     </div>
-                    <div class="tracking-doc-item">
-                        <img alt="Architecture Detail" class="tracking-doc-image"
-                            data-alt="low angle shot of modern geometric building architecture with sharp edges and clean white concrete walls"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuACz2ROLQvZ0aZ8oeZLelVa2tZBOwHjheogBvMOf9rPkSnJPLdaLjR3UapFUH8OUT6LahJBuBSMuZw_GQ9v3wK2DuPlOjAqXMKsQ7lBZStnLX4QNnx6v3zRKjZ2P5ZlLUvRgt8corGiZ55F7pkpb9WFAtfKNcg9FemucMYeJx9ZqAwk3dvWtltxoRs0dXNCBlPWNhDZ5ikQFjF9PhOxVNE3OBuy1qk_rSOkx1LnHqX9i0-TIiu_NfysyzgzpfmrSLE23L8xiUxeptA" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
+                    @empty
+                    <div style="grid-column: 1 / -1; text-align: center; color: #666; padding: 20px;">
+                        Belum ada dokumentasi pengerjaan pembangunan.
                     </div>
-                    <div class="tracking-doc-item">
-                        <img alt="Framing Progress" class="tracking-doc-image"
-                            data-alt="detailed view of precise wooden house framing with blue sky visible through the structural beams"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQhsLJxCfR7sXXy2fFMkaG2JyE9M-SU2LlrDP_l8im6PZNfCFbd4JZRN8mvybXY5TPn5uAOn4zdB_LcFIVZrdYr0UqbjuvkhMTSPjY0CrfBae9IikcOzCl8rDSQwiMLdp__w7y5Fi2J7t0IO2vYXy1-vDbfkkJ7N6aSG-u6cIKLlUdAmctk3ly4jfnJqT3irfSqHCfs8kHvZDt6nlBXTsAOsl75_UYQyFoYN1ZzQDgOi-nYVWj8PpXHN6m3yIYdACA6QDAPHNq3gQ" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
-                    </div>
-                    <div class="tracking-doc-item">
-                        <img alt="Framing Progress" class="tracking-doc-image"
-                            data-alt="detailed view of precise wooden house framing with blue sky visible through the structural beams"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQhsLJxCfR7sXXy2fFMkaG2JyE9M-SU2LlrDP_l8im6PZNfCFbd4JZRN8mvybXY5TPn5uAOn4zdB_LcFIVZrdYr0UqbjuvkhMTSPjY0CrfBae9IikcOzCl8rDSQwiMLdp__w7y5Fi2J7t0IO2vYXy1-vDbfkkJ7N6aSG-u6cIKLlUdAmctk3ly4jfnJqT3irfSqHCfs8kHvZDt6nlBXTsAOsl75_UYQyFoYN1ZzQDgOi-nYVWj8PpXHN6m3yIYdACA6QDAPHNq3gQ" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
-                    </div>
-                    <div class="tracking-doc-item">
-                        <img alt="Framing Progress" class="tracking-doc-image"
-                            data-alt="detailed view of precise wooden house framing with blue sky visible through the structural beams"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQhsLJxCfR7sXXy2fFMkaG2JyE9M-SU2LlrDP_l8im6PZNfCFbd4JZRN8mvybXY5TPn5uAOn4zdB_LcFIVZrdYr0UqbjuvkhMTSPjY0CrfBae9IikcOzCl8rDSQwiMLdp__w7y5Fi2J7t0IO2vYXy1-vDbfkkJ7N6aSG-u6cIKLlUdAmctk3ly4jfnJqT3irfSqHCfs8kHvZDt6nlBXTsAOsl75_UYQyFoYN1ZzQDgOi-nYVWj8PpXHN6m3yIYdACA6QDAPHNq3gQ" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
-                    </div>
-                    <div class="tracking-doc-item">
-                        <img alt="Framing Progress" class="tracking-doc-image"
-                            data-alt="detailed view of precise wooden house framing with blue sky visible through the structural beams"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQhsLJxCfR7sXXy2fFMkaG2JyE9M-SU2LlrDP_l8im6PZNfCFbd4JZRN8mvybXY5TPn5uAOn4zdB_LcFIVZrdYr0UqbjuvkhMTSPjY0CrfBae9IikcOzCl8rDSQwiMLdp__w7y5Fi2J7t0IO2vYXy1-vDbfkkJ7N6aSG-u6cIKLlUdAmctk3ly4jfnJqT3irfSqHCfs8kHvZDt6nlBXTsAOsl75_UYQyFoYN1ZzQDgOi-nYVWj8PpXHN6m3yIYdACA6QDAPHNq3gQ" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
-                    </div>
-                    <div class="tracking-doc-item">
-                        <img alt="Framing Progress" class="tracking-doc-image"
-                            data-alt="detailed view of precise wooden house framing with blue sky visible through the structural beams"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQhsLJxCfR7sXXy2fFMkaG2JyE9M-SU2LlrDP_l8im6PZNfCFbd4JZRN8mvybXY5TPn5uAOn4zdB_LcFIVZrdYr0UqbjuvkhMTSPjY0CrfBae9IikcOzCl8rDSQwiMLdp__w7y5Fi2J7t0IO2vYXy1-vDbfkkJ7N6aSG-u6cIKLlUdAmctk3ly4jfnJqT3irfSqHCfs8kHvZDt6nlBXTsAOsl75_UYQyFoYN1ZzQDgOi-nYVWj8PpXHN6m3yIYdACA6QDAPHNq3gQ" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
-                    </div>
-                    <div class="tracking-doc-item">
-                        <img alt="Framing Progress" class="tracking-doc-image"
-                            data-alt="detailed view of precise wooden house framing with blue sky visible through the structural beams"
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBQhsLJxCfR7sXXy2fFMkaG2JyE9M-SU2LlrDP_l8im6PZNfCFbd4JZRN8mvybXY5TPn5uAOn4zdB_LcFIVZrdYr0UqbjuvkhMTSPjY0CrfBae9IikcOzCl8rDSQwiMLdp__w7y5Fi2J7t0IO2vYXy1-vDbfkkJ7N6aSG-u6cIKLlUdAmctk3ly4jfnJqT3irfSqHCfs8kHvZDt6nlBXTsAOsl75_UYQyFoYN1ZzQDgOi-nYVWj8PpXHN6m3yIYdACA6QDAPHNq3gQ" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
-                    </div>
+                    @endforelse
                 </div>
             </div>
         </div>

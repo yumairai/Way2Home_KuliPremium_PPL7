@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Mandor;
 use App\Models\Proyek;
+use App\Models\ProgressProyek;
+use Database\Seeders\ProyekTaskSeeder;
 
 class ManageMandorController extends Controller
 {
@@ -56,8 +58,19 @@ class ManageMandorController extends Controller
             'status_proyek' => 'In Progress',
         ]);
 
-        $mandor->update([ 
+        $mandor->update([
             'status' => 'nonaktif',
+        ]);
+
+        // Auto-generate task standar pembangunan
+        ProyekTaskSeeder::generateForProyek($proyek->id);
+
+        // Buat progress awal
+        ProgressProyek::create([
+            'proyek_id'      => $proyek->id,
+            'milestone_aktif' => 'Pembersihan & Pengukuran Lahan',
+            'persentase'     => 0,
+            'tanggal_update' => now(),
         ]);
 
         return response()->json([
@@ -73,12 +86,19 @@ class ManageMandorController extends Controller
         ]);
 
         $mandor = Mandor::findOrFail($request->mandor_id);
+        $proyek = Proyek::where('mandor_id', $mandor->id)->first();
 
-        Proyek::where('mandor_id', $mandor->id)->update([
-            'mandor_id'     => null,
-            'tanggal_mulai' => null,
-            'status_proyek' => 'Pengalokasian Mandor',
-        ]);
+        if ($proyek) {
+            $proyek->tasks()->delete();
+            $proyek->progress()->delete();
+            $proyek->update([
+                'mandor_id'     => null,
+                'tanggal_mulai' => null,
+                'status_proyek' => 'Dibatalkan',
+            ]);
+        }
+
+        $mandor->update(['status' => 'aktif']);
 
         return response()->json([
             'success' => true,

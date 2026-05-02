@@ -9,6 +9,7 @@ use App\Models\Mandor;
 use App\Models\NegosiasiRenovasi;
 use App\Models\PenawaranRenovasi;
 use App\Models\RequestRenovasi;
+use App\Models\Proyek;
 use App\Services\RenovasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -283,6 +284,17 @@ class RenovasiController extends Controller
         $this->renovasiService->expirePendingOffers();
         $mandor = $this->currentMandor();
 
+        // Cek proyek pembangunan aktif — redirect kalau ada
+        $proyekBangun = Proyek::where('mandor_id', $mandor->id)
+            ->where('status_proyek', 'In Progress')
+            ->where('jenis_proyek', 'Bangun Rumah')
+            ->exists();
+
+        if ($proyekBangun) {
+            return redirect()->route('mandor.proyek.tracking');
+        }
+
+        // Sisanya tidak diubah
         $acceptedOffer = PenawaranRenovasi::with(['requestRenovasi.customer.user', 'materialRenovasi.material'])
             ->where('mandor_id', $mandor->id)
             ->where('status_penawaran', 'diterima')
@@ -296,11 +308,11 @@ class RenovasiController extends Controller
             ->latest()
             ->first();
 
-        $isHaveProject = false;
+        $isHaveProject    = false;
         $isHaveRenovation = (bool) ($acceptedOffer || $pendingOffer);
-        $isAccepted = (bool) $acceptedOffer;
+        $isAccepted       = (bool) $acceptedOffer;
 
-        $offer = $acceptedOffer ?? $pendingOffer;
+        $offer          = $acceptedOffer ?? $pendingOffer;
         $renovationData = null;
 
         if ($offer && $offer->requestRenovasi) {
@@ -310,25 +322,26 @@ class RenovasiController extends Controller
             });
 
             $renovationData = [
-                'request_id' => sprintf('REV-%03d', $offer->requestRenovasi->id),
-                'customer_name' => $offer->requestRenovasi->customer?->user?->name ?? 'Customer',
+                'request_id'     => sprintf('REV-%03d', $offer->requestRenovasi->id),
+                'customer_name'  => $offer->requestRenovasi->customer?->user?->name ?? 'Customer',
                 'customer_phone' => $offer->requestRenovasi->customer?->user?->phone_number ?? '-',
-                'biaya_total' => $this->renovasiService->formatRupiah((int) $offer->estimasi_biaya + $materialsTotal),
+                'biaya_total'    => $this->renovasiService->formatRupiah((int) $offer->estimasi_biaya + $materialsTotal),
                 'biaya_renovasi' => $this->renovasiService->formatRupiah((int) $offer->estimasi_biaya),
-                'tanggal_mulai' => optional($offer->updated_at ?? $offer->created_at)->format('d M Y'),
-                'deskripsi' => $offer->requestRenovasi->deskripsi_renovasi,
-                'analisis' => $offer->analisis_dari_mandor,
-                'photos' => $offer->requestRenovasi->getFotoDetailUrls()
+                'tanggal_mulai'  => optional($offer->updated_at ?? $offer->created_at)->format('d M Y'),
+                'deskripsi'      => $offer->requestRenovasi->deskripsi_renovasi,
+                'analisis'       => $offer->analisis_dari_mandor,
+                'photos'         => $offer->requestRenovasi->getFotoDetailUrls()
                     ?: [asset('images/aset/user-dummy.jpg')],
-                'request_db_id' => $offer->requestRenovasi->id,
+                'request_db_id'  => $offer->requestRenovasi->id,
             ];
         }
 
+        // Tambah proyek & persentase null supaya blade tidak error
         return view('mandor.mandor_tracking', compact(
             'isHaveProject',
             'isHaveRenovation',
             'isAccepted',
-            'renovationData'
+            'renovationData',
         ));
     }
 

@@ -120,228 +120,171 @@
                   </div>
               </section>
          @endif
-     @else
-         <header class="mandor-project-head">
-             <div class="mandor-project-main">
-                 <nav class="mandor-project-breadcrumb">
-                     <span class="material-symbols-outlined mandor-icon-sm">home_work</span>
-                     <span class="mandor-project-label">Active Project</span>
-                 </nav>
-                 <h1 class="mandor-project-title">
-                     Modern Villa Kemang
-                 </h1>
-                 <div class="mandor-project-meta-row">
-                     <div class="mandor-project-meta-pill">
-                         <span class="material-symbols-outlined mandor-icon-primary">person</span>
-                         <span>Budi Doremi</span>
-                     </div>
-                     <div class="mandor-project-meta-pill">
-                         <span class="material-symbols-outlined mandor-icon-primary">call</span>
-                         <span>+62 812-3456-7890</span>
-                     </div>
+    @else
+        <header class="mandor-project-head">
+            <div class="mandor-project-main">
+                <nav class="mandor-project-breadcrumb">
+                    <span class="material-symbols-outlined mandor-icon-sm">home_work</span>
+                    <span class="mandor-project-label">Active Project</span>
+                </nav>
+                <h1 class="mandor-project-title">
+                    {{ $proyek->detailBangun?->desainRumah?->tipe_rumah ?? $proyek->jenis_proyek }}
+                </h1>
+                <div class="mandor-project-meta-row">
+                    <div class="mandor-project-meta-pill">
+                        <span class="material-symbols-outlined mandor-icon-primary">person</span>
+                        <span>{{ $proyek->customer?->user?->name ?? '-' }}</span>
+                    </div>
+                    <div class="mandor-project-meta-pill">
+                        <span class="material-symbols-outlined mandor-icon-primary">call</span>
+                        <span>{{ $proyek->customer?->user?->phone_number ?? '-' }}</span>
+                    </div>
+                    <div class="mandor-project-meta-pill">
+                        <span class="material-symbols-outlined mandor-icon-primary">location_on</span>
+                        <span>{{ $proyek->alamat_proyek }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mandor-project-dates">
+                <div class="mandor-date-row mandor-date-row-divider">
+                    <span class="mandor-date-label">Tanggal Mulai</span>
+                    <span class="mandor-date-value">
+                        {{ $proyek->tanggal_mulai ? \Carbon\Carbon::parse($proyek->tanggal_mulai)->format('d M Y') : '-' }}
+                    </span>
+                </div>
+                <div class="mandor-date-row">
+                    <span class="mandor-date-label">Estimasi Selesai</span>
+                    <span class="mandor-date-value">
+                        {{ $proyek->detailBangun?->desainRumah?->estimasi_durasi && $proyek->tanggal_mulai
+                            ? \Carbon\Carbon::parse($proyek->tanggal_mulai)->addMonths($proyek->detailBangun->desainRumah->estimasi_durasi)->format('d M Y')
+                            : '-' }}
+                    </span>
+                </div>
+            </div>
+        </header>
 
-                 </div>
-             </div>
+        <div class="mandor-main-grid">
+            <section class="mandor-progress-column">
+                <div class="mandor-progress-card">
+                    <div class="mandor-progress-bg-shape"></div>
+                    <div class="mandor-progress-head">
+                        <div>
+                            <p class="mandor-progress-kicker">Overall Progress</p>
+                            <h2 class="mandor-progress-title">Proyek Pembangunan</h2>
+                        </div>
+                        <span class="mandor-progress-number" id="persentase-text">{{ $persentase }}%</span>
+                    </div>
+                    <div class="mandor-progress-track">
+                        <div class="mandor-progress-fill" id="persentase-fill" style="width: {{ $persentase }}%"></div>
+                    </div>
+                    <div class="mandor-current-milestone">
+                        <div class="mandor-current-milestone-icon-wrap">
+                            <span class="material-symbols-outlined mandor-icon-tertiary">engineering</span>
+                        </div>
+                        <div>
+                            <p class="mandor-current-milestone-label">Milestone Saat Ini</p>
+                            <h3 class="mandor-current-milestone-title" id="milestone-text">{{ $milestoneAktif }}</h3>
+                        </div>
+                    </div>
+                </div>
 
-             <div class="mandor-project-dates">
-                 <div class="mandor-date-row mandor-date-row-divider">
-                     <span class="mandor-date-label">Tanggal Mulai</span>
-                     <span class="mandor-date-value">12 Jan 2024</span>
-                 </div>
-                 <div class="mandor-date-row">
-                     <span class="mandor-date-label">Estimasi Selesai</span>
-                     <span class="mandor-date-value">15 Nov 2024</span>
-                 </div>
-             </div>
-         </header>
+                <div class="mandor-task-block">
+                    <h3 class="mandor-task-heading">
+                        <span class="material-symbols-outlined mandor-icon-primary-container">assignment</span>
+                        Task List
+                    </h3>
+                    <div class="mandor-task-list" id="task-list">
+                        @foreach ($proyek->tasks->sortBy('is_selesai') as $task)
+                            <div class="mandor-task-item {{ $task->is_selesai ? 'completed' : '' }}" 
+                                id="task-{{ $task->id }}"
+                                style="{{ $loop->index >= 4 ? 'display:none' : '' }}">
+                                <div class="mandor-task-item-left">
+                                    <span class="material-symbols-outlined mandor-icon-primary-container">
+                                        {{ $task->is_selesai ? 'check_circle' : 'radio_button_unchecked' }}
+                                    </span>
+                                    <span class="mandor-task-item-text">{{ $task->nama_task }}</span>
+                                </div>
+                                @if (!$task->is_selesai)
+                                    <button class="mandor-complete-btn" onclick="completeTask({{ $task->id }}, this)">
+                                        Complete
+                                    </button>
+                                @else
+                                    <span class="mandor-task-done-label">Selesai</span>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    @if ($proyek->tasks->count() > 4)
+                        <button class="mandor-show-more-btn" id="show-more-btn" onclick="toggleShowMore()">
+                            <span class="material-symbols-outlined">expand_more</span>
+                            Lihat Semua Task ({{ $proyek->tasks->count() }})
+                        </button>
+                    @endif
+                </div>
+            </section>
 
-         <div class="mandor-main-grid">
-             <section class="mandor-progress-column">
-                 <div class="mandor-progress-card">
-                     <div class="mandor-progress-bg-shape"></div>
-                     <div class="mandor-progress-head">
-                         <div>
-                             <p class="mandor-progress-kicker">Overall Progress
-                             </p>
-                             <h2 class="mandor-progress-title">Proyek Pembangunan</h2>
-                         </div>
-                         <span class="mandor-progress-number">50%</span>
-                     </div>
-                     <div class="mandor-progress-track">
-                         <div class="mandor-progress-fill">
-                         </div>
-                     </div>
-                     <div class="mandor-current-milestone">
-                         <div class="mandor-current-milestone-icon-wrap">
-                             <span class="material-symbols-outlined mandor-icon-tertiary">engineering</span>
-                         </div>
-                         <div>
-                             <p class="mandor-current-milestone-label">Milestone Saat Ini</p>
-                             <h3 class="mandor-current-milestone-title">Pekerjaan Struktur Lantai 1</h3>
-                         </div>
-                     </div>
-                 </div>
+            <section class="mandor-activity-column">
+                <div class="mandor-activity-card">
+                    <h3 class="mandor-activity-heading">Aktivitas Sebelumnya</h3>
+                    <div class="mandor-activity-list" id="aktivitas-list">
+                        @forelse ($proyek->aktivitas as $aktivitas)
+                            <div class="mandor-activity-item">
+                                <div class="mandor-activity-bar mandor-activity-bar-active"></div>
+                                <div>
+                                    <p class="mandor-activity-title">{{ $aktivitas->judul }}</p>
+                                    <p class="mandor-activity-desc">{{ $aktivitas->deskripsi }}</p>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="mandor-activity-empty">Belum ada aktivitas.</p>
+                        @endforelse
+                    </div>
 
-                 <div class="mandor-task-block">
-                     <h3 class="mandor-task-heading">
-                         <span class="material-symbols-outlined mandor-icon-primary-container">assignment</span>
-                         Task List
-                     </h3>
-                     <div class="mandor-task-list">
-                         <div class="mandor-task-item">
-                             <div class="mandor-task-item-left">
-                                 <span class="material-symbols-outlined mandor-icon-primary-container"
-                                     data-weight="fill">radio_button_unchecked</span>
-                                 <span class="mandor-task-item-text">Pemasangan Bekisting Kolom</span>
-                             </div>
-                             <button class="mandor-complete-btn">Complete</button>
-                         </div>
-                         <div class="mandor-task-item">
-                             <div class="mandor-task-item-left">
-                                 <span class="material-symbols-outlined mandor-icon-primary-container"
-                                     data-weight="fill">radio_button_unchecked</span>
-                                 <span class="mandor-task-item-text">Fabrikasi Besi Tulangan Utama</span>
-                             </div>
-                             <button class="mandor-complete-btn">Complete</button>
-                         </div>
-                         <div class="mandor-task-item">
-                             <div class="mandor-task-item-left">
-                                 <span class="material-symbols-outlined mandor-icon-primary-container"
-                                     data-weight="fill">radio_button_unchecked</span>
-                                 <span class="mandor-task-item-text">Leveling Lantai Kerja</span>
-                             </div>
-                             <button class="mandor-complete-btn">Complete</button>
-                         </div>
-                     </div>
-                 </div>
-             </section>
+                    <div class="mandor-new-activity">
+                        <h4 class="mandor-new-activity-title">Tulis Aktivitas Baru</h4>
+                        <div class="mandor-new-activity-fields">
+                            <input class="mandor-input" id="input-judul" placeholder="Judul Aktivitas" type="text" />
+                            <textarea class="mandor-textarea" id="input-deskripsi" placeholder="Isi Aktivitas" rows="3"></textarea>
+                        </div>
+                        <button class="mandor-add-activity-btn" onclick="tambahAktivitas({{ $proyek->id }})">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            Tambah Aktivitas
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
 
-             <section class="mandor-activity-column">
-                 <div class="mandor-activity-card">
-                     <h3 class="mandor-activity-heading">Aktivitas Sebelumnya</h3>
-                     <div class="mandor-activity-list">
-                         <div class="mandor-activity-item">
-                             <div class="mandor-activity-bar mandor-activity-bar-active"></div>
-                             <div>
-                                 <p class="mandor-activity-title">Pengecoran Dak</p>
-                                 <p class="mandor-activity-desc">Mengecor dak dalam rumah</p>
-                             </div>
-                         </div>
-                         <div class="mandor-activity-item">
-                             <div class="mandor-activity-bar"></div>
-                             <div>
-                                 <p class="mandor-activity-title">Material Bata Tiba</p>
-                                 <p class="mandor-activity-desc">Persiapan bata untuk konstruksi
-                                 </p>
-                             </div>
-                         </div>
-                         <div class="mandor-activity-item">
-                             <div class="mandor-activity-bar"></div>
-                             <div>
-                                 <p class="mandor-activity-title">Cek Instalasi Listrik</p>
-                                 <p class="mandor-activity-desc">Memeriksa instalasi listrik di
-                                     lokasi</p>
-                             </div>
-                         </div>
-                     </div>
+        <section class="mandor-docs-section">
+            <div class="mandor-docs-head">
+                <h2 class="mandor-docs-title">Dokumentasi Lapangan</h2>
+                <label class="mandor-upload-btn" for="input-foto">
+                    <span class="material-symbols-outlined">upload</span>
+                    Unggah Foto
+                </label>
+                <input type="file" id="input-foto" accept="image/*" style="display:none"
+                    onchange="uploadDokumentasi({{ $proyek->id }}, this)">
+            </div>
+            <div class="mandor-docs-grid" id="dokumentasi-grid">
+                <label class="mandor-upload-placeholder" for="input-foto">
+                    <span class="material-symbols-outlined mandor-upload-icon">add_a_photo</span>
+                    <span class="mandor-upload-text">Upload Foto Baru</span>
+                    <p class="mandor-upload-hint">Format JPG, PNG (Max 5MB)</p>
+                </label>
+                @foreach ($proyek->dokumentasi as $dok)
+                    <div class="mandor-doc-photo-card">
+                        <img src="{{ asset('storage/' . $dok->path_foto) }}" alt="Dokumentasi" class="mandor-doc-photo">
+                        <div class="mandor-doc-overlay">
+                            <span class="mandor-doc-caption">{{ $dok->created_at->format('d M Y') }}</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
+    </section>
+@endsection
 
-                     <div class="mandor-new-activity">
-                         <h4 class="mandor-new-activity-title">Tulis Aktivitas Baru</h4>
-                         <div class="mandor-new-activity-fields">
-                             <input class="mandor-input" placeholder="Judul Aktivitas" type="text" />
-                             <textarea class="mandor-textarea" placeholder="Isi Aktivitas" rows="3"></textarea>
-                         </div>
-                         <button class="mandor-add-activity-btn">
-                             <span class="material-symbols-outlined">add_circle</span>
-                             Tambah Aktivitas
-                         </button>
-                     </div>
-                 </div>
-             </section>
-         </div>
-
-         <section class="mandor-docs-section">
-             <div class="mandor-docs-head">
-                 <h2 class="mandor-docs-title">Dokumentasi Lapangan</h2>
-                 <button class="mandor-upload-btn">
-                     <span class="material-symbols-outlined">upload</span>
-                     Unggah Foto
-                 </button>
-             </div>
-             <div class="mandor-docs-grid">
-                 <div class="mandor-upload-placeholder">
-                     <span class="material-symbols-outlined mandor-upload-icon">add_a_photo</span>
-                     <span class="mandor-upload-text">Upload Foto Baru</span>
-                     <p class="mandor-upload-hint">Format JPG, PNG (Max 5MB)</p>
-                 </div>
-
-                 <div class="mandor-doc-photo-card">
-                     <img src="{{ asset('images/aset/construction.jpg') }}" alt="Documentation 1"
-                         class="mandor-doc-photo">
-
-                     <div class="mandor-doc-overlay">
-                         <span class="mandor-doc-caption">12 Mei 2024</span>
-                     </div>
-                 </div>
-
-                 <div class="mandor-doc-photo-card">
-                     <img src="{{ asset('images/aset/construction.jpg') }}" alt="Documentation 2"
-                         class="mandor-doc-photo">
-
-                     <div class="mandor-doc-overlay">
-                         <span class="mandor-doc-caption">10 Mei 2024</span>
-                     </div>
-                 </div>
-
-                 <div class="mandor-doc-photo-card">
-                     <img src="{{ asset('images/aset/construction.jpg') }}" alt="Documentation 3"
-                         class="mandor-doc-photo">
-
-                     <div class="mandor-doc-overlay">
-                         <span class="mandor-doc-caption">08 Mei 2024</span>
-                     </div>
-                 </div>
-             </div>
-     @endif
-     </section>
- @endsection
- @push('scripts')
-     <script>
-         (function() {
-             const doneButton = document.getElementById('mark-renovation-done-btn');
-             const tokenMeta = document.querySelector('meta[name="csrf-token"]');
-             const csrfToken = tokenMeta ? tokenMeta.getAttribute('content') : '';
-
-             if (!doneButton) {
-                 return;
-             }
-
-             doneButton.addEventListener('click', async function() {
-                 const requestId = doneButton.getAttribute('data-request-id');
-                 if (!requestId) {
-                     return;
-                 }
-
-                 const response = await fetch(`/mandor/renovation/${requestId}/done`, {
-                     method: 'POST',
-                     headers: {
-                         'Accept': 'application/json',
-                         'Content-Type': 'application/json',
-                         'X-CSRF-TOKEN': csrfToken
-                     },
-                     body: JSON.stringify({})
-                 });
-
-                 const data = await response.json().catch(() => ({}));
-
-                 if (!response.ok) {
-                     alert(data.message || 'Gagal menandai renovasi selesai.');
-                     return;
-                 }
-
-                 alert(data.message || 'Renovasi berhasil ditandai selesai.');
-                 window.location.reload();
-             });
-         })();
-     </script>
- @endpush
+@push('scripts')
+    <script src="{{ asset('js/mandor/tracking_proyek.js') }}"></script>
+@endpush
