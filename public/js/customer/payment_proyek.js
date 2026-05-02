@@ -101,9 +101,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (progressBtn) {
         progressBtn.addEventListener('click', () => {
             const isMandorAssigned = progressBtn.getAttribute('data-mandor') === 'true';
+            const proyekId = progressBtn.getAttribute('data-proyek-id'); // tambah ini di blade
 
             if (isMandorAssigned) {
-                alert("OTW ke page progress tracking!");
+                window.location.href = `/proyek/${proyekId}/tracking`;
             } else {
                 alert("Maaf, Mandor belum diassign. Mohon tunggu sebentar!");
             }

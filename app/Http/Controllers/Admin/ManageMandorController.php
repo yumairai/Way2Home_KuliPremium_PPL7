@@ -53,8 +53,11 @@ class ManageMandorController extends Controller
         $proyek->update([
             'mandor_id'     => $mandor->id,
             'tanggal_mulai' => now(),
-            // Ganti status proyek sesuai flow kamu setelah mandor diassign
-            // 'status_proyek' => 'Sedang Dikerjakan',
+            'status_proyek' => 'In Progress',
+        ]);
+
+        $mandor->update([ 
+            'status' => 'nonaktif',
         ]);
 
         return response()->json([

@@ -163,7 +163,8 @@ $isProyek = $isMandor;
                 </button>
                 @else
                 <button class="btn-action btn-progress-action" id="progressBtn"
-                    data-mandor="{{ $isMandor ? 'true' : 'false' }}">
+                    data-mandor="{{ $isMandor ? 'true' : 'false' }}"
+                    data-proyek-id="{{ $proyek->id }}">
                     <span class="material-symbols-outlined">analytics</span>
                     Pantau Progress
                 </button>

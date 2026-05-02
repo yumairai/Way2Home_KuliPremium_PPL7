@@ -28,8 +28,7 @@ class Mandor extends Model
     public function proyekAktif()
     {
         return $this->hasOne(Proyek::class, 'mandor_id')
-                    ->where('status_proyek', 'Pengalokasian Mandor');
-        // Ganti status sesuai flow kamu saat mandor sudah diassign
+                    ->whereNotIn('status_proyek', ['Selesai', 'Dibatalkan']);
     }
 
     public function penawaranRenovasi()

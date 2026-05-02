@@ -96,9 +96,9 @@ Route::middleware(['auth'])->group(function () {
 
         Route::prefix('project')->group(function () {
             Route::redirect('/', '/project/1');
-            Route::get('/{id}/tracking', function () {
+            Route::get('/{id}/tracking', function ($id) {
                 return view('customer-layouts.customer_tracking');
-            })->where('id', '[1-5]');
+            });
             Route::get('/{id}', [ProyekController::class, 'show'])->where('id', '[1-5]');
         });
 
@@ -110,6 +110,9 @@ Route::middleware(['auth'])->group(function () {
         // Manajemen Proyek
         Route::prefix('proyek')->group(function () {
             Route::get('/', [ProyekController::class, 'index'])->name('proyek.index');
+            Route::get('/{id}/tracking', function ($id) {          // ← pindah ke sini, sebelum /{id}
+                return view('customer-layouts.customer_tracking');
+            })->name('proyek.tracking');
             Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
 
             // Action Ajax
