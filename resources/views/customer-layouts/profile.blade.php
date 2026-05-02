@@ -20,12 +20,12 @@
                         <p class="profile-lead">Perbarui informasi personal dan preferensi akun Anda.</p>
                     </header>
 
-                    <form class="profile-form">
+                    <form class="profile-form" method="POST" action="/profile">
+                        @csrf
                         <div class="profile-avatar-block">
                             <div class="profile-avatar-wrap">
                                 <div class="profile-avatar-frame">
-                                    <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="User">
-                                </div>
+                                    <img alt="avatar" src="{{ asset('images/aset/avatar.jpg') }}" />
                                 <button class="profile-avatar-edit-btn" type="button" aria-label="Edit foto profil">
                                     <span class="material-symbols-outlined">edit</span>
                                 </button>
@@ -42,7 +42,7 @@
                                     <span class="material-symbols-outlined profile-label-icon">person</span>
                                     Nama Lengkap
                                 </label>
-                                <input class="profile-input" type="text" value="Robby Azwan" />
+                                <input class="profile-input" type="text" name="name" value="{{ $user->name }}">
                             </div>
 
                             <div class="profile-field-grid">
@@ -51,14 +51,14 @@
                                         <span class="material-symbols-outlined profile-label-icon">phone</span>
                                         Nomor HP
                                     </label>
-                                    <input class="profile-input" type="tel" value="0813-8431-0179" />
+                                    <input class="profile-input" type="tel" name="phone" value="{{ $user->phone_number }}">
                                 </div>
                                 <div class="profile-field">
                                     <label class="profile-label">
                                         <span class="material-symbols-outlined profile-label-icon">mail</span>
                                         Email
                                     </label>
-                                    <input class="profile-input" type="email" value="oby.azwan@gmail.com" />
+                                    <input class="profile-input" type="email" name="email" value="{{ $user->email }}">
                                 </div>
                             </div>
 
@@ -67,7 +67,7 @@
                                     <span class="material-symbols-outlined profile-label-icon">location_on</span>
                                     Alamat
                                 </label>
-                                <textarea class="profile-textarea" placeholder="Masukkan alamat lengkap Anda di Jawa Barat" rows="3"></textarea>
+                                <textarea class="profile-textarea" name="address" rows="3">{{ $user->address }}</textarea>
                             </div>
                         </div>
 

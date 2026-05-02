@@ -20,7 +20,7 @@
                 <span class="cart-badge" id="navCartBadge" style="display: none;">0</span>
             </div>
             <img alt="User profile avatar" class="profile-avatar" id="profileDropdown"
-                src="{{ asset('images/aset/user-dummy.jpg') }}" />
+                src="{{ asset('images/aset/avatar.jpg') }}" />
             <!-- DROPDOWN PROFILE !-->
             <div class="profile-dropdown">
                 <!-- Header dengan Background Foto (Sesuai request sebelumnya) -->
@@ -31,10 +31,10 @@
                     <div class="header-content">
                         <div class="user-info">
                             <div class="user-avatar">
-                                <img alt="avatar" src="{{ asset('images/aset/user-dummy.jpg') }}" />
+                                <img alt="avatar" src="{{ asset('images/aset/avatar.jpg') }}" />
                             </div>
                             <div class="user-details">
-                                <h3>Robby Azwan</h3>
+                                <h3>{{ auth()->user()?->name }}</h3>
                                 <p>Customer</p>
                             </div>
                         </div>
