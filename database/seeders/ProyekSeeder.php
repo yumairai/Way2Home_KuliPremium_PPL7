@@ -49,7 +49,7 @@ class ProyekSeeder extends Seeder
             [
                 'customer_id'   => $customerIds[0] ?? 1,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Bangun Rumah ',
+                'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Jl. Melati No. 12, Bandung',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Revisi Dokumen',
