@@ -3,9 +3,9 @@
         <div class="mandor-brand-row">
             <span class="mandor-brand">Way2Home</span>
             <div class="mandor-toplinks">
-                <a class="mandor-toplink mandor-toplink {{ Route::is('mandor.dashboard') ? 'active' : '' }}"
+                <a class="mandor-toplink {{ Route::is('mandor.dashboard') ? 'active' : '' }}"
                     href="{{ route('mandor.dashboard') }}">Dashboard</a>
-                <a class="mandor-toplink mandor-toplink {{ Route::is('mandor.tracking') ? 'active' : '' }}"
+                <a class="mandor-toplink {{ Route::is('mandor.tracking', 'mandor.proyek.tracking') ? 'active' : '' }}"
                     href="{{ route('mandor.tracking') }}">Tracking</a>
             </div>
         </div>
