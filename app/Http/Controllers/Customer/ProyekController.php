@@ -36,7 +36,7 @@ class ProyekController extends Controller
     public function index()
     {
         $customer = Auth::user()->customer;
-        $proyek   = Proyek::where('customer_id', $customer->id)->first();
+        $proyek   = Proyek::where('customer_id', $customer->id)->where('jenis_proyek', 'Bangun Rumah')->first();
 
         if ($proyek) {
             return redirect()->route('proyek.show', $proyek->id);
@@ -55,6 +55,7 @@ class ProyekController extends Controller
             'pembayaranDP',
         ])
             ->where('customer_id', $customer->id)
+            ->where('jenis_proyek', 'Bangun Rumah')
             ->get();
 
         $proyek = $proyeks->first(fn($p) => $p->id == $id);

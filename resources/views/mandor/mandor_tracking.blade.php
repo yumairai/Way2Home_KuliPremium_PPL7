@@ -38,7 +38,7 @@
                      </div>
                      <div class="mandor-project-meta-pill hightlight">
                          <span class="material-symbols-outlined mandor-icon-primary">payments</span>
-                         <span>Biaya Renovasi: {{ $renovationData['biaya_total'] ?? '-' }}</span>
+                         <span>Biaya Renovasi: {{ $renovationData['biaya_renovasi'] ?? '-' }}</span>
                      </div>
                  </div>
              </div>

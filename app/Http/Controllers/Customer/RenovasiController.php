@@ -268,7 +268,7 @@ class RenovasiController extends Controller
 
         DB::transaction(function () use ($offer, $requestRenovasi, $validated) {
             $offer->update(['status_penawaran' => 'ditolak']);
-            $requestRenovasi->update(['status_request' => 'dibatalkan']);
+            $requestRenovasi->update(['status_request' => 'ditolak']);
             NegosiasiRenovasi::create([
                 'request_renovasi_id' => $requestRenovasi->id,
                 'penawaran_renovasi_id' => $offer->id,
@@ -294,7 +294,7 @@ class RenovasiController extends Controller
             return 'completed';
         }
 
-        if ($request->status_request === 'dibatalkan') {
+        if ($request->status_request === 'ditolak') {
             return 'cancelled';
         }
 
