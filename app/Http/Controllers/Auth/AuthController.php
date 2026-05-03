@@ -38,14 +38,21 @@ class AuthController extends Controller
             'phone_number' => $request->phone_number,
         ]);
 
-        Customer::create(['user_id' => $user->id]);
+        // relasi customer
+        Customer::create([
+            'user_id' => $user->id
+        ]);
 
+        // login otomatis
         Auth::login($user);
         $request->session()->regenerate();
 
+        // 🔥 kirim email verifikasi
+        $user->sendEmailVerificationNotification();
+
         return response()->json([
-            'message'  => 'Register Berhasil',
-            'redirect' => route('customer-layouts.dashboard')
+            'message'  => 'Register berhasil, cek email untuk verifikasi.',
+            'redirect' => route('verification.notice') // ⬅️ BUKAN dashboard lagi
         ], 201);
     }
 
@@ -56,34 +63,46 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-            $dashboardRoute = $this->dashboardRouteForRole($user?->role);
-            $dashboardUrl = route($dashboardRoute);
-
-            if ($user->role === 'admin') {
-                return response()->json([
-                    'message'  => 'Login Admin Berhasil',
-                    'redirect' => $dashboardUrl
-                ], 200);
-            }
-
-            if ($user->role === 'mandor') {
-                return response()->json([
-                    'message'  => 'Login Mandor Berhasil',
-                    'redirect' => $dashboardUrl
-                ], 200);
-            }
-
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             return response()->json([
-                'message'  => 'Login Berhasil',
+                'message' => 'Email atau Password Salah'
+            ], 401);
+        }
+
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        // 🔥 CEK VERIFIKASI EMAIL DULU
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message'  => 'Email belum diverifikasi',
+                'redirect' => route('verification.notice')
+            ], 200);
+        }
+
+        // 🔥 kalau SUDAH verifikasi → lanjut role
+        $dashboardRoute = $this->dashboardRouteForRole($user?->role);
+        $dashboardUrl   = route($dashboardRoute);
+
+        if ($user->role === 'admin') {
+            return response()->json([
+                'message'  => 'Login Admin Berhasil',
                 'redirect' => $dashboardUrl
             ], 200);
         }
 
-        return response()->json(['message' => 'Email atau Password Salah'], 401);
+        if ($user->role === 'mandor') {
+            return response()->json([
+                'message'  => 'Login Mandor Berhasil',
+                'redirect' => $dashboardUrl
+            ], 200);
+        }
+
+        return response()->json([
+            'message'  => 'Login Berhasil',
+            'redirect' => $dashboardUrl
+        ], 200);
     }
 
     public function logout(Request $request)

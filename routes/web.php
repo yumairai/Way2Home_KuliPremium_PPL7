@@ -1,7 +1,10 @@
 <?php
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Customer\ProyekController;
 use App\Http\Controllers\Customer\MaterialController;
@@ -46,6 +49,39 @@ Route::prefix('material')->group(function () {
     Route::get('/materials', [MaterialController::class, 'getMaterials']);
 });
 
+// 🔔 Halaman notice (setelah register/login tapi belum verif)
+Route::get('/email/verify-notice', function () {
+    return view('email.verify-notice');
+})->middleware('auth')->name('verification.notice');
+
+
+// 🔗 Klik link dari email
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    // ✅ setelah verif → ke dashboard customer
+    return redirect()->route('customer-layouts.dashboard');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+
+// 🔁 Kirim ulang email verifikasi
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Email verifikasi dikirim ulang!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+
+
+Route::get('/test-email', function () {
+    Mail::raw('Test email verification', function ($message) {
+        $message->to('your-email@example.com')
+                ->subject('Test Verification');
+    });
+
+    return 'Email sent';
+});
+
 /*
 |--------------------------------------------------------------------------
 | Customer Routes (Sudah Login)
@@ -62,7 +98,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('customer.profile');
     Route::post('/profile', [ProfileController::class, 'update'])->name('customer.profile.update');
 
-    Route::middleware(['customer'])->group(function () {
+    Route::middleware(['auth', 'customer', 'verified'])->group(function () {
 
         // Dashboard
         Route::get('/dashboard', function () {

@@ -45,9 +45,9 @@
                     <!-- Input Nomor HP -->
                     <div class="input-group">
                         <label>Nomor HP</label>
-                        <input type="tel" id="phone" placeholder="Contoh: 081234567xxx" required
+                        <input type="tel" id="phone_number" placeholder="Contoh: 081234567xxx" required
                             pattern="[0-9]{10,14}" title="Masukkan 10-14 digit angka">
-                        <span id="error-phone" class="error-text"></span>
+                        <span id="error-phone_number" class="error-text"></span>
                     </div>
 
                     <!-- Input Password -->
@@ -145,9 +145,9 @@
                 clearError('password_confirmation');
         });
 
-        document.getElementById('phone').addEventListener('input', function() {
+        document.getElementById('phone_number').addEventListener('input', function() {
             const regex = /^[0-9]{10,14}$/;
-            !regex.test(this.value) ? showError('phone', 'Format nomor HP tidak valid.') : clearError('phone');
+            !regex.test(this.value) ? showError('phone_number', 'Format nomor HP tidak valid.') : clearError('phone_number');
         });
 
         document.getElementById('registerForm').addEventListener('submit', (e) => {
@@ -157,7 +157,7 @@
             const formData = {
                 name: document.getElementById('name').value,
                 email: document.getElementById('email').value,
-                phone_number: document.getElementById('phone').value,
+                phone_number: document.getElementById('phone_number').value,
                 password: document.getElementById('password').value,
                 password_confirmation: document.getElementById('password_confirmation').value
             };
