@@ -105,6 +105,15 @@ class ProyekController extends Controller
                         Auth::id(),
                         'proyek/dokumen'
                     );
+                    // 🔥 DEBUG PENTING
+                    if (!$path) {
+                        throw new \Exception("Upload gagal: path kosong");
+                    }
+
+                    \Log::info('UPLOAD SUCCESS', [
+                        'label' => $label,
+                        'path' => $path,
+                    ]);
                     $uploadedFiles[] = ['path' => $path, 'label' => $label];
 
                 } catch (\Exception $e) {
