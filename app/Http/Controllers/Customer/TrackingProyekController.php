@@ -31,9 +31,26 @@ class TrackingProyekController extends Controller
 
         $totalTask      = $proyek->tasks->count();
         $selesaiTask    = $proyek->tasks->where('is_selesai', true)->count();
-        $persentase     = $totalTask > 0 ? round(($selesaiTask / $totalTask) * 100) : 0;
-        $milestoneAktif = $proyek->tasks->firstWhere('is_selesai', false)?->nama_task ?? 'Semua Task Selesai';
-        $milestoneSelesai = $proyek->tasks->where('is_selesai', true)->last()?->nama_task ?? '-';
+        $milestoneAktif   = $proyek->tasks->firstWhere('is_selesai', false)?->milestone ?? 'Semua Selesai';
+        $milestoneSelesai = $proyek->tasks->where('is_selesai', true)->last()?->milestone ?? '-';
+        $bobotMilestone = [
+            'Fondasi'   => 15,
+            'Struktur'  => 35,
+            'Atap'      => 15,
+            'MEP'       => 15,
+            'Finishing' => 20,
+        ];
+
+        $persentase = 0;
+        foreach ($bobotMilestone as $milestone => $bobot) {
+            $tasks        = $proyek->tasks->where('milestone', $milestone);
+            $total        = $tasks->count();
+            $selesai      = $tasks->where('is_selesai', true)->count();
+            if ($total > 0) {
+                $persentase += ($selesai / $total) * $bobot;
+            }
+        }
+        $persentase = round($persentase);
 
         $estimasiSelesai = null;
         if ($proyek->tanggal_mulai && $proyek->detailBangun?->desainRumah?->estimasi_durasi) {
@@ -42,12 +59,27 @@ class TrackingProyekController extends Controller
                 ->format('d M Y');
         }
 
+        $milestones = collect(['Fondasi', 'Struktur', 'Atap', 'MEP', 'Finishing'])
+            ->map(function ($nama) use ($proyek) {
+                $tasks   = $proyek->tasks->where('milestone', $nama);
+                $total   = $tasks->count();
+                $selesai = $tasks->where('is_selesai', true)->count();
+                $status  = match(true) {
+                    $total === 0        => 'pending',
+                    $selesai === $total => 'completed',
+                    $selesai > 0        => 'in-progress',
+                    default             => 'pending',
+                };
+                return ['nama' => $nama, 'status' => $status];
+            });
+
         return view('customer-layouts.customer_tracking', compact(
             'proyek',
             'persentase',
             'milestoneAktif',
             'milestoneSelesai',
             'estimasiSelesai',
+            'milestones',
         ));
     }
 }

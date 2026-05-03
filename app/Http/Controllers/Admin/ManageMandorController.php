@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Mandor;
 use App\Models\Proyek;
 use App\Models\ProgressProyek;
-use Database\Seeders\ProyekTaskSeeder;
+use Database\Seeders\ProyekMilestoneSeeder;
 
 class ManageMandorController extends Controller
 {
@@ -63,14 +63,14 @@ class ManageMandorController extends Controller
         ]);
 
         // Auto-generate task standar pembangunan
-        ProyekTaskSeeder::generateForProyek($proyek->id);
+        ProyekMilestoneSeeder::generateForProyek($proyek->id);
 
         // Buat progress awal
         ProgressProyek::create([
-            'proyek_id'      => $proyek->id,
-            'milestone_aktif' => 'Pembersihan & Pengukuran Lahan',
-            'persentase'     => 0,
-            'tanggal_update' => now(),
+            'proyek_id'       => $proyek->id,
+            'milestone_aktif' => 'Fondasi',
+            'persentase'      => 0,
+            'tanggal_update'  => now(),
         ]);
 
         return response()->json([
