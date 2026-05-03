@@ -28,7 +28,19 @@ class SupabaseStorageService
     public function uploadPrivate(UploadedFile $file, int $userId, string $folder): string
     {
         $path = $userId . '/' . $folder . '/' . uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-        Storage::disk('user_private')->put($path, file_get_contents($file));
+
+        $result = Storage::disk('user_private')->put($path, file_get_contents($file));
+
+        // ❌ kalau gagal upload
+        if (!$result) {
+            throw new \Exception('Upload ke Supabase gagal (put() return false)');
+        }
+
+        // 🔥 cek benar-benar ada
+        if (!Storage::disk('user_private')->exists($path)) {
+            throw new \Exception('File tidak ditemukan setelah upload');
+        }
+
         return $path;
     }
 
