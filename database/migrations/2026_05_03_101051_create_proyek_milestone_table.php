@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('proyek_task', function (Blueprint $table) {
+        Schema::create('proyek_milestone', function (Blueprint $table) {
             $table->id();
             $table->foreignId('proyek_id')->constrained('proyek')->cascadeOnDelete();
             $table->string('nama_task');
+            $table->string('milestone');
             $table->boolean('is_selesai')->default(false);
             $table->integer('urutan');
             $table->timestamps();
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('proyek_task');
+        Schema::dropIfExists('proyek_milestone');
     }
 };

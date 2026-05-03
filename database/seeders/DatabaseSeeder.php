@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ProyekSeeder::class,
             DetailProyekBangunSeeder::class,
             DokumenProyekSeeder::class,
-            ProyekTaskSeeder::class,
+            ProyekMilestoneSeeder::class,
         ]);
     }
 }

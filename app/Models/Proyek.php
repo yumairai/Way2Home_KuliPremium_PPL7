@@ -50,7 +50,7 @@ class Proyek extends Model
 
     public function tasks()
     {
-        return $this->hasMany(ProyekTask::class, 'proyek_id')->orderBy('urutan');
+        return $this->hasMany(ProyekMilestone::class, 'proyek_id')->orderBy('urutan');
     }
 
     public function aktivitas()
