@@ -33,7 +33,7 @@
                                     <span>Ganti Foto</span>
                                 </div>
                             </div>
-                            <p class="profile-avatar-hint">FORMAT JPG ATAU PNG. MAKS 2MB.</p>
+                            <p class="profile-avatar-hint">jpg/png maks 2mb</p>
                         </div>
 
                         <div class="profile-fields">
