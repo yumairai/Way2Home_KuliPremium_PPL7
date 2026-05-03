@@ -188,7 +188,9 @@ class RekomendasiService
         if ($harga >= 1_000_000_000) {
             return 'Rp ' . number_format($harga / 1_000_000_000, 1, ',', '.') . ' M';
         }
-        return 'Rp ' . number_format($harga / 1_000_000, 0, ',', '.') . ' Jt';
+        $bulat = ceil($harga / 1_000_000) * 1_000_000;
+        return 'Rp ' . number_format($bulat, 0, ',', '.') . ' jt';
+
     }
 
     /**
