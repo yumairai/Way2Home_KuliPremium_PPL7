@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
                 'role'         => 'admin',
                 'phone_number' => '081111111111',
                 'address'      => 'Kantor Pusat Management',
+                'email_verified_at' => now(), // Admin tidak perlu verifikasi email
             ]
         );
 
@@ -58,11 +59,12 @@ class UserSeeder extends Seeder
             $user = User::updateOrCreate(
                 ['email' => $c['email']],
                 [
-                    'name'         => $c['name'],
-                    'password'     => 'passwordcustomer',
-                    'role'         => 'customer',
-                    'phone_number' => $c['phone'],
-                    'address'      => $c['address'],
+                    'name'              => $c['name'],
+                    'password'          => 'passwordcustomer',
+                    'role'              => 'customer',
+                    'phone_number'      => $c['phone'],
+                    'address'           => $c['address'],
+                    'email_verified_at' => now(), // Customer seed otomatis verified
                 ]
             );
 
@@ -107,6 +109,7 @@ class UserSeeder extends Seeder
                     'role'         => 'mandor',
                     'phone_number' => $m['phone'],
                     'address'      => $m['address'],
+                    'email_verified_at' => now(), // Mandor tidak perlu verifikasi email
                 ]
             );
         }

@@ -10,6 +10,7 @@ use App\Models\NegosiasiRenovasi;
 use App\Models\PenawaranRenovasi;
 use App\Models\RequestRenovasi;
 use App\Models\Proyek;
+use App\Models\MandorActivityHistory;
 use App\Services\RenovasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -119,13 +120,26 @@ class RenovasiController extends Controller
         $completedProjects = 0;
         $requestCount = $renovationRequests->count();
 
+        // Ambil history aktivitas mandor
+        $activityHistory = MandorActivityHistory::where('mandor_id', $mandor->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'title' => $activity->description,
+                    'timestamp' => $activity->created_at->format('d M Y H:i'),
+                ];
+            });
+
         return view('mandor.mandor_dashboard', compact(
             'renovationRequests',
             'requestMap',
             'materialCatalog',
             'activeProjects',
             'completedProjects',
-            'requestCount'
+            'requestCount',
+            'activityHistory'
         ));
     }
 
@@ -160,12 +174,12 @@ class RenovasiController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($validated, $requestRenovasi, $mandor) {
-            $isNewOffer = !PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
-                ->where('mandor_id', $mandor->id)
-                ->where('status_penawaran', 'pending')
-                ->exists();
+        $isNewOffer = !PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
+            ->where('mandor_id', $mandor->id)
+            ->where('status_penawaran', 'pending')
+            ->exists();
 
+        DB::transaction(function () use ($validated, $requestRenovasi, $mandor, $isNewOffer) {
             $offer = PenawaranRenovasi::updateOrCreate(
                 [
                     'request_renovasi_id' => $requestRenovasi->id,
@@ -204,6 +218,11 @@ class RenovasiController extends Controller
                 'nominal_tawaran' => $validated['estimasi_biaya'],
             ]);
         });
+
+        // Log aktivitas submit offer
+        if ($isNewOffer) {
+            MandorActivityHistory::logOfferSubmitted($mandor, $requestRenovasi, $validated['estimasi_biaya']);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -365,6 +384,9 @@ class RenovasiController extends Controller
         DB::transaction(function () use ($requestRenovasi, $mandor) {
             $requestRenovasi->update(['status_request' => 'selesai']);
             $this->renovasiService->syncMandorStatus($mandor);
+            
+            // Log aktivitas renovasi selesai
+            MandorActivityHistory::logRenovationCompleted($mandor, $requestRenovasi);
         });
 
         return response()->json([

@@ -46,73 +46,20 @@
             </div>
             <div class="dashboard-activity-list dashboard-activity-list-collapsed" id="dashboard-activity-list">
                 <div class="dashboard-activity-track">
-                    <article class="dashboard-activity-item">
+                    @forelse($activityHistory as $activity)
+                    <article class="dashboard-activity-item{{ $loop->index >= 4 ? ' dashboard-activity-item-hidden' : '' }}">
                         <div class="dashboard-activity-connector"></div>
                         <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Diassign proyek pembangunan oleh admin</p>
-                            <span class="dashboard-activity-timestamp">1 Mei 2026 14:30</span>
+                            <p class="dashboard-activity-title">{{ $activity['title'] }}</p>
+                            <span class="dashboard-activity-timestamp">{{ $activity['timestamp'] }}</span>
                         </div>
                     </article>
-
-                    <article class="dashboard-activity-item">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Menyelesaikan proyek pembangunan tertentu</p>
-                            <span class="dashboard-activity-timestamp">29 April 2026 11:15</span>
-                        </div>
-                    </article>
-
-                    <article class="dashboard-activity-item">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Mengambil dan mereview renovasi tertentu</p>
-                            <span class="dashboard-activity-timestamp">28 April 2026 09:45</span>
-                        </div>
-                    </article>
-
-                    <article class="dashboard-activity-item">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Melakukan negosiasi dengan renovasi tertentu</p>
-                            <span class="dashboard-activity-timestamp">27 April 2026 16:20</span>
-                        </div>
-                    </article>
-
-                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Tawaran renovasi diterima customer</p>
-                            <span class="dashboard-activity-timestamp">26 April 2026 13:50</span>
-                        </div>
-                    </article>
-
-                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Tawaran + negosiasi renovasi diterima customer</p>
-                            <span class="dashboard-activity-timestamp">25 April 2026 10:30</span>
-                        </div>
-                    </article>
-
-                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Tawaran renovasi ditolak customer</p>
-                            <span class="dashboard-activity-timestamp">24 April 2026 15:05</span>
-                        </div>
-                    </article>
-
-                    <article class="dashboard-activity-item dashboard-activity-item-hidden">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">Telah menyelesaikan renovasi tertentu</p>
-                            <span class="dashboard-activity-timestamp">23 April 2026 12:00</span>
-                        </div>
-                    </article>
+                    @empty
+                    <div class="dashboard-activity-empty">
+                        <p>Belum ada aktivitas</p>
+                    </div>
+                    @endforelse
                 </div>
-            </div>
-            <div class="dashboard-activity-empty" id="dashboard-activity-empty" style="display: none;">
-                <p>Belum ada aktivitas</p>
             </div>
             <button class="dashboard-activity-expand-btn" id="dashboard-activity-expand-btn" type="button">Lihat
                 keseluruhan</button>

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Mandor;
 use App\Models\Proyek;
 use App\Models\ProgressProyek;
+use App\Models\MandorActivityHistory;
 use Database\Seeders\ProyekMilestoneSeeder;
 
 class ManageMandorController extends Controller
@@ -73,6 +74,9 @@ class ManageMandorController extends Controller
             'tanggal_update'  => now(),
         ]);
 
+        // Log aktivitas mandor
+        MandorActivityHistory::logAssignedProject($mandor, $proyek);
+
         return response()->json([
             'success' => true,
             'message' => "Mandor {$mandor->user->name} berhasil diassign!"
@@ -89,13 +93,17 @@ class ManageMandorController extends Controller
         $proyek = Proyek::where('mandor_id', $mandor->id)->first();
 
         if ($proyek) {
+            // Hapus semua data terkait proyek
             $proyek->tasks()->delete();
             $proyek->progress()->delete();
-            $proyek->update([
-                'mandor_id'     => null,
-                'tanggal_mulai' => null,
-                'status_proyek' => 'Dibatalkan',
-            ]);
+            $proyek->pembayaran()->delete();
+            $proyek->detailBangun()?->delete();
+            $proyek->dokumen()->delete();
+            $proyek->aktivitas()->delete();
+            $proyek->dokumentasi()->delete();
+            
+            // Hapus proyek secara permanen
+            $proyek->delete();
         }
 
         $mandor->update(['status' => 'aktif']);

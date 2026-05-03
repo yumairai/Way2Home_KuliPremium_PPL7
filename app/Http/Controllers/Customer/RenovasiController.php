@@ -8,6 +8,7 @@ use App\Models\NegosiasiRenovasi;
 use App\Models\PenawaranRenovasi;
 use App\Models\Proyek;
 use App\Models\RequestRenovasi;
+use App\Models\MandorActivityHistory;
 use App\Services\RenovasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -174,6 +175,9 @@ class RenovasiController extends Controller
 
             $offer->update(['status_penawaran' => 'diterima']);
             $requestRenovasi->update(['status_request' => 'disetujui']);
+            
+            // Log aktivitas tawaran diterima
+            MandorActivityHistory::logOfferAccepted($offer->mandor, $offer);
             NegosiasiRenovasi::create([
                 'request_renovasi_id' => $requestRenovasi->id,
                 'penawaran_renovasi_id' => $offer->id,
@@ -237,6 +241,9 @@ class RenovasiController extends Controller
             'pesan' => $validated['pesan'],
             'nominal_tawaran' => $validated['nominal_tawaran'] ?? null,
         ]);
+
+        // Log aktivitas negosiasi diterima untuk mandor
+        MandorActivityHistory::logNegotiationReceived($offer->mandor, $requestRenovasi, NegosiasiRenovasi::latest()->first());
 
         return response()->json([
             'status' => 'success',

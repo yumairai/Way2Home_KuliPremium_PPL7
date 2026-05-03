@@ -9,6 +9,7 @@ use App\Models\ProyekAktivitas;
 use App\Models\ProyekDokumentasi;
 use App\Models\ProgressProyek;
 use App\Models\Mandor;
+use App\Models\MandorActivityHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -85,6 +86,9 @@ class TrackingProyekController extends Controller
             $proyek->update(['status_proyek' => 'Selesai']);
             $mandor = $this->currentMandor();
             $mandor->update(['status' => 'aktif']);
+            
+            // Log aktivitas penyelesaian proyek
+            MandorActivityHistory::logCompletedProject($mandor, $proyek);
         }
 
         return response()->json([

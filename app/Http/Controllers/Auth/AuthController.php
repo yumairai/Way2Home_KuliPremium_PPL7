@@ -73,15 +73,15 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        // 🔥 CEK VERIFIKASI EMAIL DULU
-        if (!$user->hasVerifiedEmail()) {
+        // 🔥 CEK VERIFIKASI EMAIL - Hanya untuk customer
+        if ($user->role === 'customer' && !$user->hasVerifiedEmail()) {
             return response()->json([
                 'message'  => 'Email belum diverifikasi',
                 'redirect' => route('verification.notice')
             ], 200);
         }
 
-        // 🔥 kalau SUDAH verifikasi → lanjut role
+        // 🔥 Admin dan mandor langsung login tanpa perlu verifikasi email
         $dashboardRoute = $this->dashboardRouteForRole($user?->role);
         $dashboardUrl   = route($dashboardRoute);
 
