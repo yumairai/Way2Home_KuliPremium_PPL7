@@ -18,7 +18,7 @@
                 </div>
                 <div class="dashboard-stat-copy">
                     <p class="dashboard-stat-label">Project Saat Ini</p>
-                    <p class="dashboard-stat-value">{{ $activeProjects }}</p>
+                    <p class="dashboard-stat-value">{{ $activeProjectLabel }}</p>                
                 </div>
             </div>
             <div class="dashboard-stat-card">

@@ -131,6 +131,48 @@ class RenovasiController extends Controller
                     'timestamp' => $activity->created_at->format('d M Y H:i'),
                 ];
             });
+            $mandor = $this->currentMandor();
+
+            /**
+             * =========================
+             * PROYEK BANGUN AKTIF
+             * =========================
+             */
+            $activeBangun = Proyek::with('detailBangun')
+                ->where('mandor_id', $mandor->id)
+                ->where('status_proyek', 'In Progress')
+                ->where('jenis_proyek', 'Bangun Rumah')
+                ->first();
+
+            $activeBangunLabel = null;
+
+            if ($activeBangun) {
+                $nama = $activeBangun->detailBangun?->nama_proyek;
+
+                $activeBangunLabel = $nama
+                    ? "Bangun - {$nama} (#{$activeBangun->id})"
+                    : "Bangun - Proyek #{$activeBangun->id}";
+            }
+
+            /**
+             * =========================
+             * PROYEK RENOVASI AKTIF
+             * =========================
+             */
+            $activeRenovasi = \App\Models\PenawaranRenovasi::with('requestRenovasi')
+                ->where('mandor_id', $mandor->id)
+                ->where('status_penawaran', 'diterima')
+                ->whereHas('requestRenovasi', fn($q) =>
+                    $q->where('status_request', '!=', 'selesai')
+                )
+                ->latest()
+                ->first();
+
+            $activeRenovasiLabel = $activeRenovasi
+                ? "Renovasi - #{$activeRenovasi->requestRenovasi->id}"
+                : null;
+
+            $activeProjectLabel = $activeBangunLabel ?? $activeRenovasiLabel ?? 'Tidak ada proyek aktif';
 
         return view('mandor.mandor_dashboard', compact(
             'renovationRequests',
@@ -139,7 +181,8 @@ class RenovasiController extends Controller
             'activeProjects',
             'completedProjects',
             'requestCount',
-            'activityHistory'
+            'activityHistory',
+            'activeProjectLabel'
         ));
     }
 
