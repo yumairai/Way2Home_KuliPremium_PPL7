@@ -66,7 +66,7 @@
                             style="font-variation-settings: 'FILL' 1;">foundation</span>
                         <div>
                             <p class="tracking-meta-label">Milestone Berikutnya</p>
-                            <p class="tracking-meta-value">{{ $proyek->tasks->where('is_selesai', false)->skip(1)->first()?->nama_task ?? '-' }}</p>
+                            <p class="tracking-meta-value">{{ $proyek->tasks->where('is_selesai', false)->skip(1)->first()?->milestone ?? '-' }}</p>
                         </div>
                     </div>
                 </div>
@@ -134,30 +134,32 @@
                 <div class="tracking-milestone-wrap">
                     <div class="tracking-milestone-connector"></div>
                     <div class="tracking-milestone-grid">
-                        @foreach($proyek->tasks as $task)
+                        @foreach($milestones as $milestone)
                         <div class="tracking-milestone-item">
-                            @if($task->is_selesai)
-                            <div class="tracking-milestone-icon tracking-milestone-icon-complete">
-                                <span class="material-symbols-outlined tracking-icon-sm" style="font-variation-settings: 'FILL' 1;">check</span>
-                            </div>
-                            <div>
-                                <p class="tracking-milestone-name">{{ $task->nama_task }}</p>
-                                <span class="tracking-milestone-state tracking-state-muted">Selesai</span>
-                            </div>
+                            @if($milestone['status'] === 'completed')
+                                <div class="tracking-milestone-icon tracking-milestone-icon-complete">
+                                    <span class="material-symbols-outlined tracking-icon-sm" style="font-variation-settings: 'FILL' 1;">check</span>
+                                </div>
+                                <div>
+                                    <p class="tracking-milestone-name">{{ $milestone['nama'] }}</p>
+                                    <span class="tracking-milestone-state tracking-state-muted">Selesai</span>
+                                </div>
+                            @elseif($milestone['status'] === 'in-progress')
+                                <div class="tracking-milestone-icon tracking-milestone-icon-active">
+                                    <span class="tracking-milestone-dot"></span>
+                                </div>
+                                <div>
+                                    <p class="tracking-milestone-name">{{ $milestone['nama'] }}</p>
+                                    <span class="tracking-milestone-state tracking-state-primary">In Progress</span>
+                                </div>
                             @else
-                            <div class="tracking-milestone-icon {{ $task->nama_task === $milestoneAktif ? 'tracking-milestone-icon-active' : 'tracking-milestone-icon-pending' }}">
-                                @if($task->nama_task === $milestoneAktif)
-                                <span class="tracking-milestone-dot"></span>
-                                @else
-                                <span class="material-symbols-outlined tracking-icon-sm">hourglass_empty</span>
-                                @endif
-                            </div>
-                            <div>
-                                <p class="tracking-milestone-name {{ $task->nama_task !== $milestoneAktif ? 'tracking-state-pending' : '' }}">{{ $task->nama_task }}</p>
-                                <span class="tracking-milestone-state {{ $task->nama_task === $milestoneAktif ? 'tracking-state-primary' : 'tracking-state-pending' }}">
-                                    {{ $task->nama_task === $milestoneAktif ? 'In Progress' : 'Pending' }}
-                                </span>
-                            </div>
+                                <div class="tracking-milestone-icon tracking-milestone-icon-pending">
+                                    <span class="material-symbols-outlined tracking-icon-sm">hourglass_empty</span>
+                                </div>
+                                <div>
+                                    <p class="tracking-milestone-name tracking-state-pending">{{ $milestone['nama'] }}</p>
+                                    <span class="tracking-milestone-state tracking-state-pending">Pending</span>
+                                </div>
                             @endif
                         </div>
                         @endforeach

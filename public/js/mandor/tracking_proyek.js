@@ -85,7 +85,7 @@ async function completeTask(taskId, btn) {
 
     if (data.persentase === 100) {
         alert('Semua task selesai! Proyek telah selesai.');
-        window.location.reload();
+        window.location.href = '/mandor/dashboard';
     }
 }
 
