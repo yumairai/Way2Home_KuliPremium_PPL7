@@ -17,15 +17,17 @@ class VerifikasiProyekController extends Controller
 
         // Generate signed URL untuk semua dokumen di semua proyek
         foreach ($proyek as $item) {
-            $paths = $item->detailBangun->dokumenProyek->pluck('file_path')->toArray();
+            if ($item->detailBangun) {
+                $paths = $item->detailBangun->dokumenProyek->pluck('file_path')->toArray();
 
-            if (!empty($paths)) {
-                $signedUrls = $storageService->getAdminSignedUrls($paths);
+                if (!empty($paths)) {
+                    $signedUrls = $storageService->getAdminSignedUrls($paths);
 
-                $item->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
-                    $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
-                    return $dokumen;
-                });
+                    $item->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
+                        $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                        return $dokumen;
+                    });
+                }
             }
         }
 
@@ -37,15 +39,17 @@ class VerifikasiProyekController extends Controller
         $proyek = Proyek::with(['customer.user', 'detailBangun.dokumenProyek'])->findOrFail($id);
 
         // Generate signed URL untuk semua dokumen sekaligus (1 request)
-        $paths = $proyek->detailBangun->dokumenProyek->pluck('file_path')->toArray();
+        if ($proyek->detailBangun) {
+            $paths = $proyek->detailBangun->dokumenProyek->pluck('file_path')->toArray();
 
-        if (!empty($paths)) {
-            $signedUrls = $storageService->getAdminSignedUrls($paths);
+            if (!empty($paths)) {
+                $signedUrls = $storageService->getAdminSignedUrls($paths);
 
-            $proyek->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
-                $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
-                return $dokumen;
-            });
+                $proyek->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
+                    $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                    return $dokumen;
+                });
+            }
         }
 
         return view('admin.verifikasi.show', compact('proyek'));
@@ -61,11 +65,13 @@ class VerifikasiProyekController extends Controller
 
         $proyek = Proyek::findOrFail($id);
 
-        $allFinal = $proyek->detailBangun->dokumenProyek
-            ->every(fn($doc) => in_array($doc->status_verifikasi, ['disetujui', 'ditolak']));
+        if ($proyek->detailBangun) {
+            $allFinal = $proyek->detailBangun->dokumenProyek
+                ->every(fn($doc) => in_array($doc->status_verifikasi, ['disetujui', 'ditolak']));
 
-        if ($allFinal) {
-            return back()->with('error', 'Dokumen sudah final, tidak bisa diubah lagi.');
+            if ($allFinal && $proyek->detailBangun->dokumenProyek->isNotEmpty()) {
+                return back()->with('error', 'Dokumen sudah final, tidak bisa diubah lagi.');
+            }
         }
 
         DB::transaction(function () use ($request, $proyek) {
@@ -78,9 +84,11 @@ class VerifikasiProyekController extends Controller
             }
 
             // 2. Simpan catatan admin ke Detail Proyek Bangun
-            $proyek->detailBangun()->update([
-                'catatan_admin' => $request->catatan_admin
-            ]);
+            if ($proyek->detailBangun) {
+                $proyek->detailBangun()->update([
+                    'catatan_admin' => $request->catatan_admin
+                ]);
+            }
 
             // 3. Update status utama proyek
             $statusFinal = $request->status_proyek;
