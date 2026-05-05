@@ -66,36 +66,44 @@ class TrackingProyekController extends Controller
         $mandor = $this->currentMandor();
         abort_if($task->proyek->mandor_id !== $mandor->id, 403);
 
+        // Tandai task selesai
         $task->update(['is_selesai' => true]);
 
-        $proyek         = $task->proyek;
-        $tasks          = $proyek->tasks()->orderBy('urutan')->get();
-        $persentase     = $this->hitungPersentase($tasks);
+        $proyek = $task->proyek;
+        $tasks = $proyek->tasks()->orderBy('urutan')->get();
+        $persentase = $this->hitungPersentase($tasks);
         $milestoneAktif = $tasks->firstWhere('is_selesai', false)?->milestone ?? 'Semua Selesai';
 
+        // Update progress proyek
         ProgressProyek::updateOrCreate(
             ['proyek_id' => $proyek->id],
             [
                 'milestone_aktif' => $milestoneAktif,
-                'persentase'      => $persentase,
-                'tanggal_update'  => now(),
+                'persentase' => $persentase,
+                'tanggal_update' => now(),
             ]
         );
 
+        // Jika proyek 100% selesai, update status dan bebaskan mandor
         if ($persentase === 100) {
-            $proyek->update(['status_proyek' => 'Selesai']);
-            $mandor = $this->currentMandor();
-            $mandor->update(['status' => 'aktif']);
-            
-            // Log aktivitas penyelesaian proyek
-            MandorActivityHistory::logCompletedProject($mandor, $proyek);
+            DB::transaction(function () use ($proyek, $mandor) {
+                $proyek->update([
+                    'status_proyek' => 'Selesai',
+                    'mandor_id' => null  // Bebaskan mandor dari proyek
+                ]);
+                $mandor->update(['status' => 'aktif']);
+                
+                // Log aktivitas penyelesaian proyek
+                MandorActivityHistory::logCompletedProject($mandor, $proyek);
+            });
         }
 
         return response()->json([
-            'success'         => true,
-            'persentase'      => $persentase,
+            'success' => true,
+            'persentase' => $persentase,
             'milestone_aktif' => $milestoneAktif,
-            'is_done'         => $persentase === 100,
+            'is_done' => $persentase === 100,
+            'message' => $persentase === 100 ? 'Proyek selesai! Mandor telah dibebaskan.' : 'Task berhasil diselesaikan.',
         ]);
     }
 

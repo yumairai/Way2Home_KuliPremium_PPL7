@@ -285,7 +285,8 @@ class RenovasiController extends Controller
             ]);
 
             if ($offer->mandor) {
-                $this->renovasiService->syncMandorStatus($offer->mandor);
+                // Set mandor status to aktif karena penawaran ditolak
+                $offer->mandor->update(['status' => 'aktif']);
             }
         });
 

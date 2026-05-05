@@ -47,7 +47,8 @@ class RenovasiService
                 }
 
                 if ($offer->mandor) {
-                    $this->syncMandorStatus($offer->mandor);
+                    // Set mandor status to aktif karena penawaran expired
+                    $offer->mandor->update(['status' => 'aktif']);
                 }
             });
         }
@@ -76,20 +77,6 @@ class RenovasiService
 
         // expiry = 1 hari setelah balasan terakhir mandor
         return Carbon::parse($lastReply->created_at)->addDay();
-    }
-
-    public function syncMandorStatus(Mandor $mandor): void
-    {
-        $hasAcceptedOffer = PenawaranRenovasi::where('mandor_id', $mandor->id)
-            ->where('status_penawaran', 'diterima')
-            ->whereHas('requestRenovasi', function ($query) {
-                $query->where('status_request', '!=', 'selesai');
-            })
-            ->exists();
-
-        $mandor->update([
-            'status' => $hasAcceptedOffer ? 'nonaktif' : 'aktif',
-        ]);
     }
 
     public function formatRupiah(int $amount): string

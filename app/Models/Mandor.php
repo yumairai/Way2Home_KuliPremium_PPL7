@@ -31,6 +31,16 @@ class Mandor extends Model
                     ->whereNotIn('status_proyek', ['Selesai', 'Dibatalkan']);
     }
 
+    // Cek apakah mandor sedang mengerjakan renovasi aktif
+    public function renovasiAktif()
+    {
+        return $this->hasOne(PenawaranRenovasi::class, 'mandor_id')
+                    ->where('status_penawaran', 'diterima')
+                    ->whereHas('requestRenovasi', function ($query) {
+                        $query->where('status_request', '!=', 'selesai');
+                    });
+    }
+
     public function penawaranRenovasi()
     {
         return $this->hasMany(PenawaranRenovasi::class, 'mandor_id');

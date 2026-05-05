@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mandor;
 
 use App\Http\Controllers\Controller;
+use App\Models\DetailProyekRenovasi;
 use App\Models\Material;
 use App\Models\MaterialRenovasi;
 use App\Models\Mandor;
@@ -37,7 +38,7 @@ class RenovasiController extends Controller
             ->count();
 
         $hasActiveProject = $activeProjects > 0;
-        $isMandorAvailable = !$hasActiveProject;
+        $isMandorAvailable = $mandor->status === 'aktif';
 
         $renovationRequests = RequestRenovasi::with([
             'customer.user',
@@ -411,11 +412,11 @@ class RenovasiController extends Controller
     {
         $mandor = $this->currentMandor();
 
+        // Cek apakah mandor memiliki akses ke renovasi ini
         $acceptedOffer = PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
             ->where('mandor_id', $mandor->id)
             ->where('status_penawaran', 'diterima')
-            ->latest()
-            ->first();
+            ->exists();
 
         if (!$acceptedOffer) {
             return response()->json([
@@ -424,9 +425,19 @@ class RenovasiController extends Controller
             ], 403);
         }
 
+        // Update status renovasi dan bebaskan mandor dari proyek
         DB::transaction(function () use ($requestRenovasi, $mandor) {
             $requestRenovasi->update(['status_request' => 'selesai']);
-            $this->renovasiService->syncMandorStatus($mandor);
+            $mandor->update(['status' => 'aktif']);
+            
+            // Cari proyek renovasi yang terkait dan update status + bebaskan mandor
+            $detailRenovasi = DetailProyekRenovasi::where('request_renovasi_id', $requestRenovasi->id)->first();
+            if ($detailRenovasi && $detailRenovasi->proyek) {
+                $detailRenovasi->proyek->update([
+                    'status_proyek' => 'Selesai',
+                    'mandor_id' => null
+                ]);
+            }
             
             // Log aktivitas renovasi selesai
             MandorActivityHistory::logRenovationCompleted($mandor, $requestRenovasi);
@@ -434,7 +445,7 @@ class RenovasiController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Renovasi berhasil ditandai selesai.',
+            'message' => 'Renovasi berhasil ditandai selesai. Mandor telah dibebaskan dari proyek.',
         ]);
     }
 

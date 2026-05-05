@@ -40,7 +40,7 @@
             <div class="mandor-entries">
                 @forelse($mandors as $mandor)
                     @php
-                        $isBusy = $mandor->proyekAktif !== null;
+                        $isBusy = $mandor->status === 'nonaktif';
                     @endphp
                     <div class="mandor-entry {{ $isBusy ? 'busy' : '' }}" data-name="{{ strtolower($mandor->user->name) }}">
                         <div class="mandor-entry-info">
@@ -64,9 +64,15 @@
 
                         <div class="mandor-entry-actions">
                             <div class="mandor-entry-project">
-                                <p class="mandor-entry-project-label">Proyek Saat Ini</p>
+                                <p class="mandor-entry-project-label">Status Proyek</p>
                                 <p class="mandor-entry-project-name">
-                                    {{ $mandor->proyekAktif ? $mandor->proyekAktif->jenis_proyek : '-' }}
+                                    @if($isBusy && $mandor->proyekAktif)
+                                        {{ $mandor->proyekAktif->jenis_proyek }}
+                                    @elseif($isBusy && $mandor->renovasiAktif)
+                                        Renovasi Aktif
+                                    @else
+                                        Tidak Ada Proyek
+                                    @endif
                                 </p>
                             </div>
 
@@ -77,7 +83,7 @@
                                 </button>
                             @else
                                 <button class="mandor-assign-btn disabled" disabled>
-                                    Assign Proyek
+                                    Sedang Bertugas
                                 </button>
                             @endif
                         </div>

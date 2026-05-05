@@ -15,7 +15,7 @@ class ManageMandorController extends Controller
     public function index()
     {
         // Load mandor beserta user dan proyek aktifnya
-        $mandors = Mandor::with(['user', 'proyekAktif'])
+        $mandors = Mandor::with(['user', 'proyekAktif', 'renovasiAktif'])
             ->where('status', '!=', 'suspend')
             ->get();
 
@@ -45,6 +45,14 @@ class ManageMandorController extends Controller
 
         $mandor = Mandor::findOrFail($request->mandor_id);
         $proyek = Proyek::findOrFail($request->proyek_id);
+
+        // Cek apakah mandor sedang busy
+        if ($mandor->status === 'nonaktif') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mandor ini sedang menangani proyek lain!'
+            ], 422);
+        }
 
         if ($proyek->mandor_id !== null) {
             return response()->json([
