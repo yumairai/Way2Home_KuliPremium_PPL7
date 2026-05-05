@@ -173,6 +173,74 @@ $isProyek = $isMandor;
 
         </div>
     </section>
+
+    @if ($isProyek)
+    <div class="cicilan-section">
+        <h3 class="section-title">Periode Cicilan Rumah</h3>
+        <div class="card-grid">
+            @php
+                // Data cicilan sementara - akan diganti dengan data dari database
+                $installments = [
+                    [
+                        'periode' => 1,
+                        'price' => 'Rp 50.000.000',
+                        'due_date' => '15 Jan 2026',
+                        'card_class' => 'completed',
+                        'badge_class' => 'paid',
+                        'badge' => 'Lunas'
+                    ],
+                    [
+                        'periode' => 2,
+                        'price' => 'Rp 50.000.000',
+                        'due_date' => '15 Feb 2026',
+                        'card_class' => 'active',
+                        'badge_class' => 'pending',
+                        'badge' => 'Menunggu'
+                    ],
+                    [
+                        'periode' => 3,
+                        'price' => 'Rp 50.000.000',
+                        'due_date' => '15 Mar 2026',
+                        'card_class' => 'pending',
+                        'badge_class' => 'upcoming',
+                        'badge' => 'Akan Datang'
+                    ]
+                ];
+            @endphp
+
+            @foreach ($installments as $installment)
+                <div class="card {{ $installment['card_class'] }}">
+                    <div class="card-header">
+                        <div>
+                            <p class="periode-label {{ $installment['card_class'] === 'active' ? 'highlight' : '' }}">
+                                Periode {{ $installment['periode'] }}
+                            </p>
+                            <p class="price">{{ $installment['price'] }}</p>
+                        </div>
+                        <span class="badge {{ $installment['badge_class'] }}">{{ $installment['badge'] }}</span>
+                    </div>
+
+                    <div class="date {{ $installment['card_class'] === 'active' ? 'highlight' : '' }}">
+                        <span class="material-symbols-outlined">calendar_today</span>
+                        {{ $installment['due_date'] }}
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="info-box">
+            <span class="material-symbols-outlined">warning</span>
+            <p><b>Informasi Penting:</b> Jika cicilan belum dibayar sesuai jadwal, pengerjaan proyek
+                akan ditunda sementara.</p>
+        </div>
+
+        <button class="btn-primary" id="periodePayBtn">
+            <span class="material-symbols-outlined">payments</span>
+            Bayar Periode
+        </button>
+    </div>
+    @endif
+
 </div>
 
 <div class="project-sidebar">
