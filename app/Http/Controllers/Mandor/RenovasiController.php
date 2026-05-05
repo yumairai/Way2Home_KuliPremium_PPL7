@@ -132,48 +132,50 @@ class RenovasiController extends Controller
                     'timestamp' => $activity->created_at->format('d M Y H:i'),
                 ];
             });
-            $mandor = $this->currentMandor();
+        $mandor = $this->currentMandor();
 
-            /**
-             * =========================
-             * PROYEK BANGUN AKTIF
-             * =========================
-             */
-            $activeBangun = Proyek::with('detailBangun')
-                ->where('mandor_id', $mandor->id)
-                ->where('status_proyek', 'In Progress')
-                ->where('jenis_proyek', 'Bangun Rumah')
-                ->first();
+        /**
+         * =========================
+         * PROYEK BANGUN AKTIF
+         * =========================
+         */
+        $activeBangun = Proyek::with('detailBangun')
+            ->where('mandor_id', $mandor->id)
+            ->where('status_proyek', 'In Progress')
+            ->where('jenis_proyek', 'Bangun Rumah')
+            ->first();
 
-            $activeBangunLabel = null;
+        $activeBangunLabel = null;
 
-            if ($activeBangun) {
-                $nama = $activeBangun->detailBangun?->nama_proyek;
+        if ($activeBangun) {
+            $nama = $activeBangun->detailBangun?->nama_proyek;
 
-                $activeBangunLabel = $nama
-                    ? "Bangun - {$nama} (#{$activeBangun->id})"
-                    : "Bangun - Proyek #{$activeBangun->id}";
-            }
+            $activeBangunLabel = $nama
+                ? "Bangun - {$nama} (#{$activeBangun->id})"
+                : "Bangun - Proyek #{$activeBangun->id}";
+        }
 
-            /**
-             * =========================
-             * PROYEK RENOVASI AKTIF
-             * =========================
-             */
-            $activeRenovasi = \App\Models\PenawaranRenovasi::with('requestRenovasi')
-                ->where('mandor_id', $mandor->id)
-                ->where('status_penawaran', 'diterima')
-                ->whereHas('requestRenovasi', fn($q) =>
-                    $q->where('status_request', '!=', 'selesai')
-                )
-                ->latest()
-                ->first();
+        /**
+         * =========================
+         * PROYEK RENOVASI AKTIF
+         * =========================
+         */
+        $activeRenovasi = \App\Models\PenawaranRenovasi::with('requestRenovasi')
+            ->where('mandor_id', $mandor->id)
+            ->where('status_penawaran', 'diterima')
+            ->whereHas(
+                'requestRenovasi',
+                fn($q) =>
+                $q->where('status_request', '!=', 'selesai')
+            )
+            ->latest()
+            ->first();
 
-            $activeRenovasiLabel = $activeRenovasi
-                ? "Renovasi - #{$activeRenovasi->requestRenovasi->id}"
-                : null;
+        $activeRenovasiLabel = $activeRenovasi
+            ? "Renovasi - #{$activeRenovasi->requestRenovasi->id}"
+            : null;
 
-            $activeProjectLabel = $activeBangunLabel ?? $activeRenovasiLabel ?? 'Tidak ada proyek aktif';
+        $activeProjectLabel = $activeBangunLabel ?? $activeRenovasiLabel ?? 'Tidak ada proyek aktif';
 
         return view('mandor.mandor_dashboard', compact(
             'renovationRequests',
@@ -261,6 +263,11 @@ class RenovasiController extends Controller
                 'pesan' => $validated['feedback'],
                 'nominal_tawaran' => $validated['estimasi_biaya'],
             ]);
+
+            // Update status mandor menjadi busy saat submit offer pertama kali
+            if ($isNewOffer) {
+                $mandor->update(['status' => 'nonaktif']);
+            }
         });
 
         // Log aktivitas submit offer
@@ -429,7 +436,7 @@ class RenovasiController extends Controller
         DB::transaction(function () use ($requestRenovasi, $mandor) {
             $requestRenovasi->update(['status_request' => 'selesai']);
             $mandor->update(['status' => 'aktif']);
-            
+
             // Cari proyek renovasi yang terkait dan update status + bebaskan mandor
             $detailRenovasi = DetailProyekRenovasi::where('request_renovasi_id', $requestRenovasi->id)->first();
             if ($detailRenovasi && $detailRenovasi->proyek) {
@@ -438,7 +445,7 @@ class RenovasiController extends Controller
                     'mandor_id' => null
                 ]);
             }
-            
+
             // Log aktivitas renovasi selesai
             MandorActivityHistory::logRenovationCompleted($mandor, $requestRenovasi);
         });
