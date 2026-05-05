@@ -31,8 +31,35 @@ class TrackingProyekController extends Controller
 
         $totalTask      = $proyek->tasks->count();
         $selesaiTask    = $proyek->tasks->where('is_selesai', true)->count();
-        $milestoneAktif   = $proyek->tasks->firstWhere('is_selesai', false)?->milestone ?? 'Semua Selesai';
-        $milestoneSelesai = $proyek->tasks->where('is_selesai', true)->last()?->milestone ?? '-';
+        $daftarMilestone = ['Fondasi', 'Struktur', 'Atap', 'MEP', 'Finishing'];
+        $milestoneSelesai = '-';
+        foreach (array_reverse($daftarMilestone) as $nama) {
+            $tasks = $proyek->tasks->where('milestone', $nama);
+            if ($tasks->count() > 0 && $tasks->where('is_selesai', true)->count() === $tasks->count()) {
+                $milestoneSelesai = $nama;
+                break;
+            }
+        }
+        $milestoneAktif      = 'Semua Selesai';
+        $milestoneBerikutnya = '-';
+        foreach ($daftarMilestone as $i => $nama) {
+            $tasks   = $proyek->tasks->where('milestone', $nama);
+            $total   = $tasks->count();
+            $selesai = $tasks->where('is_selesai', true)->count();
+
+            if ($total > 0 && $selesai < $total) {
+                $milestoneAktif = $nama;
+                // Cari milestone berikutnya yang punya task
+                foreach (array_slice($daftarMilestone, $i + 1) as $next) {
+                    if ($proyek->tasks->where('milestone', $next)->count() > 0) {
+                        $milestoneBerikutnya = $next;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
         $bobotMilestone = [
             'Fondasi'   => 15,
             'Struktur'  => 35,
@@ -59,25 +86,41 @@ class TrackingProyekController extends Controller
                 ->format('d M Y');
         }
 
-        $milestones = collect(['Fondasi', 'Struktur', 'Atap', 'MEP', 'Finishing'])
-            ->map(function ($nama) use ($proyek) {
-                $tasks   = $proyek->tasks->where('milestone', $nama);
-                $total   = $tasks->count();
-                $selesai = $tasks->where('is_selesai', true)->count();
-                $status  = match(true) {
-                    $total === 0        => 'pending',
-                    $selesai === $total => 'completed',
-                    $selesai > 0        => 'in-progress',
-                    default             => 'pending',
-                };
-                return ['nama' => $nama, 'status' => $status];
-            });
+        $statusMilestone = [];
+        foreach ($daftarMilestone as $nama) {
+            $tasks   = $proyek->tasks->where('milestone', $nama);
+            $total   = $tasks->count();
+            $selesai = $tasks->where('is_selesai', true)->count();
+
+            $statusMilestone[$nama] = match(true) {
+                $total === 0        => 'pending',
+                $selesai === $total => 'completed',
+                $selesai > 0        => 'in-progress',
+                default             => 'pending',
+            };
+        }
+        $forceNext = true;
+        foreach ($daftarMilestone as $nama) {
+            if ($statusMilestone[$nama] === 'completed') {
+                continue;
+            }
+            if ($statusMilestone[$nama] === 'pending' && $forceNext) {
+                $statusMilestone[$nama] = 'in-progress';
+            }
+            break;
+        }
+
+        $milestones = collect($daftarMilestone)->map(fn($nama) => [
+            'nama'   => $nama,
+            'status' => $statusMilestone[$nama],
+        ]);
 
         return view('customer-layouts.customer_tracking', compact(
             'proyek',
             'persentase',
             'milestoneAktif',
             'milestoneSelesai',
+            'milestoneBerikutnya',
             'estimasiSelesai',
             'milestones',
         ));

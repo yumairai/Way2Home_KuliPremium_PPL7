@@ -197,7 +197,8 @@
                         @foreach ($proyek->tasks->sortBy('is_selesai') as $task)
                             <div class="mandor-task-item {{ $task->is_selesai ? 'completed' : '' }}" 
                                 id="task-{{ $task->id }}"
-                                style="{{ $loop->index >= 4 ? 'display:none' : '' }}">
+                                data-milestone="{{ $task->milestone }}"
+                                style="{{ $loop->index >= 3 ? 'display:none' : '' }}">
                                 <div class="mandor-task-item-left">
                                     <span class="material-symbols-outlined mandor-icon-primary-container">
                                         {{ $task->is_selesai ? 'check_circle' : 'radio_button_unchecked' }}
@@ -205,16 +206,22 @@
                                     <span class="mandor-task-item-text">{{ $task->nama_task }}</span>
                                 </div>
                                 @if (!$task->is_selesai)
-                                    <button class="mandor-complete-btn" onclick="completeTask({{ $task->id }}, this)">
-                                        Complete
-                                    </button>
+                                    @if ($task->milestone === $milestoneAktif)
+                                        <button class="mandor-complete-btn" onclick="completeTask({{ $task->id }}, this)">
+                                            Complete
+                                        </button>
+                                    @else
+                                        <button class="mandor-complete-btn" disabled>
+                                            Complete
+                                        </button>
+                                    @endif
                                 @else
-                                    <span class="mandor-task-done-label">Selesai</span>
+                                    <span class="mandor-task-done-label">Done</span>
                                 @endif
                             </div>
                         @endforeach
                     </div>
-                    @if ($proyek->tasks->count() > 4)
+                    @if ($proyek->tasks->count() > 3)
                         <button class="mandor-show-more-btn" id="show-more-btn" onclick="toggleShowMore()">
                             <span class="material-symbols-outlined">expand_more</span>
                             Lihat Semua Task ({{ $proyek->tasks->count() }})

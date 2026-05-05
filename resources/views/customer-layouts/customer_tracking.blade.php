@@ -66,7 +66,7 @@
                             style="font-variation-settings: 'FILL' 1;">foundation</span>
                         <div>
                             <p class="tracking-meta-label">Milestone Berikutnya</p>
-                            <p class="tracking-meta-value">{{ $proyek->tasks->where('is_selesai', false)->skip(1)->first()?->milestone ?? '-' }}</p>
+                            <p class="tracking-meta-value">{{ $milestoneBerikutnya }}</p>
                         </div>
                     </div>
                 </div>

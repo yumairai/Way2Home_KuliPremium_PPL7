@@ -45,7 +45,7 @@ function reorderAndRenderTasks(expanded) {
     // Reappend sesuai urutan baru
     ordered.forEach((el, index) => {
         list.appendChild(el);
-        el.style.display = (expanded || index < 4) ? '' : 'none';
+        el.style.display = (expanded || index < 3) ? '' : 'none';
     });
 }
 
@@ -72,13 +72,16 @@ async function completeTask(taskId, btn) {
     taskEl.querySelector('.material-symbols-outlined').innerText = 'check_circle';
     btn.replaceWith(Object.assign(document.createElement('span'), {
         className: 'mandor-task-done-label',
-        innerText: 'Selesai'
+        innerText: 'Done'
     }));
 
     // Update progress
     document.getElementById('persentase-text').innerText = `${data.persentase}%`;
     document.getElementById('persentase-fill').style.width = `${data.persentase}%`;
     document.getElementById('milestone-text').innerText = data.milestone_aktif;
+
+    // Unlock tombol di milestone yang sekarang aktif
+    unlockMilestone(data.milestone_aktif);
 
     // Reorder task list — completed pindah ke bawah
     reorderAndRenderTasks(isExpanded);
@@ -87,6 +90,23 @@ async function completeTask(taskId, btn) {
         alert('Semua task selesai! Proyek telah selesai.');
         window.location.href = '/mandor/dashboard';
     }
+}
+
+function unlockMilestone(milestoneAktif) {
+    const taskItems = document.querySelectorAll('.mandor-task-item');
+    taskItems.forEach(item => {
+        const btn = item.querySelector('.mandor-complete-btn');
+        if (!btn || !btn.disabled) return;
+
+        const taskMilestone = item.dataset.milestone;
+        if (taskMilestone === milestoneAktif) {
+            const taskId = item.id.replace('task-', '');
+            btn.disabled = false;
+            btn.onclick = function () {
+                completeTask(taskId, btn);
+            };
+        }
+    });
 }
 
 // ── Tambah Aktivitas ───────────────────────────

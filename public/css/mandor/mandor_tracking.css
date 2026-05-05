@@ -464,6 +464,11 @@
     padding: 0.5rem 1.5rem;
 }
 
+.mandor-complete-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 .mandor-show-more-btn {
     width: 100%;
     border: 2px dashed rgba(194, 198, 213, 0.4);
