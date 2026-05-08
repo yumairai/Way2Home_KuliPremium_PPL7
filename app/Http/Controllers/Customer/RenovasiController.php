@@ -104,6 +104,11 @@ class RenovasiController extends Controller
             $customer = Auth::user()?->customer;
             abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
 
+            $normalizedBudget = preg_replace('/\D+/', '', (string) $request->input('budget_estimasi'));
+            $request->merge([
+                'budget_estimasi' => $normalizedBudget,
+            ]);
+
             $validated = $request->validate([
                 'budget_estimasi' => 'required|integer|min:100000',
                 'deskripsi_renovasi' => 'required|string|min:20',
@@ -175,7 +180,7 @@ class RenovasiController extends Controller
 
             $offer->update(['status_penawaran' => 'diterima']);
             $requestRenovasi->update(['status_request' => 'disetujui']);
-            
+
             // Log aktivitas tawaran diterima
             MandorActivityHistory::logOfferAccepted($offer->mandor, $offer);
             NegosiasiRenovasi::create([

@@ -14,7 +14,8 @@ class MandorDashboardController extends Controller
 {
     public function index()
     {
-        $mandor = $this->currentMandor();
+        // get currently authenticated mandor user
+        $mandor = Auth::user();
 
         /**
          * =========================
@@ -81,7 +82,7 @@ class MandorDashboardController extends Controller
          * 3. ACTIVITY HISTORY (FIX DI SINI)
          * =========================
          */
-        $activities = MandorActivityHistory::where('mandor_id', $mandorId)
+        $activities = MandorActivityHistory::where('mandor_id', $mandor->id)
             ->latest()
             ->take(10)
             ->get();
@@ -135,7 +136,6 @@ class MandorDashboardController extends Controller
          */
         return view('mandor.dashboard', compact(
             'activeProjectLabel',
-            'completedProjects',
             'requestCount',
             'renovationRequests',
             'activityHistory',

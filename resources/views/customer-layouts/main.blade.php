@@ -17,6 +17,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/ui/dialog.css') }}">
     @stack('styles')
 </head>
 
@@ -33,6 +34,9 @@
     </main>
     <!-- FOOTER -->
     @include('partials.footer')
+    @include('partials.w2h-dialog')
+    @include('partials.w2h-flash')
+    <script src="{{ asset('js/ui/dialog.js') }}"></script>
     <script src="{{ asset('js/auth.js') }}"></script>
     @stack('scripts')
 </body>

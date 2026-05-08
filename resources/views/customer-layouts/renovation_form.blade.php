@@ -16,22 +16,6 @@
                 <h1 class="rf-form-title">Form Pengajuan Renovasi</h1>
                 <p class="rf-form-subtitle">Ajukan permohonan renovasi rumah Anda dengan mudah.</p>
             </div>
-            @if (session('success'))
-                <div class="rf-form-alert rf-form-alert-success">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="rf-form-alert rf-form-alert-error">{{ session('error') }}</div>
-            @endif
-            @if ($errors->any())
-                <div class="rf-form-alert rf-form-alert-error">
-                    <strong>Mohon periksa kembali isian form.</strong>
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
             <!-- The Form -->
             <form action="{{ route('customer.renovation.store') }}" method="POST" enctype="multipart/form-data"
                 class="rf-form-body">
@@ -58,8 +42,8 @@
                     <div class="rf-input-wrap">
                         <div class="rf-input-prefix">
                             Rp</div>
-                        <input class="rf-input rf-input-budget" placeholder="0" type="number" name="budget_estimasi"
-                            min="100000" value="{{ old('budget_estimasi') }}" required />
+                        <input class="rf-input rf-input-budget" placeholder="0" type="text" name="budget_estimasi"
+                            inputmode="numeric" autocomplete="off" value="{{ old('budget_estimasi') }}" required />
                     </div>
                 </div>
                 <div class="rf-field-group">

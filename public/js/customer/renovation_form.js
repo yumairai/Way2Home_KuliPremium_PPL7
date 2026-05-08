@@ -10,8 +10,26 @@
     let previewItems = previewGrid ? Array.from(previewGrid.querySelectorAll('.rf-preview-item')) : [];
     const fotoError = document.getElementById('foto-error');
     const form = document.querySelector('.rf-form-body');
+    const budgetInput = document.querySelector('.rf-input-budget');
 
     if (!uploadBox || !input || !previewGrid) return;
+
+    function getBudgetDigits(value) {
+        return String(value || '').replace(/\D+/g, '');
+    }
+
+    function formatBudget(value) {
+        const digits = getBudgetDigits(value);
+        if (!digits) return '';
+
+        return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    function syncBudgetInput() {
+        if (!budgetInput) return;
+
+        budgetInput.value = formatBudget(budgetInput.value);
+    }
 
     // If preview placeholders were removed from markup, create dynamic slots
     if (previewItems.length === 0) {
@@ -45,6 +63,18 @@
 
     // hide native input visually (CSS also ensures this)
     input.classList.add('rf-file-input-hidden');
+
+    if (budgetInput) {
+        syncBudgetInput();
+
+        budgetInput.addEventListener('input', () => {
+            syncBudgetInput();
+        });
+
+        budgetInput.addEventListener('blur', () => {
+            syncBudgetInput();
+        });
+    }
 
     let files = [];
 

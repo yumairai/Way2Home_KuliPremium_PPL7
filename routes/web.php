@@ -94,7 +94,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Profile (tidak perlu middleware customer)
     Route::get('/profile', function () {
-        return view('customer-layouts.profile', ['user' => auth()->user()]);
+        return view('customer-layouts.profile', ['user' => Auth::user()]);
     })->name('customer.profile');
     Route::post('/profile', [ProfileController::class, 'update'])->name('customer.profile.update');
 

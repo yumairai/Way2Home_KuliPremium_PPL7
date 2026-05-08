@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    // 1. Ambil semua data keranjang user yang sedang login (Read)
+    // 1. Ambil semua data keranjang user yang sedang login (Read) - OPTIMIZED
     public function index()
     {
         $userId = Auth::id();
-        $carts = Cart::with('material')
+        $carts = Cart::select('id', 'user_id', 'material_id', 'jumlah')  // Only needed columns
+            ->with('material:id,nama_material,harga,satuan,kategori')    // Only needed material columns
             ->where('user_id', $userId)
             ->get();
 
@@ -23,7 +24,7 @@ class CartController extends Controller
         ]);
     }
 
-    // 2. Tambah barang ke keranjang (Create/Update)
+    // 2. Tambah barang ke keranjang (Create/Update) - OPTIMIZED
     public function addToCart(Request $request)
     {
         if (!Auth::check()) {
@@ -31,27 +32,24 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'material_id' => 'required|exists:materials,id',
+            'material_id' => 'required|integer|min:1',  // Fast integer validation
             'jumlah' => 'required|integer|min:1'
         ]);
 
         $userId = Auth::id();
+        $materialId = $request->material_id;
+        $jumlah = $request->jumlah;
 
-        $cart = Cart::where('user_id', $userId)
-            ->where('material_id', $request->material_id)
-            ->first();
-
-        if ($cart) {
-            $cart->update([
-                'jumlah' => $request->jumlah
-            ]);
-        } else {
-            Cart::create([
+        // Gunakan updateOrCreate untuk 1 query saja (bukan 2-3 query)
+        Cart::updateOrCreate(
+            [
                 'user_id' => $userId,
-                'material_id' => $request->material_id,
-                'jumlah' => $request->jumlah
-            ]);
-        }
+                'material_id' => $materialId
+            ],
+            [
+                'jumlah' => $jumlah
+            ]
+        );
 
         return response()->json(['message' => 'Keranjang berhasil diperbarui!']);
     }

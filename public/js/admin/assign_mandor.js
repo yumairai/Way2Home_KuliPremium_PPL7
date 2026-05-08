@@ -21,11 +21,12 @@ function closeDocModal() {
     selectedProyekId = null;
 }
 
-function unassignMandor(element) {
+async function unassignMandor(element) {
     const mandorId = element.dataset.mandorId;
     const mandorName = element.dataset.mandorName;
 
-    if (!confirm(`Yakin ingin melepas ${mandorName} dari proyeknya?`)) return;
+    const confirmed = await W2HDialog.confirm(`Yakin ingin melepas ${mandorName} dari proyeknya?`);
+    if (!confirmed) return;
 
     fetch('/admin/manajemen-mandor/unassign', {
         method: 'POST',
@@ -35,12 +36,16 @@ function unassignMandor(element) {
         },
         body: JSON.stringify({ mandor_id: mandorId }),
     })
-    .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-        if (data.success) location.reload();
-    })
-    .catch(() => alert('Terjadi kesalahan server.'));
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                W2HDialog.success(data.message);
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                W2HDialog.error(data.message);
+            }
+        })
+        .catch(() => W2HDialog.error('Terjadi kesalahan server.'));
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -63,9 +68,9 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Tombol assign
-    document.querySelector('.modal-btn-submit').addEventListener('click', function () {
+    document.querySelector('.modal-btn-submit').addEventListener('click', async function () {
         if (!selectedMandorId || !selectedProyekId) {
-            alert('Pilih proyek terlebih dahulu!');
+            await W2HDialog.alert('Pilih proyek terlebih dahulu!');
             return;
         }
 
@@ -80,14 +85,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 proyek_id: selectedProyekId,
             }),
         })
-        .then(res => res.json())
-        .then(data => {
-            alert(data.message);
-            if (data.success) {
-                closeDocModal();
-                location.reload();
-            }
-        })
-        .catch(() => alert('Terjadi kesalahan server.'));
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    W2HDialog.success(data.message);
+                    setTimeout(() => {
+                        closeDocModal();
+                        location.reload();
+                    }, 1500);
+                } else {
+                    W2HDialog.error(data.message);
+                }
+            })
+            .catch(() => W2HDialog.error('Terjadi kesalahan server.'));
     });
 });

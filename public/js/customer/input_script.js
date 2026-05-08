@@ -60,7 +60,7 @@ submitBtn.addEventListener("click", async (e) => {
     // Validasi jumlah kamar
     const jumlahKamar = parseInt(document.getElementById('jumlah_kamar').value);
     if (!jumlahKamar || jumlahKamar < 1 || jumlahKamar > 10) {
-        alert("Jumlah kamar harus diisi antara 1 - 10.");
+        await W2HDialog.alert("Jumlah kamar harus diisi antara 1 - 10.");
         document.getElementById('jumlah_kamar').focus();
         return;
     }
@@ -68,7 +68,7 @@ submitBtn.addEventListener("click", async (e) => {
     // Validasi prioritas
     const prioritasEl = document.querySelector('.box.active');
     if (!prioritasEl) {
-        alert("Silakan pilih prioritas preferensi terlebih dahulu.");
+        await W2HDialog.alert("Silakan pilih prioritas preferensi terlebih dahulu.");
         return;
     }
 
@@ -77,12 +77,12 @@ submitBtn.addEventListener("click", async (e) => {
     submitBtn.textContent = "⏳ Memproses ML Engine...";
 
     const payload = {
-        lokasi:          document.getElementById('lokasi').value,
+        lokasi: document.getElementById('lokasi').value,
         gaya_arsitektur: document.getElementById('gaya_arsitektur').value,
-        luas_area:       parseInt(document.getElementById('areaRange').value),
-        jumlah_kamar:    jumlahKamar,
-        budget:          parseInt(document.getElementById('budgetRange').value),
-        prioritas:       prioritasEl.dataset.value,
+        luas_area: parseInt(document.getElementById('areaRange').value),
+        jumlah_kamar: jumlahKamar,
+        budget: parseInt(document.getElementById('budgetRange').value),
+        prioritas: prioritasEl.dataset.value,
     };
 
     try {
@@ -104,13 +104,13 @@ submitBtn.addEventListener("click", async (e) => {
                 window.location.href = "/recommendation/result";
             }, 500);
         } else {
-            alert("Gagal memproses: " + (result.message || "Terjadi kesalahan."));
+            await W2HDialog.error("Gagal memproses: " + (result.message || "Terjadi kesalahan."));
             submitBtn.disabled = false;
             submitBtn.textContent = "Buat Rekomendasi";
         }
     } catch (error) {
         console.error("Error:", error);
-        alert("Terjadi kesalahan koneksi. Pastikan server berjalan.");
+        await W2HDialog.error("Terjadi kesalahan koneksi. Pastikan server berjalan.");
         submitBtn.disabled = false;
         submitBtn.textContent = "Buat Rekomendasi";
     }

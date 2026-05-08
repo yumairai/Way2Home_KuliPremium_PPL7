@@ -553,6 +553,53 @@
     gap: 10px;
 }
 
+.doc-bulk-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.doc-bulk-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #0e1744;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.doc-bulk-btn span {
+    font-size: 1.1rem;
+}
+
+.doc-bulk-btn-reject {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.doc-bulk-btn-reject:hover {
+    background: #fee2e2;
+    border-color: #dc2626;
+}
+
+.doc-bulk-btn-approve {
+    border-color: #16a34a;
+    color: #16a34a;
+}
+
+.doc-bulk-btn-approve:hover {
+    background: #ecfdf5;
+    border-color: #16a34a;
+}
+
 /* Item Dokumen */
 .doc-item {
     display: flex;

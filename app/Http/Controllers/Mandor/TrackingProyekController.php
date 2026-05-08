@@ -12,6 +12,7 @@ use App\Models\Mandor;
 use App\Models\MandorActivityHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TrackingProyekController extends Controller
 {
@@ -88,7 +89,7 @@ class TrackingProyekController extends Controller
         );
 
         if ($persentase === 100) {
-            \DB::transaction(function () use ($proyek, $mandor) {
+            DB::transaction(function () use ($proyek, $mandor) {
                 $proyek->update([
                     'status_proyek' => 'Selesai',
                     'mandor_id'     => null,

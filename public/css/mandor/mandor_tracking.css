@@ -780,6 +780,11 @@
     background: var(--surface-container);
 }
 
+.mandor-reno-card-upload {
+    background: var(--surface-container-low);
+    border: 1px solid rgba(194, 198, 213, 0.2);
+}
+
 .mandor-reno-head,
 .mandor-reno-head-row {
     display: flex;
@@ -938,6 +943,163 @@
     gap: 1.5rem;
 }
 
+.mandor-reno-upload-btn {
+    border: 0;
+    border-radius: 9999px;
+    padding: 0.65rem 1.35rem;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.mandor-reno-upload-btn:hover {
+    opacity: 0.9;
+}
+
+.mandor-reno-file-input {
+    display: none;
+}
+
+.mandor-reno-dropzone {
+    border: 2px dashed rgba(0, 71, 150, 0.35);
+    border-radius: 1rem;
+    background: var(--surface-container-lowest);
+    min-height: 170px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.mandor-reno-dropzone:hover,
+.mandor-reno-dropzone.is-dragover {
+    border-color: var(--primary);
+    background: var(--surface-container);
+    transform: translateY(-1px);
+}
+
+.mandor-reno-dropzone.is-error {
+    border-color: #dc2626;
+    background: #fef2f2;
+}
+
+.mandor-reno-dropzone.is-error .mandor-reno-dropzone-icon,
+.mandor-reno-dropzone.is-error .mandor-reno-dropzone-title,
+.mandor-reno-dropzone.is-error .mandor-reno-dropzone-hint {
+    color: #dc2626;
+}
+
+.mandor-reno-dropzone:focus-visible {
+    outline: 2px solid rgba(0, 71, 150, 0.22);
+    outline-offset: 3px;
+}
+
+.mandor-reno-dropzone-icon {
+    font-size: 2.25rem;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.mandor-reno-dropzone-title {
+    margin: 0;
+    color: var(--on-surface);
+    font-weight: 700;
+}
+
+.mandor-reno-dropzone-hint {
+    margin: 0.35rem 0 0;
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.mandor-reno-dropzone-error {
+    min-height: 1.25rem;
+    margin: 0.5rem 0 0;
+    color: #dc2626;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mandor-reno-preview-grid {
+    margin-top: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.mandor-reno-preview-card {
+    position: relative;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    background: #e7edf8;
+    border: 1px solid rgba(194, 198, 213, 0.35);
+}
+
+.mandor-reno-preview-remove {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.45rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.72);
+    color: #fff;
+    font-size: 0;
+    cursor: pointer;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.mandor-reno-preview-remove::before {
+    content: 'close';
+    font-family: 'Material Symbols Outlined';
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.mandor-reno-preview-remove:hover {
+    background: rgba(220, 38, 38, 0.9);
+}
+
+.mandor-reno-preview-remove:active {
+    transform: scale(0.95);
+}
+
+.mandor-reno-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mandor-reno-preview-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.72rem;
+    color: #fff;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.1));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .mandor-reno-textarea {
     width: 100%;
     min-height: 200px;
@@ -1090,7 +1252,8 @@
     }
 
     .mandor-reno-card-gallery,
-    .mandor-reno-card-analysis {
+    .mandor-reno-card-analysis,
+    .mandor-reno-card-upload {
         grid-column: span 12;
     }
 
@@ -1119,6 +1282,10 @@
     }
 
     .mandor-docs-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .mandor-reno-preview-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }

@@ -151,8 +151,18 @@
 
 @push('scripts')
     <script>
-        function pilihRumah(id, nama) {
-            if (confirm('Pilih desain "' + nama + '"?\n\nAnda akan diarahkan ke halaman pembangunan.')) {
+        async function pilihRumah(id, nama) {
+            const confirmed = window.W2HDialog && typeof window.W2HDialog.confirm === 'function' ?
+                await window.W2HDialog.confirm('Pilih desain "' + nama +
+                    '"?\n\nAnda akan diarahkan ke halaman pembangunan.', {
+                        title: 'Konfirmasi Pilihan Desain',
+                        confirmText: 'Ya, pilih desain',
+                        cancelText: 'Batal',
+                        variant: 'warning',
+                    }) :
+                confirm('Pilih desain "' + nama + '"?\n\nAnda akan diarahkan ke halaman pembangunan.');
+
+            if (confirmed) {
                 window.location.href = '/house-build-form?desain_id=' + id;
             }
         }

@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <title>Verifikasi Email</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ asset('css/ui/dialog.css') }}">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
 
     <style>
         body {
@@ -23,7 +28,7 @@
             width: 100%;
             max-width: 420px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
         }
 
         h2 {
@@ -71,41 +76,40 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="card">
-    <h2>Verifikasi Email</h2>
+    <div class="card">
+        <h2>Verifikasi Email</h2>
 
-    <p>
-        Kami telah mengirimkan link verifikasi ke:
-        <br>
-        <span class="email">{{ auth()->user()->email }}</span>
-    </p>
+        <p>
+            Kami telah mengirimkan link verifikasi ke:
+            <br>
+            <span class="email">{{ auth()->user()->email }}</span>
+        </p>
 
-    <p>
-        Silakan cek inbox atau folder spam, lalu klik link untuk mengaktifkan akun kamu.
-    </p>
+        <p>
+            Silakan cek inbox atau folder spam, lalu klik link untuk mengaktifkan akun kamu.
+        </p>
 
-    {{-- notif resend --}}
-    @if (session('message'))
-        <div class="alert success">
-            {{ session('message') }}
+        <div class="button">
+            <form method="POST" action="{{ route('verification.send') }}">
+                @csrf
+                <button type="submit">
+                    Kirim Ulang Email
+                </button>
+            </form>
         </div>
-    @endif
 
-    <div class="button">
-        <form method="POST" action="{{ route('verification.send') }}">
-            @csrf
-            <button type="submit">
-                Kirim Ulang Email
-            </button>
-        </form>
+        <p style="margin-top:20px; font-size:12px;">
+            Jika tidak menerima email, tunggu beberapa detik lalu klik tombol di atas.
+        </p>
     </div>
 
-    <p style="margin-top:20px; font-size:12px;">
-        Jika tidak menerima email, tunggu beberapa detik lalu klik tombol di atas.
-    </p>
-</div>
+    @include('partials.w2h-dialog')
+    @include('partials.w2h-flash')
+    <script src="{{ asset('js/ui/dialog.js') }}"></script>
 
 </body>
+
 </html>

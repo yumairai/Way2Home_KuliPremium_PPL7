@@ -85,10 +85,10 @@
                                         data-documents="{{ json_encode(
                                             $dokumen->map(function ($d) {
                                                 return [
-                                                    'id'                 => $d->id,
-                                                    'nama_dokumen'       => $d->jenis_dokumen,
-                                                    'file_url'           => $d->signed_url,  // ← ubah ini
-                                                    'status_verifikasi'  => $d->status_verifikasi,
+                                                    'id' => $d->id,
+                                                    'nama_dokumen' => $d->jenis_dokumen,
+                                                    'file_url' => $d->signed_url, // ← ubah ini
+                                                    'status_verifikasi' => $d->status_verifikasi,
                                                 ];
                                             }),
                                         ) }}">
@@ -143,6 +143,14 @@
                     <div class="doc-sidebar">
                         <p class="doc-label">Dokumen Pengaju:</p>
                         <div class="doc-list">
+                        </div>
+                        <div class="doc-bulk-actions">
+                            <button type="button" class="doc-bulk-btn doc-bulk-btn-reject" onclick="rejectAllDocs()">
+                                Tolak Semua
+                            </button>
+                            <button type="button" class="doc-bulk-btn doc-bulk-btn-approve" onclick="approveAllDocs()">
+                                Verifikasi Semua
+                            </button>
                         </div>
                     </div>
                     <div class="doc-preview-container">

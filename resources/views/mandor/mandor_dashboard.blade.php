@@ -18,7 +18,7 @@
                 </div>
                 <div class="dashboard-stat-copy">
                     <p class="dashboard-stat-label">Project Saat Ini</p>
-                    <p class="dashboard-stat-value">{{ $activeProjectLabel }}</p>                
+                    <p class="dashboard-stat-value">{{ $activeProjectLabel }}</p>
                 </div>
             </div>
             <div class="dashboard-stat-card">
@@ -47,17 +47,18 @@
             <div class="dashboard-activity-list dashboard-activity-list-collapsed" id="dashboard-activity-list">
                 <div class="dashboard-activity-track">
                     @forelse($activityHistory as $activity)
-                    <article class="dashboard-activity-item{{ $loop->index >= 4 ? ' dashboard-activity-item-hidden' : '' }}">
-                        <div class="dashboard-activity-connector"></div>
-                        <div class="dashboard-activity-content">
-                            <p class="dashboard-activity-title">{{ $activity['title'] }}</p>
-                            <span class="dashboard-activity-timestamp">{{ $activity['timestamp'] }}</span>
-                        </div>
-                    </article>
+                        <article
+                            class="dashboard-activity-item{{ $loop->index >= 4 ? ' dashboard-activity-item-hidden' : '' }}">
+                            <div class="dashboard-activity-connector"></div>
+                            <div class="dashboard-activity-content">
+                                <p class="dashboard-activity-title">{{ $activity['title'] }}</p>
+                                <span class="dashboard-activity-timestamp">{{ $activity['timestamp'] }}</span>
+                            </div>
+                        </article>
                     @empty
-                    <div class="dashboard-activity-empty">
-                        <p>Belum ada aktivitas</p>
-                    </div>
+                        <div class="dashboard-activity-empty">
+                            <p>Belum ada aktivitas</p>
+                        </div>
                     @endforelse
                 </div>
             </div>
@@ -127,8 +128,8 @@
                     <p class="dashboard-review-subtitle">Detail pengajuan renovasi <strong
                             id="dashboard-review-request-id">-</strong> dari klien.</p>
                 </div>
-                <button class="dashboard-review-close-btn material-symbols-outlined" type="button"
-                    aria-label="Close modal" data-review-close>close</button>
+                <button class="dashboard-review-close-btn material-symbols-outlined" type="button" aria-label="Close modal"
+                    data-review-close>close</button>
             </div>
 
             <div class="dashboard-review-body">
@@ -138,6 +139,14 @@
                         <div class="dashboard-review-inline">
                             <span class="material-symbols-outlined dashboard-review-icon">person</span>
                             <span class="dashboard-review-value" id="dashboard-review-applicant">-</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-review-summary-item">
+                        <span class="dashboard-review-label">Estimasi Budget</span>
+                        <div class="dashboard-review-inline">
+                            <span class="material-symbols-outlined dashboard-review-icon">monetization_on</span>
+                            <span class="dashboard-review-value dashboard-review-value-small"
+                                id="dashboard-review-budget">-</span>
                         </div>
                     </div>
                     <div class="dashboard-review-summary-item">
@@ -220,8 +229,8 @@
                     <div class="dashboard-review-cost-wrap">
                         <label class="dashboard-review-cost-field" for="dashboard-review-cost">
                             <span class="dashboard-review-cost-prefix">Rp</span>
-                            <input class="dashboard-review-cost-input" id="dashboard-review-cost" type="number"
-                                inputmode="numeric" min="0" step="1000" placeholder="Contoh: 12500000" />
+                            <input class="dashboard-review-cost-input" id="dashboard-review-cost" type="text"
+                                inputmode="numeric" autocomplete="off" placeholder="Contoh: 12.500.000" />
                         </label>
                         <p class="dashboard-review-cost-hint">Masukkan total biaya renovasi.</p>
                     </div>

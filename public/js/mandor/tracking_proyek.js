@@ -13,9 +13,125 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
             body: JSON.stringify({})
         });
         const data = await response.json().catch(() => ({}));
-        if (!response.ok) { alert(data.message || 'Gagal menandai renovasi selesai.'); return; }
-        alert(data.message || 'Renovasi berhasil ditandai selesai.');
+        if (!response.ok) { await W2HDialog.error(data.message || 'Gagal menandai renovasi selesai.'); return; }
+        await W2HDialog.success(data.message || 'Renovasi berhasil ditandai selesai.');
         window.location.reload();
+    });
+})();
+
+// ── Renovasi documentation (frontend only) ───
+(function () {
+    const input = document.getElementById('renovation-doc-input');
+    const dropzone = document.getElementById('renovation-dropzone');
+    const previewGrid = document.getElementById('renovation-preview-grid');
+    const dropzoneError = document.getElementById('renovation-dropzone-error');
+
+    if (!input || !dropzone || !previewGrid || !dropzoneError) return;
+
+    let previewCounter = 0;
+    const MAX_FILE_SIZE = 2 * 1024 * 1024;
+
+    const clearDropzoneError = () => {
+        dropzone.classList.remove('is-error');
+        dropzoneError.textContent = '';
+    };
+
+    const setDropzoneError = (message) => {
+        dropzone.classList.add('is-error');
+        dropzoneError.textContent = message;
+    };
+
+    const createPreviewCard = (file) => {
+        const blobUrl = URL.createObjectURL(file);
+        const previewId = `renovation-preview-${previewCounter++}`;
+
+        const card = document.createElement('div');
+        card.className = 'mandor-reno-preview-card';
+        card.dataset.previewId = previewId;
+        card.dataset.blobUrl = blobUrl;
+        card.innerHTML = `
+            <button type="button" class="mandor-reno-preview-remove" aria-label="Hapus foto dokumentasi">close</button>
+            <img class="mandor-reno-preview-image" src="${blobUrl}" alt="Preview dokumentasi renovasi">
+            <p class="mandor-reno-preview-name">${file.name}</p>
+        `;
+
+        const removeButton = card.querySelector('.mandor-reno-preview-remove');
+        if (removeButton) {
+            removeButton.addEventListener('click', () => {
+                URL.revokeObjectURL(blobUrl);
+                card.remove();
+            });
+        }
+
+        previewGrid.appendChild(card);
+    };
+
+    const handleFiles = (fileList) => {
+        const files = Array.from(fileList || []);
+        if (!files.length) return;
+
+        let hasInvalidSize = false;
+        let addedCount = 0;
+
+        files.forEach((file) => {
+            if (!file.type.startsWith('image/')) {
+                return;
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                hasInvalidSize = true;
+                return;
+            }
+
+            addedCount += 1;
+            createPreviewCard(file);
+        });
+
+        if (hasInvalidSize && !addedCount) {
+            setDropzoneError('Ukuran foto melebihi 2 MB. Silakan pilih foto yang lebih kecil.');
+            return;
+        }
+
+        if (hasInvalidSize) {
+            setDropzoneError('Ada foto yang melebihi 2 MB, foto tersebut tidak ditampilkan ke preview.');
+            return;
+        }
+
+        clearDropzoneError();
+    };
+
+    input.addEventListener('change', () => {
+        handleFiles(input.files);
+        input.value = '';
+    });
+
+    dropzone.addEventListener('click', () => input.click());
+    dropzone.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            input.click();
+        }
+    });
+
+    ['dragenter', 'dragover'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            clearDropzoneError();
+            dropzone.classList.add('is-dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            if (eventName === 'drop') {
+                const droppedFiles = event.dataTransfer?.files;
+                if (droppedFiles && droppedFiles.length) {
+                    handleFiles(droppedFiles);
+                }
+            }
+            dropzone.classList.remove('is-dragover');
+        });
     });
 })();
 
@@ -32,11 +148,11 @@ function toggleShowMore() {
 }
 
 function reorderAndRenderTasks(expanded) {
-    const list    = document.getElementById('task-list');
-    const items   = Array.from(list.querySelectorAll('.mandor-task-item'));
+    const list = document.getElementById('task-list');
+    const items = Array.from(list.querySelectorAll('.mandor-task-item'));
 
     // Pisah completed dan belum
-    const pending   = items.filter(el => !el.classList.contains('completed'));
+    const pending = items.filter(el => !el.classList.contains('completed'));
     const completed = items.filter(el => el.classList.contains('completed'));
 
     // Urutkan: pending dulu, completed di bawah
@@ -60,7 +176,7 @@ async function completeTask(taskId, btn) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
-        alert(data.message || 'Gagal menyelesaikan task.');
+        await W2HDialog.error(data.message || 'Gagal menyelesaikan task.');
         btn.disabled = false;
         btn.innerText = 'Complete';
         return;
@@ -87,7 +203,7 @@ async function completeTask(taskId, btn) {
     reorderAndRenderTasks(isExpanded);
 
     if (data.persentase === 100) {
-        alert('Semua task selesai! Proyek telah selesai.');
+        await W2HDialog.success('Semua task selesai! Proyek telah selesai.');
         window.location.href = '/mandor/dashboard';
     }
 }
@@ -111,17 +227,17 @@ function unlockMilestone(milestoneAktif) {
 
 // ── Tambah Aktivitas ───────────────────────────
 async function tambahAktivitas(proyekId) {
-    const judul     = document.getElementById('input-judul').value.trim();
+    const judul = document.getElementById('input-judul').value.trim();
     const deskripsi = document.getElementById('input-deskripsi').value.trim();
-    if (!judul || !deskripsi) { alert('Judul dan isi aktivitas wajib diisi.'); return; }
+    if (!judul || !deskripsi) { await W2HDialog.alert('Judul dan isi aktivitas wajib diisi.'); return; }
     const response = await fetch(`/mandor/proyek/${proyekId}/aktivitas`, {
         method: 'POST',
         headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
         body: JSON.stringify({ judul, deskripsi })
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) { alert(data.message || 'Gagal menambah aktivitas.'); return; }
-    const list  = document.getElementById('aktivitas-list');
+    if (!response.ok) { await W2HDialog.error(data.message || 'Gagal menambah aktivitas.'); return; }
+    const list = document.getElementById('aktivitas-list');
     const empty = list.querySelector('.mandor-activity-empty');
     if (empty) empty.remove();
     const item = document.createElement('div');
@@ -149,7 +265,7 @@ async function uploadDokumentasi(proyekId, input) {
         body: formData
     });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) { alert(data.message || 'Gagal upload foto.'); return; }
+    if (!response.ok) { await W2HDialog.error(data.message || 'Gagal upload foto.'); return; }
     const grid = document.getElementById('dokumentasi-grid');
     const card = document.createElement('div');
     card.className = 'mandor-doc-photo-card';

@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const requestIdEl = modal.querySelector('#dashboard-review-request-id');
     const applicantEl = modal.querySelector('#dashboard-review-applicant');
     const locationEl = modal.querySelector('#dashboard-review-location');
+    const budgetEl = modal.querySelector('#dashboard-review-budget');
     const descriptionEl = modal.querySelector('#dashboard-review-description');
     const photoCountEl = modal.querySelector('#dashboard-review-photo-count');
     const galleryEl = modal.querySelector('#dashboard-review-gallery');
@@ -37,6 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectedMaterialQty = {};
 
     const formatRupiah = (value) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`;
+    const parseRupiahDigits = (value) => String(value || '').replace(/\D+/g, '');
+    const formatCostInput = (value) => {
+        const digits = parseRupiahDigits(value);
+
+        if (!digits) {
+            return '';
+        }
+
+        return Number(digits).toLocaleString('id-ID');
+    };
+    const getMandorCost = () => Number(parseRupiahDigits(costInput instanceof HTMLInputElement ? costInput.value : ''));
 
     const postJson = (url, payload) =>
         fetch(url, {
@@ -275,6 +287,10 @@ document.addEventListener('DOMContentLoaded', () => {
             locationEl.textContent = request.location || '-';
         }
 
+        if (budgetEl) {
+            budgetEl.textContent = request.budget ? request.budget : '-';
+        }
+
         if (descriptionEl) {
             descriptionEl.textContent = request.description || '-';
         }
@@ -314,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (costInput instanceof HTMLInputElement) {
-            costInput.value = request.existing_offer_cost ? String(request.existing_offer_cost) : '';
+            costInput.value = request.existing_offer_cost ? formatCostInput(request.existing_offer_cost) : '';
         }
 
         if (takeRenovationButton instanceof HTMLButtonElement) {
@@ -348,8 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateActionButtonsState = () => {
         const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
         const messageValue = negotiationMessageInput instanceof HTMLTextAreaElement ? negotiationMessageInput.value.trim() : '';
-        const costValue = costInput instanceof HTMLInputElement ? costInput.value.trim() : '';
-        const isCostValid = Number(costValue) > 0;
+        const isCostValid = getMandorCost() > 0;
         const { itemCount } = getMaterialSummary();
         const hasMaterialSelected = itemCount > 0;
         const hasRequestSelected = typeof selectedRequestDbId === 'string' && selectedRequestDbId.length > 0;
@@ -411,7 +426,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (costInput instanceof HTMLInputElement) {
-        costInput.addEventListener('input', updateActionButtonsState);
+        costInput.addEventListener('input', () => {
+            const selectionStart = costInput.selectionStart;
+            costInput.value = formatCostInput(costInput.value);
+
+            if (selectionStart !== null) {
+                costInput.setSelectionRange(costInput.value.length, costInput.value.length);
+            }
+
+            updateActionButtonsState();
+        });
+
+        costInput.addEventListener('focus', () => {
+            costInput.value = parseRupiahDigits(costInput.value);
+        });
+
+        costInput.addEventListener('blur', () => {
+            costInput.value = formatCostInput(costInput.value);
+        });
     }
 
     if (negotiationMessageInput instanceof HTMLTextAreaElement) {
@@ -422,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
         negotiateButton.addEventListener('click', async () => {
             const requestId = negotiateButton.dataset.requestId;
             const requestDbId = negotiateButton.dataset.requestDbId;
-            const mandorCost = Number(costInput instanceof HTMLInputElement ? costInput.value : 0);
+            const mandorCost = getMandorCost();
             const negotiationMessage = negotiationMessageInput instanceof HTMLTextAreaElement ? negotiationMessageInput.value.trim() : '';
             const { selectedMaterials, total: materialTotal } = getMaterialSummary();
 
@@ -431,12 +463,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!negotiationMessage) {
-                alert('Pesan negosiasi tidak boleh kosong.');
+                await W2HDialog.alert('Pesan negosiasi tidak boleh kosong.');
                 return;
             }
 
             if (!selectedMaterials.length || mandorCost <= 0) {
-                alert('Pilih material dan isi nominal renovasi terlebih dahulu.');
+                await W2HDialog.alert('Pilih material dan isi nominal renovasi terlebih dahulu.');
                 return;
             }
 
@@ -452,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await postJson(`/mandor/renovation/${requestDbId}/negotiate`, payload);
 
             if (!result.ok) {
-                alert(result.data.message || 'Gagal mengirim negosiasi.');
+                await W2HDialog.error(result.data.message || 'Gagal mengirim negosiasi.');
                 return;
             }
 
@@ -474,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 negotiationMessageInput.value = '';
             }
             updateActionButtonsState();
-            alert(result.data.message || 'Negosiasi berhasil dikirim.');
+            await W2HDialog.success(result.data.message || 'Negosiasi berhasil dikirim.');
         });
     }
 
@@ -482,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
         takeRenovationButton.addEventListener('click', async () => {
             const requestId = takeRenovationButton.dataset.requestId;
             const requestDbId = takeRenovationButton.dataset.requestDbId;
-            const mandorCost = Number(costInput instanceof HTMLInputElement ? costInput.value : 0);
+            const mandorCost = getMandorCost();
             const feedbackValue = feedbackInput instanceof HTMLTextAreaElement ? feedbackInput.value.trim() : '';
             const { selectedMaterials } = getMaterialSummary();
 
@@ -491,12 +523,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (!feedbackValue) {
-                alert('Feedback mandor tidak boleh kosong.');
+                await W2HDialog.alert('Feedback mandor tidak boleh kosong.');
                 return;
             }
 
             if (!selectedMaterials.length || mandorCost <= 0) {
-                alert('Pilih material dan isi nominal renovasi terlebih dahulu.');
+                await W2HDialog.alert('Pilih material dan isi nominal renovasi terlebih dahulu.');
                 return;
             }
 
@@ -512,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await postJson(`/mandor/renovation/${requestDbId}/offer`, payload);
 
             if (!result.ok) {
-                alert(result.data.message || 'Gagal mengambil renovasi.');
+                await W2HDialog.error(result.data.message || 'Gagal mengambil renovasi.');
                 return;
             }
 
@@ -546,7 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             selectedRequestCanTakeRenovation = false;
             updateActionButtonsState();
-            alert(result.data.message || 'Renovasi berhasil diambil.');
+            await W2HDialog.success(result.data.message || 'Renovasi berhasil diambil.');
         });
     }
 

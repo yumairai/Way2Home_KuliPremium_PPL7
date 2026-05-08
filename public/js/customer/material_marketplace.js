@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const apiUrl = '/material/materials' + (urlParams.toString() ? '?' + urlParams.toString() : '');
 
     await fetchMaterials(apiUrl);
-    updateFloatingCart();
+    updateFloatingCart();  // Initial load - tidak perlu debounce
 
     // 2. Pasang Event Listener untuk Filter & Search
     const searchBtn = document.querySelector('.search-btn');
@@ -31,16 +31,16 @@ async function applyFilters() {
     const search = document.querySelector('.search-input').value;
     const price = document.getElementById('priceRange').value;
     const sort = document.querySelector('.sort-select').value;
-    
+
     // Ambil kategori yang diceklis
     const categories = Array.from(document.querySelectorAll('.checkbox-input:checked'))
-                            .map(cb => cb.nextElementSibling.innerText);
+        .map(cb => cb.nextElementSibling.innerText);
 
     let params = new URLSearchParams();
     if (search) params.append('search', search);
     if (price > 0) params.append('harga_max', price);
     categories.forEach(c => params.append('kategori[]', c));
-    
+
     // Mapping Sort
     const sortMap = { 'Harga Terendah': 'harga_rendah', 'Harga Tertinggi': 'harga_tinggi', 'Terbaru': 'terbaru' };
     params.append('sort', sortMap[sort] || 'terbaru');
@@ -75,8 +75,8 @@ async function fetchMaterials(url) {
         productGrid.innerHTML = '';
         materials.forEach(item => {
             const cartItem = cartData.find(c => c.material_id === item.id);
-            const statusBadge = item.stok > 0 
-                ? '<div class="product-badge badge-ready">Ready Stock</div>' 
+            const statusBadge = item.stok > 0
+                ? '<div class="product-badge badge-ready">Ready Stock</div>'
                 : '<div class="product-badge badge-preorder">Pre Order</div>';
 
             let actionHtml = '';
@@ -152,77 +152,96 @@ function renderPagination(result) {
 async function handleInitialAdd(id) {
     const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
     if (!isLoggedIn) {
-        alert('Silakan login terlebih dahulu!');
+        await W2HDialog.alert('Silakan login terlebih dahulu!');
         window.location.href = window.loginUrl;
         return;
     }
 
-    const res = await fetch('/cart/add', {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({ material_id: id, jumlah: 1 })
-    });
+    // Optimistic: Langsung update UI sebelum network call
+    const productCard = document.getElementById(`action-${id}`);
+    productCard.innerHTML = `
+        <div class="cart-quantity">
+            <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 0)">-</button>
+            <input type="number" class="cart-quantity-input" value="1" 
+                min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                onchange="updateCartQtyDirect(${id}, this.value)" 
+                onblur="updateCartQtyDirect(${id}, this.value)">
+            <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 2)">+</button>
+        </div>`;
 
-    if (res.ok) {
-        // Update tampilan tombol ke +/-
-        document.getElementById(`action-${id}`).innerHTML = `
-            <div class="cart-quantity">
-                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 0)">-</button>
-                <input type="number" class="cart-quantity-input" value="1" 
-                    min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                    onchange="updateCartQtyDirect(${id}, this.value)" 
-                    onblur="updateCartQtyDirect(${id}, this.value)">
-                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 2)">+</button>
-            </div>`;
-        updateFloatingCart();
-    }
+    // Network call di background tanpa menunggu
+    setTimeout(async () => {
+        try {
+            const res = await fetch('/cart/add', {
+                method: 'POST',
+                headers: getHeaders(),
+                body: JSON.stringify({ material_id: id, jumlah: 1 })
+            });
+
+            if (res.ok) {
+                debouncedUpdateFloatingCart();
+            }
+        } catch (err) {
+            console.error('Error adding to cart:', err);
+        }
+    }, 0);
 }
 
 async function updateCartQty(id, newQty) {
     const container = document.getElementById(`action-${id}`);
-    
+
+    // Optimistic: Update UI dulu
     if (newQty < 1) {
-        const res = await fetch(`/cart/remove-material/${id}`, { 
-            method: 'DELETE', 
-            headers: getHeaders() 
-        });
-        if (res.ok) {
-            container.innerHTML = `<button class="add-to-cart-btn" onclick="handleInitialAdd(${id})">Tambah <img src="/images/icon/trolley.png"></button>`;
-            updateFloatingCart();
-        }
+        container.innerHTML = `<button class="add-to-cart-btn" onclick="handleInitialAdd(${id})">Tambah <img src="/images/icon/trolley.png"></button>`;
     } else {
-        const res = await fetch('/cart/add', {
-            method: 'POST',
-            headers: getHeaders(),
-            body: JSON.stringify({ material_id: id, jumlah: newQty })
-        });
-        if (res.ok) {
-            container.innerHTML = `
-                <div class="cart-quantity">
-                    <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty - 1})">-</button>
-                    <input type="number" class="cart-quantity-input" value="${newQty}" 
-                        min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                        onchange="updateCartQtyDirect(${id}, this.value)" 
-                        onblur="updateCartQtyDirect(${id}, this.value)">
-                    <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty + 1})">+</button>
-                </div>`;
-            updateFloatingCart();
-        }
+        container.innerHTML = `
+            <div class="cart-quantity">
+                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty - 1})">-</button>
+                <input type="number" class="cart-quantity-input" value="${newQty}" 
+                    min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                    onchange="updateCartQtyDirect(${id}, this.value)" 
+                    onblur="updateCartQtyDirect(${id}, this.value)">
+                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty + 1})">+</button>
+            </div>`;
     }
+
+    // Network call di background
+    setTimeout(async () => {
+        try {
+            if (newQty < 1) {
+                await fetch(`/cart/remove-material/${id}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+            } else {
+                await fetch('/cart/add', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ material_id: id, jumlah: newQty })
+                });
+            }
+            debouncedUpdateFloatingCart();
+        } catch (err) {
+            console.error('Error updating cart:', err);
+        }
+    }, 0);
 }
 
 // Update quantity langsung dari input (saat user ketik dan selesai)
 async function updateCartQtyDirect(id, value) {
     const newQty = parseInt(value);
-    
+
     // Jika 0 atau kurang, hapus dari cart
     if (isNaN(newQty) || newQty <= 0) {
         await updateCartQty(id, 0); // 0 akan trigger remove
         return;
     }
-    
+
     await updateCartQty(id, newQty);
 }
+
+// Global debounce timer untuk updateFloatingCart
+let floatingCartTimeout;
 
 async function updateFloatingCart() {
     const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
@@ -232,30 +251,38 @@ async function updateFloatingCart() {
         const res = await fetch('/cart');
         const result = await res.json();
         const carts = result.data || [];
-        
+
         const floatingCart = document.querySelector('.checkout-btn');
         if (!floatingCart) return;
 
         if (carts.length > 0) {
             const totalItems = carts.reduce((sum, i) => sum + i.jumlah, 0);
             const totalHarga = carts.reduce((sum, i) => sum + (i.jumlah * i.material.harga), 0);
-            
+
             floatingCart.style.display = 'flex';
             document.getElementById('checkoutCount').innerText = totalItems;
             document.getElementById('checkoutTotal').innerText = totalHarga.toLocaleString('id-ID');
         } else {
             floatingCart.style.display = 'none';
         }
-        
+
         // Update navbar cart badge
         if (window.updateNavCartBadge) window.updateNavCartBadge();
     } catch (e) { console.error(e); }
 }
 
+// Wrapper dengan debounce - maksimal 300ms sekali call
+function debouncedUpdateFloatingCart() {
+    clearTimeout(floatingCartTimeout);
+    floatingCartTimeout = setTimeout(() => {
+        updateFloatingCart();
+    }, 300);
+}
+
 // SLIDER HARGA (Desain)
 const slider = document.getElementById('priceRange');
 if (slider) {
-    slider.addEventListener('input', function() {
+    slider.addEventListener('input', function () {
         const val = this.value;
         const label = document.getElementById('currentPriceLabel');
         const percentage = (val - this.min) / (this.max - this.min) * 100;

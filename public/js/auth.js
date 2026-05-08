@@ -76,10 +76,20 @@ const AuthApp = {
             }
 
             // fallback
+            if (window.W2HDialog && typeof window.W2HDialog.error === 'function') {
+                await window.W2HDialog.error(data.message || 'Registrasi gagal.');
+                return;
+            }
+
             alert(data.message || 'Registrasi Gagal');
 
         } catch (error) {
             console.error(error);
+            if (window.W2HDialog && typeof window.W2HDialog.error === 'function') {
+                await window.W2HDialog.error('Kesalahan koneksi server.');
+                return;
+            }
+
             alert('Kesalahan koneksi server.');
         }
     },

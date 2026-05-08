@@ -374,20 +374,20 @@ if (mainSubmitBtn) {
             if (response.ok && data.status === 'success') {
                 // pergi ke halaman sesuai paket
                 if (selectedPackage === 'material-only') {
-                    alert("Berhasil! " + data.message_2);
-                    window.location.href = "/material";
+                    await W2HDialog.success("Berhasil! " + data.message_2);
+                    setTimeout(() => window.location.href = "/material", 1500);
                 } else {
-                    alert("Berhasil! " + data.message_1);
-                    window.location.href = "/proyek";
+                    await W2HDialog.success("Berhasil! " + data.message_1);
+                    setTimeout(() => window.location.href = "/proyek", 1500);
                 }
             } else {
                 // Jika Laravel mengembalikan error (misal file kegedean/validasi gagal)
-                alert("Gagal: " + (data.message || "Terjadi kesalahan pada server"));
+                await W2HDialog.error("Gagal: " + (data.message || "Terjadi kesalahan pada server"));
                 resetButton(originalText);
             }
         } catch (error) {
             console.error('Error:', error);
-            alert("Koneksi terputus atau server bermasalah.");
+            await W2HDialog.error("Koneksi terputus atau server bermasalah.");
             resetButton(originalText);
         }
     });
