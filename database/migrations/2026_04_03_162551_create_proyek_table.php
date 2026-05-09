@@ -30,8 +30,6 @@ return new class extends Migration
             ];
             
             $table->enum('status_proyek', $statuses)->default('Menunggu Verifikasi');
-            
-            $table->integer('jumlah_cicilan')->default(0);
             $table->timestamps();
         });
     }

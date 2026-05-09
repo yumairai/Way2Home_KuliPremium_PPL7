@@ -82,6 +82,9 @@ Route::get('/test-email', function () {
     return 'Email sent';
 });
 
+Route::post('/midtrans/callback', [PaymentProyekController::class, 'callback'])
+    ->name('midtrans.callback');
+
 /*
 |--------------------------------------------------------------------------
 | Customer Routes (Sudah Login)
@@ -135,8 +138,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}/tracking', [CustomerTrackingProyekController::class, 'tracking'])->name('proyek.tracking');
             Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
             Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
-            Route::post('/bayar-dp', [PaymentProyekController::class, 'bayarDP'])->name('proyek.bayarDP');
-        });
+            Route::post('/bayar', [PaymentProyekController::class, 'bayar']);
+            Route::post('/payment-success', [PaymentProyekController::class, 'handleSuccess']);        });
 
         // Material & Cart
         Route::prefix('material')->group(function () {

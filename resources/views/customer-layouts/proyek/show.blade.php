@@ -3,22 +3,33 @@
 
 @php
 $statusProyek = $proyek->status_proyek;
-$detail = $proyek->detailBangun;
-$desain = $detail?->desainRumah;
-$dokumen = $detail?->dokumenProyek ?? collect();
+$detail       = $proyek->detailBangun;
+$desain       = $detail?->desainRumah;
 $catatanAdmin = $detail?->catatan_admin;
 
-// Cek sudah bayar dari relasi pembayaranDP
-$sudahBayar = $proyek->pembayaranDP !== null;
+// Ambil semua pembayaran terurut by periode
+$semuaPembayaran = $proyek->pembayaranProyek;
+
+// DP = periode 0
+$dp        = $semuaPembayaran->firstWhere('periode', 0);
+$sudahBayarDP = $dp?->status_pembayaran === 'berhasil';
+
+// Cicilan = periode 1-3
+$cicilans = $semuaPembayaran->where('periode', '>', 0)->values();
+
+// Cicilan aktif pertama yang belum lunas (berurutan)
+$cicilanAktif = $cicilans->first(
+    fn($c) => in_array($c->status_pembayaran, ['belum_bayar', 'pending', 'gagal', 'jatuh_tempo'])
+);
 
 $statusDokumen = match($statusProyek) {
-'Menunggu Verifikasi' => 'pending',
-'Revisi Dokumen' => 'revision',
-default => 'approved',
+    'Menunggu Verifikasi' => 'pending',
+    'Revisi Dokumen'      => 'revision',
+    default               => 'approved',
 };
 
 $isMandor = !in_array($statusProyek, [
-'Menunggu Verifikasi', 'Revisi Dokumen', 'Pembayaran DP', 'Pengalokasian Mandor'
+    'Menunggu Verifikasi', 'Revisi Dokumen', 'Pembayaran DP', 'Pengalokasian Mandor'
 ]);
 $isProyek = $isMandor;
 @endphp
@@ -77,6 +88,7 @@ $isProyek = $isMandor;
                 </div>
             </div>
 
+            {{-- ── Info Banner ── --}}
             @if ($statusDokumen === 'revision')
             <div class="information-container">
                 <div class="information-icon-box">
@@ -101,13 +113,9 @@ $isProyek = $isMandor;
                     <h3>Dokumen Sedang Direview</h3>
                     <p>Mohon tunggu 1×24 jam.</p>
                 </div>
-                <button class="btn-upload" style="display:none">
-                    <span class="material-symbols-outlined">upload_file</span>
-                    Upload Ulang
-                </button>
             </div>
 
-            @elseif ($statusDokumen === 'approved' && !$sudahBayar)
+            @elseif ($statusDokumen === 'approved' && !$sudahBayarDP)
             <div class="information-container verified">
                 <div class="information-icon-box verified">
                     <span class="material-symbols-outlined">check</span>
@@ -116,22 +124,20 @@ $isProyek = $isMandor;
                     <h3>Dokumen Terverifikasi</h3>
                     <p>Mohon melakukan pembayaran DP dalam waktu 7×24 jam. Jika tidak, proyek akan otomatis dibatalkan.</p>
                 </div>
-                <button class="btn-upload" style="display:none"></button>
             </div>
 
-            @elseif ($sudahBayar && !$isMandor)
+            @elseif ($sudahBayarDP && !$isMandor)
             <div class="information-container verified">
                 <div class="information-icon-box verified">
                     <span class="material-symbols-outlined">check</span>
                 </div>
                 <div class="information-content verified">
-                    <h3>Pembayaran Berhasil</h3>
+                    <h3>Pembayaran DP Berhasil</h3>
                     <p>Mohon tunggu 1×24 jam untuk pengalokasian mandor proyek Anda.</p>
                 </div>
-                <button class="btn-upload" style="display:none"></button>
             </div>
 
-            @elseif ($sudahBayar && $isMandor)
+            @elseif ($sudahBayarDP && $isMandor)
             <div class="information-container verified">
                 <div class="information-icon-box verified">
                     <span class="material-symbols-outlined">check</span>
@@ -142,10 +148,10 @@ $isProyek = $isMandor;
                         <strong style="color:#004796">Way2Home</strong>.
                     </p>
                 </div>
-                <button class="btn-upload" style="display:none"></button>
             </div>
             @endif
 
+            {{-- ── Action Buttons ── --}}
             <div class="button-group">
                 <button class="btn-action btn-cancel" id="cancelBtn"
                     data-proyek="{{ $isProyek ? 'true' : 'false' }}">
@@ -153,15 +159,19 @@ $isProyek = $isMandor;
                     Batalkan Proyek
                 </button>
 
-                @if (!$sudahBayar)
+                @if (!$sudahBayarDP)
+                {{-- Tombol Bayar DP --}}
                 <button class="btn-action btn-payments-action" id="dpBtn"
-                    data-harga="{{ $desain?->estimasi_biaya ?? 0 }}"
-                    data-proyek-id="{{ $proyek->id }}"
+                    data-pembayaran-id="{{ $dp?->id }}"
+                    data-nominal="{{ $dp?->jumlah_bayar ?? 0 }}"
+                    data-label="Down Payment"
                     {{ $statusDokumen !== 'approved' ? 'disabled' : '' }}>
                     <span class="material-symbols-outlined">payments</span>
                     Bayar DP
                 </button>
+
                 @else
+                {{-- Tombol Pantau Progress --}}
                 <button class="btn-action btn-progress-action" id="progressBtn"
                     data-mandor="{{ $isMandor ? 'true' : 'false' }}"
                     data-proyek-id="{{ $proyek->id }}">
@@ -174,58 +184,38 @@ $isProyek = $isMandor;
         </div>
     </section>
 
+    {{-- ── Cicilan Section (hanya tampil jika proyek aktif) ── --}}
     @if ($isProyek)
     <div class="cicilan-section">
         <h3 class="section-title">Periode Cicilan Rumah</h3>
         <div class="card-grid">
+
+            @forelse ($cicilans as $cicilan)
             @php
-                // Data cicilan sementara - akan diganti dengan data dari database
-                $installments = [
-                    [
-                        'periode' => 1,
-                        'price' => 'Rp 50.000.000',
-                        'due_date' => '15 Jan 2026',
-                        'card_class' => 'completed',
-                        'badge_class' => 'paid',
-                        'badge' => 'Lunas'
-                    ],
-                    [
-                        'periode' => 2,
-                        'price' => 'Rp 50.000.000',
-                        'due_date' => '15 Feb 2026',
-                        'card_class' => 'active',
-                        'badge_class' => 'pending',
-                        'badge' => 'Menunggu'
-                    ],
-                    [
-                        'periode' => 3,
-                        'price' => 'Rp 50.000.000',
-                        'due_date' => '15 Mar 2026',
-                        'card_class' => 'pending',
-                        'badge_class' => 'upcoming',
-                        'badge' => 'Akan Datang'
-                    ]
-                ];
+                $isAktifCard = $cicilanAktif && $cicilanAktif->id === $cicilan->id;
+                $cardClass   = $isAktifCard ? 'active' : $cicilan->cardClass();
             @endphp
-
-            @foreach ($installments as $installment)
-                <div class="card {{ $installment['card_class'] }}">
-                    <div class="card-header">
-                        <div>
-                            <p class="periode-label {{ $installment['card_class'] === 'active' ? 'highlight' : '' }}">
-                                Periode {{ $installment['periode'] }}
-                            </p>
-                            <p class="price">{{ $installment['price'] }}</p>
-                        </div>
-                        <span class="badge {{ $installment['badge_class'] }}">{{ $installment['badge'] }}</span>
+            <div class="card {{ $cardClass }}">
+                <div class="card-header">
+                    <div>
+                        <p class="periode-label {{ $isAktifCard ? 'highlight' : '' }}">
+                            Periode {{ $cicilan->periode }}
+                        </p>
+                        <p class="price">Rp {{ number_format($cicilan->jumlah_bayar, 0, ',', '.') }}</p>
                     </div>
-
-                    <div class="date {{ $installment['card_class'] === 'active' ? 'highlight' : '' }}">
-                        <span class="material-symbols-outlined">calendar_today</span>
-                        {{ $installment['due_date'] }}
-                    </div>
+                    <span class="badge {{ $cicilan->badgeClass() }}">
+                        {{ $cicilan->badgeLabel() }}
+                    </span>
                 </div>
-            @endforeach
+                <div class="date {{ $isAktifCard ? 'highlight' : '' }}">
+                    <span class="material-symbols-outlined">calendar_today</span>
+                    {{ $cicilan->tanggal_jatuh_tempo?->format('d M Y') ?? '-' }}
+                </div>
+            </div>
+            @empty
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Cicilan belum tersedia.</p>
+            @endforelse
+
         </div>
 
         <div class="info-box">
@@ -234,15 +224,26 @@ $isProyek = $isMandor;
                 akan ditunda sementara.</p>
         </div>
 
-        <button class="btn-primary" id="periodePayBtn">
+        <button class="btn-primary" id="periodePayBtn"
+            data-pembayaran-id="{{ $cicilanAktif?->id }}"
+            data-nominal="{{ $cicilanAktif?->jumlah_bayar }}"
+            data-periode="{{ $cicilanAktif?->periode }}"
+            {{ !$cicilanAktif ? 'disabled' : '' }}>
             <span class="material-symbols-outlined">payments</span>
-            Bayar Periode
+            @if (!$cicilanAktif)
+                Semua Cicilan Lunas 🎉
+            @elseif ($cicilanAktif->status_pembayaran === 'pending')
+                Selesaikan Pembayaran Periode {{ $cicilanAktif->periode }}
+            @else
+                Bayar Periode {{ $cicilanAktif->periode }}
+            @endif
         </button>
     </div>
     @endif
 
 </div>
 
+{{-- ── Sidebar ── --}}
 <div class="project-sidebar">
 
     <div class="info-box-gradient">
@@ -308,7 +309,7 @@ $isProyek = $isMandor;
             {{-- 3. Pembayaran DP --}}
             <div class="milestone-item">
                 <div class="milestone-timeline">
-                    @if ($sudahBayar)
+                    @if ($sudahBayarDP)
                     <div class="milestone-icon completed">
                         <span class="material-symbols-outlined">check</span>
                     </div>
@@ -327,8 +328,8 @@ $isProyek = $isMandor;
                 </div>
                 <div class="milestone-content">
                     <p class="milestone-label">Pembayaran DP</p>
-                    @if ($sudahBayar)
-                    <p class="milestone-date">Pembayaran Berhasil</p>
+                    @if ($sudahBayarDP)
+                    <p class="milestone-date">{{ $dp->tanggal_bayar?->format('d M Y') }}</p>
                     @elseif ($statusDokumen === 'approved')
                     <p class="milestone-date">Menunggu Pembayaran</p>
                     @else
@@ -345,7 +346,7 @@ $isProyek = $isMandor;
                         <span class="material-symbols-outlined">check</span>
                     </div>
                     <div class="milestone-line"></div>
-                    @elseif ($sudahBayar)
+                    @elseif ($sudahBayarDP)
                     <div class="milestone-icon in-progress">
                         <span class="material-symbols-outlined">person</span>
                     </div>
@@ -366,18 +367,12 @@ $isProyek = $isMandor;
             {{-- 5. Proyek Mulai --}}
             <div class="milestone-item">
                 <div class="milestone-timeline">
-                    @if ($isProyek)
-                    <div class="milestone-icon completed">
+                    <div class="milestone-icon {{ $isProyek ? 'completed' : 'pending' }}">
                         <span class="material-symbols-outlined">start</span>
                     </div>
-                    @else
-                    <div class="milestone-icon pending">
-                        <span class="material-symbols-outlined">start</span>
-                    </div>
-                    @endif
                 </div>
                 <div class="milestone-content">
-                    <p class="milestone-label">{{ $isProyek ? 'Proyek Dibuat' : 'Mulai' }}</p>
+                    <p class="milestone-label">{{ $isProyek ? 'Proyek Aktif' : 'Mulai' }}</p>
                     <p class="milestone-date">{{ $isProyek ? 'Pantau progress proyek Anda' : 'Progress dimulai' }}</p>
                 </div>
             </div>

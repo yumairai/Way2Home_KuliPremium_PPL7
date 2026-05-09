@@ -67,6 +67,9 @@ class ManageMandorController extends Controller
             'status_proyek' => 'In Progress',
         ]);
 
+        $proyek->load('detailBangun.desainRumah');
+        $proyek->generateCicilan();
+
         $mandor->update([
             'status' => 'nonaktif',
         ]);
@@ -104,7 +107,7 @@ class ManageMandorController extends Controller
             // Hapus semua data terkait proyek
             $proyek->tasks()->delete();
             $proyek->progress()->delete();
-            $proyek->pembayaran()->delete();
+            $proyek->pembayaranProyek()->delete();
             $proyek->detailBangun()?->delete();
             $proyek->dokumen()->delete();
             $proyek->aktivitas()->delete();

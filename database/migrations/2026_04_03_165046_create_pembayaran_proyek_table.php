@@ -14,15 +14,30 @@ return new class extends Migration
         Schema::create('pembayaran_proyek', function (Blueprint $table) {
             $table->id();
             $table->foreignId('proyek_id')->constrained('proyek')->cascadeOnDelete();
-
+ 
+            // 0 = DP, 1-3 = cicilan
+            $table->unsignedTinyInteger('periode')->default(0);
+ 
+            $table->bigInteger('jumlah_bayar');
+            $table->date('tanggal_jatuh_tempo')->nullable();
+            $table->date('tanggal_bayar')->nullable();
+ 
+            // Midtrans
             $table->string('snap_token')->nullable();
             $table->string('order_id')->nullable();
-
-            $table->bigInteger('jumlah_bayar');
-            $table->string('tipe_pembayaran'); // Contoh: 'DP', 'Termin 1'
-            $table->enum('status_pembayaran', ['pending', 'berhasil', 'gagal', 'diverifikasi'])->default('pending');
-            $table->date('tanggal_pembayaran');
+            $table->string('metode_pembayaran')->nullable();
+ 
+            $table->enum('status_pembayaran', [
+                'belum_bayar',
+                'pending',
+                'berhasil',
+                'gagal',
+                'jatuh_tempo',
+            ])->default('belum_bayar');
+ 
             $table->timestamps();
+ 
+            $table->unique(['proyek_id', 'periode']);
         });
     }
 

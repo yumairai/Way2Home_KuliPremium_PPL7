@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DetailProyekBangunSeeder::class,
             DokumenProyekSeeder::class,
             ProyekMilestoneSeeder::class,
+            PembayaranProyekSeeder::class,
         ]);
     }
 }

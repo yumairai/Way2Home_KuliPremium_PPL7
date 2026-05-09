@@ -18,7 +18,6 @@ class Proyek extends Model
         'alamat_proyek',
         'tanggal_mulai',
         'status_proyek',
-        'jumlah_cicilan'
     ];
 
     public function customer()
@@ -36,16 +35,74 @@ class Proyek extends Model
         return $this->hasOne(DetailProyekBangun::class, 'proyek_id');
     }
 
-    public function pembayaran()
+    public function pembayaranProyek()
     {
-        return $this->hasMany(PembayaranProyek::class, 'proyek_id');
+        return $this->hasMany(PembayaranProyek::class, 'proyek_id')->orderBy('periode');
     }
-
+    
+    // Shortcut: hanya DP (periode 0)
     public function pembayaranDP()
     {
-        return $this->hasOne(PembayaranProyek::class, 'proyek_id')
-            ->where('tipe_pembayaran', 'DP')
-            ->where('status_pembayaran', 'berhasil');
+        return $this->hasOne(PembayaranProyek::class, 'proyek_id')->where('periode', 0);
+    }
+    
+    // Shortcut: hanya cicilan (periode 1-3)
+    public function cicilanProyek()
+    {
+        return $this->hasMany(PembayaranProyek::class, 'proyek_id')->where('periode', '>', 0)->orderBy('periode');
+    }
+    
+    // ─── Generate DP (dipanggil saat proyek pertama dibuat) ───────────
+    
+    public function generateDP(): void
+    {
+        if ($this->pembayaranProyek()->where('periode', 0)->exists()) {
+            return;
+        }
+    
+        $estimasiBiaya = $this->detailBangun->desainRumah->estimasi_biaya;
+        $nominalDP     = (int) round($estimasiBiaya * 0.30);
+    
+        PembayaranProyek::create([
+            'proyek_id'           => $this->id,
+            'periode'             => 0,
+            'jumlah_bayar'        => $nominalDP,
+            'tanggal_jatuh_tempo' => null, // DP tidak punya jatuh tempo tetap
+            'status_pembayaran'   => 'belum_bayar',
+        ]);
+    }
+    
+    // ─── Generate 3 Cicilan (dipanggil saat mandor dialokasikan) ──────
+    
+    public function generateCicilan(): void
+    {
+        if ($this->cicilanProyek()->exists()) {
+            return;
+        }
+    
+        $estimasiBiaya = $this->detailBangun->desainRumah->estimasi_biaya;
+        $sisaBiaya     = $estimasiBiaya * 0.70;
+    
+        // Bagi rata ke 3 periode; sisa pembulatan masuk ke periode terakhir
+        $perTermin   = (int) floor($sisaBiaya / 3);
+        $sisaRound   = (int) $sisaBiaya - ($perTermin * 3);
+    
+        $rows = [];
+        for ($i = 1; $i <= 3; $i++) {
+            $nominal = $perTermin + ($i === 3 ? $sisaRound : 0); // sisa pembulatan ke periode 3
+    
+            $rows[] = [
+                'proyek_id'           => $this->id,
+                'periode'             => $i,
+                'jumlah_bayar'        => $nominal,
+                'tanggal_jatuh_tempo' => now()->addMonths($i)->toDateString(),
+                'status_pembayaran'   => 'belum_bayar',
+                'created_at'          => now(),
+                'updated_at'          => now(),
+            ];
+        }
+    
+        PembayaranProyek::insert($rows);
     }
 
     public function tasks()

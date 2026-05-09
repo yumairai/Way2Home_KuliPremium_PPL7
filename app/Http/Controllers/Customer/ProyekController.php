@@ -52,7 +52,7 @@ class ProyekController extends Controller
         $proyeks = Proyek::with([
             'detailBangun.desainRumah',
             'detailBangun.dokumenProyek',
-            'pembayaranDP',
+            'pembayaranProyek',
         ])
             ->where('customer_id', $customer->id)
             ->where('jenis_proyek', 'Bangun Rumah')
@@ -156,6 +156,9 @@ class ProyekController extends Controller
 
             DB::commit();
 
+            $proyek->load('detailBangun.desainRumah');
+            $proyek->generateDP();
+            
             return response()->json([
                 'status'    => 'success',
                 'message_1' => 'Pengajuan pembangunan berhasil dikirim!',
