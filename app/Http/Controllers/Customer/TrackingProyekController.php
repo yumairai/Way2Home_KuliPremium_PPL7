@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Proyek;
+use App\Models\ProyekDokumentasi;
 use Illuminate\Support\Facades\Auth;
+use App\Services\SupabaseStorageService;
 
 class TrackingProyekController extends Controller
 {
@@ -124,5 +126,14 @@ class TrackingProyekController extends Controller
             'estimasiSelesai',
             'milestones',
         ));
+    }
+
+    public function getDokumentasiUrl(ProyekDokumentasi $dok, \App\Services\SupabaseStorageService $storage)
+    {
+        $customer = Auth::user()->customer;
+        abort_if($dok->proyek->customer_id !== $customer->id, 403);
+
+        $url = $storage->getSignedUrl($dok->storage_path, 3600);
+        return redirect($url);
     }
 }

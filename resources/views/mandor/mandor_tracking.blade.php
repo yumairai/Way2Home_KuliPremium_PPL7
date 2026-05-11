@@ -310,15 +310,15 @@
                      <span class="mandor-upload-text">Upload Foto Baru</span>
                      <p class="mandor-upload-hint">Format JPG, PNG (Max 5MB)</p>
                  </label>
-                 @foreach ($proyek->dokumentasi as $dok)
-                     <div class="mandor-doc-photo-card">
-                         <img src="{{ asset('storage/' . $dok->path_foto) }}" alt="Dokumentasi"
-                             class="mandor-doc-photo">
-                         <div class="mandor-doc-overlay">
-                             <span class="mandor-doc-caption">{{ $dok->created_at->format('d M Y') }}</span>
-                         </div>
-                     </div>
-                 @endforeach
+                @foreach ($proyek->dokumentasi as $dok)
+                    <div class="mandor-doc-photo-card">
+                        <img src="{{ route('mandor.dokumentasi.url', $dok->id) }}" 
+                            alt="Dokumentasi" class="mandor-doc-photo">
+                        <div class="mandor-doc-overlay">
+                            <span class="mandor-doc-caption">{{ $dok->created_at->format('d M Y') }}</span>
+                        </div>
+                    </div>
+                @endforeach
              </div>
          </section>
      @endif

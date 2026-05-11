@@ -133,7 +133,7 @@ class TrackingProyekController extends Controller
         ]);
     }
 
-    public function uploadDokumentasi(Request $request, Proyek $proyek)
+    public function uploadDokumentasi(Request $request, Proyek $proyek, \App\Services\SupabaseStorageService $storage)
     {
         $mandor = $this->currentMandor();
         abort_if($proyek->mandor_id !== $mandor->id, 403);
@@ -142,18 +142,34 @@ class TrackingProyekController extends Controller
             'foto' => 'required|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
-        $path = $request->file('foto')->store('proyek/dokumentasi', 'public');
+        $storagePath = $storage->uploadPrivate(
+            $request->file('foto'),
+            $mandor->user_id,
+            'proyek/dokumentasi/' . $proyek->id
+        );
 
         $dok = ProyekDokumentasi::create([
-            'proyek_id' => $proyek->id,
-            'path_foto' => $path,
+            'proyek_id'    => $proyek->id,
+            'path_foto'    => $storagePath, // simpan path saja
+            'storage_path' => $storagePath,
         ]);
+
+        $signedUrl = $storage->getSignedUrl($storagePath, 3600);
 
         return response()->json([
             'success'  => true,
-            'foto_url' => asset('storage/' . $dok->path_foto),
+            'foto_url' => $signedUrl,
             'tanggal'  => $dok->created_at->format('d M Y'),
         ]);
+    }
+
+    public function getDokumentasiUrl(ProyekDokumentasi $dok, \App\Services\SupabaseStorageService $storage)
+    {
+        $mandor = $this->currentMandor();
+        abort_if($dok->proyek->mandor_id !== $mandor->id, 403);
+
+        $url = $storage->getSignedUrl($dok->storage_path, 3600);
+        return redirect($url);
     }
 
     private function hitungPersentase($tasks): int

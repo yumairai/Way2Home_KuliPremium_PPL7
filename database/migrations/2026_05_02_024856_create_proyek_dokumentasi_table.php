@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('proyek_id')->constrained('proyek')->cascadeOnDelete();
             $table->string('path_foto');
+            $table->string('storage_path')->nullable()->after('path_foto');
             $table->timestamps();
         });
     }

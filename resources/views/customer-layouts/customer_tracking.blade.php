@@ -209,9 +209,10 @@
                     @forelse($proyek->dokumentasi as $doc)
                     <div class="tracking-doc-item">
                         <img alt="Dokumentasi Proyek" class="tracking-doc-image"
-                            src="{{ asset('storage/' . $doc->path_foto) }}" />
-                        <div class="tracking-doc-overlay"><span
-                                class="material-symbols-outlined tracking-doc-zoom">zoom_in</span></div>
+                            src="{{ route('proyek.dokumentasi.url', $doc->id) }}" />
+                        <div class="tracking-doc-overlay">
+                            <span class="material-symbols-outlined tracking-doc-zoom">zoom_in</span>
+                        </div>
                     </div>
                     @empty
                     <div style="grid-column: 1 / -1; text-align: center; color: #666; padding: 20px;">

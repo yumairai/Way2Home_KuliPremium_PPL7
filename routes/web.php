@@ -135,11 +135,13 @@ Route::middleware(['auth'])->group(function () {
         // Manajemen Proyek
         Route::prefix('proyek')->group(function () {
             Route::get('/', [ProyekController::class, 'index'])->name('proyek.index');
+            Route::get('/dokumentasi/{dok}', [CustomerTrackingProyekController::class, 'getDokumentasiUrl'])->name('proyek.dokumentasi.url'); // ← sudah benar posisinya
             Route::get('/{id}/tracking', [CustomerTrackingProyekController::class, 'tracking'])->name('proyek.tracking');
             Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
             Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
             Route::post('/bayar', [PaymentProyekController::class, 'bayar']);
-            Route::post('/payment-success', [PaymentProyekController::class, 'handleSuccess']);        });
+            Route::post('/payment-success', [PaymentProyekController::class, 'handleSuccess']);
+        });
 
         // Material & Cart
         Route::prefix('material')->group(function () {
@@ -216,4 +218,5 @@ Route::middleware(['auth', 'mandor'])->prefix('mandor')->group(function () {
     Route::post('/task/{task}/complete', [MandorTrackingProyekController::class, 'completeTask'])->name('mandor.task.complete');
     Route::post('/proyek/{proyek}/aktivitas', [MandorTrackingProyekController::class, 'tambahAktivitas'])->name('mandor.proyek.aktivitas');
     Route::post('/proyek/{proyek}/dokumentasi', [MandorTrackingProyekController::class, 'uploadDokumentasi'])->name('mandor.proyek.dokumentasi');
+    Route::get('/dokumentasi/{dok}', [MandorTrackingProyekController::class, 'getDokumentasiUrl'])->name('mandor.dokumentasi.url');
 });
