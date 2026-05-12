@@ -53,64 +53,54 @@ class Proyek extends Model
     }
     
     // ─── Generate DP (dipanggil saat proyek pertama dibuat) ───────────
-
+    
     public function generateDP(): void
     {
         if ($this->pembayaranProyek()->where('periode', 0)->exists()) {
             return;
         }
-
-        $estimasiBiaya = (int) $this->detailBangun->desainRumah->estimasi_biaya;
+    
+        $estimasiBiaya = $this->detailBangun->desainRumah->estimasi_biaya;
         $nominalDP     = (int) round($estimasiBiaya * 0.30);
-
+    
         PembayaranProyek::create([
             'proyek_id'           => $this->id,
             'periode'             => 0,
             'jumlah_bayar'        => $nominalDP,
-            'tanggal_jatuh_tempo' => null,
+            'tanggal_jatuh_tempo' => null, // DP tidak punya jatuh tempo tetap
             'status_pembayaran'   => 'belum_bayar',
         ]);
     }
-
+    
     // ─── Generate 3 Cicilan (dipanggil saat mandor dialokasikan) ──────
-
+    
     public function generateCicilan(): void
     {
         if ($this->cicilanProyek()->exists()) {
             return;
         }
 
-        $estimasiBiaya = (int) $this->detailBangun->desainRumah->estimasi_biaya;
-        $estimasiDurasi = (int) ($this->detailBangun->desainRumah->estimasi_durasi ?? 12); // dalam bulan
+        $desain = $this->detailBangun->desainRumah;
+        $estimasiBiaya = $desain->estimasi_biaya;
+        $durasiBulan = $desain->estimasi_durasi; // Misal: 4, 8, atau 12
 
-        // Ambil nominal DP yang sudah tersimpan agar total tepat (bukan hitung ulang 70%)
-        $nominalDP = (int) ($this->pembayaranDP?->jumlah_bayar ?? round($estimasiBiaya * 0.30));
-        $sisaBiaya = $estimasiBiaya - $nominalDP; // integer, pasti tepat
-
-        // Bagi rata ke 3 termin; sisa pembulatan masuk ke periode terakhir
-        $perTermin = (int) floor($sisaBiaya / 3);
-        $sisaRound = $sisaBiaya - ($perTermin * 3);
-
-        // Bagi rata durasi proyek ke 3 interval yang sama
-        $intervalBulan = (int) round($estimasiDurasi / 3);
-        $tanggalMulai  = \Carbon\Carbon::parse($this->tanggal_mulai ?? now());
+        // Skema Persentase Tetap
+        $skema = [
+            ['periode' => 1, 'persen' => 0.25, 'titik_waktu' => 0.25], // 25% dari total durasi
+            ['periode' => 2, 'persen' => 0.25, 'titik_waktu' => 0.60], // 60% dari total durasi
+            ['periode' => 3, 'persen' => 0.20, 'titik_waktu' => 1.00], // Akhir durasi (100%)
+        ];
 
         $rows = [];
-        for ($i = 1; $i <= 3; $i++) {
-            // Periode terakhir mendapat sisa pembulatan nominal
-            $nominal = $perTermin + ($i === 3 ? $sisaRound : 0);
-
-            // Jatuh tempo: setiap interval bulan dari tanggal mulai
-            // Periode 3 tepat di akhir estimasi durasi
-            $jatuhTempo = ($i < 3)
-                ? $tanggalMulai->copy()->addMonths($intervalBulan * $i)->toDateString()
-                : $tanggalMulai->copy()->addMonths($estimasiDurasi)->toDateString();
+        foreach ($skema as $s) {
+            // Menghitung bulan jatuh tempo secara dinamis
+            $tambahBulan = (int) max(1, round($durasiBulan * $s['titik_waktu']));
 
             $rows[] = [
                 'proyek_id'           => $this->id,
-                'periode'             => $i,
-                'jumlah_bayar'        => $nominal,
-                'tanggal_jatuh_tempo' => $jatuhTempo,
+                'periode'             => $s['periode'],
+                'jumlah_bayar'        => (int) round($estimasiBiaya * $s['persen']),
+                'tanggal_jatuh_tempo' => now()->addMonths($tambahBulan)->toDateString(),
                 'status_pembayaran'   => 'belum_bayar',
                 'created_at'          => now(),
                 'updated_at'          => now(),
