@@ -19,6 +19,9 @@ use App\Http\Controllers\Admin\VerifikasiProyekController;
 use App\Http\Controllers\Admin\ManageMandorController;
 use App\Http\Controllers\Mandor\RenovasiController as MandorRenovasiController;
 use App\Http\Controllers\Mandor\TrackingProyekController as MandorTrackingProyekController;
+use App\Http\Controllers\Admin\ManageMaterialController;
+use App\Http\Controllers\Admin\ManageOrderController;
+use App\Http\Controllers\Customer\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +32,7 @@ use App\Http\Controllers\Mandor\TrackingProyekController as MandorTrackingProyek
 Route::get('/', [AuthController::class, 'index'])->name('home');
 
 Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
+Route::post('/payment/checkout/success', [PaymentMaterialController::class, 'handleSuccess']); // ← tambah ini
 Route::post('/proyek/callback', [ProyekController::class, 'callback']);
 
 /*
@@ -128,9 +132,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/renovation/{requestRenovasi}/reject-offer', [CustomerRenovasiController::class, 'rejectOffer'])->name('customer.renovation.reject');
 
         // Order history
-        Route::get('/order', function () {
-            return view('customer-layouts.order');
-        })->name('customer.order');
+        Route::get('/order', [OrderController::class, 'index'])->name('customer.order');
+
 
         // Manajemen Proyek
         Route::prefix('proyek')->group(function () {
@@ -177,13 +180,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/verifikasi', [VerifikasiProyekController::class, 'index'])->name('admin.verifikasi');
     Route::put('/verifikasi/{id}', [VerifikasiProyekController::class, 'update'])->name('admin.verifikasi.update');
 
-    Route::get('/kelola-material', function () {
-        return view('admin.kelola_material');
-    })->name('admin.material');
+    Route::get('/kelola-material', [ManageMaterialController::class, 'index'])
+        ->name('admin.material');
 
-    Route::get('/order-management', function () {
-        return view('admin.manajemen_order');
-    })->name('admin.order');
+    Route::get('/order-management', [ManageOrderController::class, 'index'])->name('admin.order');
+    Route::patch('/order-management/{order}/status', [ManageOrderController::class, 'updateStatus'])->name('admin.order.updateStatus');
+
+    Route::get('/kelola-material', [ManageMaterialController::class, 'index'])->name('admin.material');
+    Route::post('/kelola-material', [ManageMaterialController::class, 'store'])->name('admin.material.store');
+    Route::put('/kelola-material/{material}', [ManageMaterialController::class, 'update'])->name('admin.material.update');
+    Route::delete('/kelola-material/{material}', [ManageMaterialController::class, 'destroy'])->name('admin.material.destroy');
 
     Route::get('/manajemen-mandor', [ManageMandorController::class, 'index'])->name('admin.mandor');
     Route::post('/manajemen-mandor/assign', [ManageMandorController::class, 'assign'])->name('admin.mandor.assign');

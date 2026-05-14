@@ -16,6 +16,21 @@ class OrderMaterial extends Model
 
     public function customer()
     {
-        return $this->belongsTo(User::class, 'customer_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return match($this->status_order) {
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Menunggu Pengiriman',
+            'persiapan'  => 'Diproses Admin',
+            'dikirim'    => 'Dalam Pengiriman',
+            'selesai'    => 'Pesanan Selesai',
+            'expire'     => 'Kedaluwarsa',
+            'cancel'     => 'Dibatalkan',
+            'deny'       => 'Ditolak',
+            default      => ucfirst($this->status_order),
+        };
     }
 }

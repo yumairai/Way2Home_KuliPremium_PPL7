@@ -14,7 +14,7 @@ class CartController extends Controller
     {
         $userId = Auth::id();
         $carts = Cart::select('id', 'user_id', 'material_id', 'jumlah')  // Only needed columns
-            ->with('material:id,nama_material,harga,satuan,kategori')    // Only needed material columns
+            ->with('material:id,nama_material,harga,satuan,kategori,path_foto_material')
             ->where('user_id', $userId)
             ->get();
 
@@ -91,5 +91,16 @@ class CartController extends Controller
         if (!$cart) return response()->json(['message' => 'Barang tidak ditemukan'], 404);
         $cart->delete();
         return response()->json(['message' => 'Barang dihapus dari keranjang']);
+    }
+
+    public function cartPage()
+    {
+        $user = Auth::user();
+        $customer = $user->customer; // relasi customer
+
+        return view('customer.cart', [
+            'user' => $user,
+            'customer' => $customer,
+        ]);
     }
 }

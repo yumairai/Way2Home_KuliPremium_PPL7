@@ -22,16 +22,15 @@
                         <div class="delivery-address-grid">
                             <div class="delivery-address-field">
                                 <label class="delivery-address-label" for="nama_lengkap">Nama Lengkap</label>
-                                <input class="delivery-address-input" id="nama_lengkap" placeholder="Contoh: Budi Santoso" type="text" />
+                                <input class="delivery-address-input" id="nama_lengkap" placeholder="Contoh: Budi Santoso" type="text" value="{{ $user->name ?? '' }}" />
                             </div>
                             <div class="delivery-address-field">
                                 <label class="delivery-address-label" for="nomor_telepon">Nomor Telepon</label>
-                                <input class="delivery-address-input" id="nomor_telepon" placeholder="Contoh: 08123456789" type="tel" />
+                                <input class="delivery-address-input" id="nomor_telepon" placeholder="Contoh: 08123456789" type="tel" value="{{ $customer->no_hp ?? $user->phone_number ?? '' }}" />
                             </div>
                             <div class="delivery-address-field full-width">
                                 <label class="delivery-address-label" for="alamat_lengkap">Alamat Lengkap</label>
-                                <textarea class="delivery-address-textarea" id="alamat_lengkap"
-                                    placeholder="Tuliskan alamat detail seperti nama jalan, nomor rumah, RT/RW, dan kelurahan/kecamatan"></textarea>
+                                <textarea class="delivery-address-textarea" id="alamat_lengkap" placeholder="Tuliskan alamat detail...">{{ $user->address ?? '' }}</textarea>
                             </div>
                         </div>
                         <div class="delivery-address-checkbox-container">

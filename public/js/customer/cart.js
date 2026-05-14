@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return `
             <div class="cart-item">
                 <div class="cart-item-image-container">
-                    <img class="cart-item-image" src="/${material.path_foto_material}" alt="${material.nama_material}">
+                    <img class="cart-item-image" src="${material.path_foto_material}" alt="${material.nama_material}">
                 </div>
                 <div class="cart-item-content">
                     <div class="cart-item-header">
@@ -157,9 +157,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(data => {
                     if (data.status === 'success') {
                         window.snap.pay(data.token, {
-                            onSuccess: function () {
-                                W2HDialog.success("Pembayaran berhasil!");
-                                setTimeout(() => window.location.href = '/material', 1500);
+                            onSuccess: function (result) {
+                                fetch('/payment/checkout/success', {
+                                    method: 'POST',
+                                    headers: getHeaders(true),
+                                    body: JSON.stringify({
+                                        order_id: result.order_id,
+                                        transaction_status: result.transaction_status,
+                                    })
+                                }).finally(() => {
+                                    W2HDialog.alert("Pembayaran berhasil!");
+                                    setTimeout(() => window.location.href = '/order', 1500);
+                                });
                             },
                             onPending: function () {
                                 W2HDialog.alert("Menunggu pembayaran... Silakan cek email atau riwayat pesanan.");

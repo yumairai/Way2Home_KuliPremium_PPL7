@@ -24,38 +24,45 @@ class PaymentMaterialController extends Controller
 
     public function checkout(Request $request)
     {
-        $user = $request->user(); 
+        $user = $request->user();
 
-        // Validasi: Pastikan user sudah login
         if (!$user) {
             return response()->json(['message' => 'Sesi berakhir, silakan login kembali.'], 401);
         }
-        
-        // 1. Cari data di tabel customers berdasarkan user_id
+
         $customer = Customer::where('user_id', $user->id)->first();
 
         if (!$customer) {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Profil Customer tidak ditemukan. Pastikan Anda sudah terdaftar sebagai pelanggan.'
+                'status'  => 'error',
+                'message' => 'Profil Customer tidak ditemukan.'
             ], 404);
         }
-        
-        // 2. Ambil isi keranjang belanja
+
         $cartItems = Cart::where('user_id', $user->id)->with('material')->get();
 
         if ($cartItems->isEmpty()) {
             return response()->json(['message' => 'Keranjang Anda kosong.'], 400);
         }
 
-        // 3. Hitung Subtotal
-        $subtotal = $cartItems->sum(function($item) {
-            return $item->jumlah * $item->material->harga;
-        });
+        $existingPending = OrderMaterial::where('customer_id', $customer->id)
+            ->where('status_order', 'pending')
+            ->latest()
+            ->first();
 
-        // 4. Hitung Biaya Layanan (2%, Min 5rb, Max 50rb)
+        if ($existingPending) {
+            // Kembalikan snap token yang sudah ada
+            return response()->json([
+                'status'   => 'success',
+                'token'    => $existingPending->snap_token,
+                'order_id' => $existingPending->order_id_midtrans
+            ]);
+        }
+
+        $subtotal = $cartItems->sum(fn($item) => $item->jumlah * $item->material->harga);
+
         $serviceFee = $subtotal * 0.02;
-        if ($serviceFee < 5000) $serviceFee = 5000;
+        if ($serviceFee < 5000)  $serviceFee = 5000;
         if ($serviceFee > 50000) $serviceFee = 50000;
 
         $grandTotal = $subtotal + $serviceFee;
@@ -63,10 +70,8 @@ class PaymentMaterialController extends Controller
         DB::beginTransaction();
 
         try {
-            // 5. Buat ID unik untuk Midtrans
             $orderIdMidtrans = 'W2H-' . time() . '-' . $user->id;
-            
-            // 6. Simpan ke tabel OrderMaterial
+
             $order = OrderMaterial::create([
                 'customer_id'       => $customer->id,
                 'order_id_midtrans' => $orderIdMidtrans,
@@ -78,7 +83,7 @@ class PaymentMaterialController extends Controller
                 'status_order'      => 'pending',
             ]);
 
-            // 7. Pindahkan item dari Cart ke DetailOrder & Hapus Cart
+            // Salin item ke detail_order TAPI cart BELUM dihapus
             foreach ($cartItems as $item) {
                 DetailOrder::create([
                     'order_material_id' => $order->id,
@@ -87,11 +92,9 @@ class PaymentMaterialController extends Controller
                     'harga_satuan'      => $item->material->harga,
                     'subtotal'          => $item->jumlah * $item->material->harga,
                 ]);
-                
-                $item->delete(); // Hapus item dari keranjang
+                // $item->delete() ← DIHAPUS dari sini
             }
 
-            // 8. Parameter Midtrans
             $params = [
                 'transaction_details' => [
                     'order_id'     => $orderIdMidtrans,
@@ -118,18 +121,15 @@ class PaymentMaterialController extends Controller
                 ]
             ];
 
-            // 9. Dapatkan Snap Token
             $snapToken = Snap::getSnapToken($params);
-            
-            // 10. Update Snap Token ke database
             $order->update(['snap_token' => $snapToken]);
 
             DB::commit();
 
             return response()->json([
-                'status'  => 'success',
-                'token'   => $snapToken,
-                'order_id'=> $orderIdMidtrans
+                'status'   => 'success',
+                'token'    => $snapToken,
+                'order_id' => $orderIdMidtrans
             ]);
 
         } catch (\Exception $e) {
@@ -139,5 +139,31 @@ class PaymentMaterialController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function handleSuccess(Request $request)
+    {
+        $order = OrderMaterial::where('order_id_midtrans', $request->order_id)->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order tidak ditemukan'], 404);
+        }
+
+        if ($order->status_order === 'pending') {
+            $order->update(['status_order' => 'paid']);
+        }
+
+        if ($transactionStatus === 'settlement' || 
+        ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
+            $status = 'paid';
+        } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
+            $status = $transactionStatus;
+        } else {
+            $status = 'pending';
+        }
+        // Baru hapus cart setelah pembayaran sukses
+        Cart::where('user_id', $request->user()->id)->delete();
+
+        return response()->json(['message' => 'OK']);
     }
 }
