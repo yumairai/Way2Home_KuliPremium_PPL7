@@ -1,15 +1,41 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Controllers\Customer\MaterialController;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Customer\PreferensiController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Customer\ProyekController;
+use App\Http\Controllers\Customer\MaterialController;
+use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\PreferensiController;
+use App\Http\Controllers\Customer\PaymentMaterialController;
+use App\Http\Controllers\Customer\PaymentProyekController;
+use App\Http\Controllers\Customer\RenovasiController as CustomerRenovasiController;
+use App\Http\Controllers\Customer\ProfileController;
+use App\Http\Controllers\Customer\TrackingProyekController as CustomerTrackingProyekController;
+use App\Http\Controllers\Admin\VerifikasiProyekController;
+use App\Http\Controllers\Admin\ManageMandorController;
+use App\Http\Controllers\Mandor\RenovasiController as MandorRenovasiController;
+use App\Http\Controllers\Mandor\TrackingProyekController as MandorTrackingProyekController;
+
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', [AuthController::class, 'index'])->name('home');
 
-Route::get('/material', [MaterialController::class, 'index'])->name('material.index');
-Route::get('/api/materials', [MaterialController::class, 'getMaterials']);
+Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
+Route::post('/proyek/callback', [ProyekController::class, 'callback']);
+
+/*
+|--------------------------------------------------------------------------
+| Guest Routes (Belum Login)
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -18,99 +44,176 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-Route::middleware(['auth'])->group(function () {
-    Route::post('/api/preferensi/simpan', [PreferensiController::class, 'store']);
-    Route::post('/api/proyek/ajukan', [ProyekController::class, 'store']); // pindah ke sini yak dari api.php
-
-    Route::get('/dashboard', function () {
-        return view('customer-layouts.dashboard');
-    })->name('customer-layouts.dashboard');
-
-    Route::get('/material/cart', function () {
-        return view('customer-layouts.cart');
-    });
-
-    Route::get('/recommendation', function () {
-        return view('customer-layouts.input_preferensi_ai');
-    });
-
-    Route::get('/recommendation/result', [PreferensiController::class, 'result']);
-
-    Route::get('/renovation', function () {
-        return view('customer-layouts.renovation');
-    })->name('customer.renovation');
-
-    Route::get('/renovation-form', function () {
-        return view('customer-layouts.renovation_form');
-    })->name('customer.renovation_form');
-
-    Route::get('/house-build-form', [ProyekController::class, 'create'])->name('proyek.form_bangun');
-
-    Route::prefix('project')->group(function () {
-        Route::redirect('/', '/project/1');
-        Route::get('/{id}/tracking', function () {
-            return view('customer-layouts.customer_tracking');
-        })->where('id', '[1-5]');
-        Route::get('/{id}', [ProyekController::class, 'show'])->where('id', '[1-5]');
-    });
-
-    Route::get('/profile', function () {
-        return view('customer-layouts.profile');
-    });
-
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::post('/customer-logout', [AuthController::class, 'logout'])->name('customer.logout');
+Route::prefix('material')->group(function () {
+    Route::get('/', [MaterialController::class, 'index'])->name('material.index');
+    Route::get('/materials', [MaterialController::class, 'getMaterials']);
 });
 
-// admin
-Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::redirect('/', '/admin/dashboard');
+// 🔔 Halaman notice (setelah register/login tapi belum verif)
+Route::get('/email/verify-notice', function () {
+    return view('email.verify-notice');
+})->middleware('auth')->name('verification.notice');
 
+
+// 🔗 Klik link dari email
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+
+    // ✅ setelah verif → ke dashboard customer
+    return redirect()->route('customer-layouts.dashboard');
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+
+// 🔁 Kirim ulang email verifikasi
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+
+    return back()->with('message', 'Email verifikasi dikirim ulang!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
+
+
+Route::get('/test-email', function () {
+    Mail::raw('Test email verification', function ($message) {
+        $message->to('your-email@example.com')
+                ->subject('Test Verification');
+    });
+
+    return 'Email sent';
+});
+
+Route::post('/midtrans/callback', [PaymentProyekController::class, 'callback'])
+    ->name('midtrans.callback');
+
+/*
+|--------------------------------------------------------------------------
+| Customer Routes (Sudah Login)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Profile (tidak perlu middleware customer)
+    Route::get('/profile', function () {
+        return view('customer-layouts.profile', ['user' => Auth::user()]);
+    })->name('customer.profile');
+    Route::post('/profile', [ProfileController::class, 'update'])->name('customer.profile.update');
+
+    Route::middleware(['auth', 'customer', 'verified'])->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', function () {
+            return view('customer-layouts.dashboard');
+        })->name('customer-layouts.dashboard');
+
+        Route::post('/preferensi/simpan', [PreferensiController::class, 'store'])->name('proyek.preferensi.simpan');
+
+        // Rekomendasi
+        Route::get('/recommendation', function () {
+            return view('customer-layouts.input_preferensi_ai');
+        })->name('recommendation.input');
+        Route::get('/recommendation/result', [PreferensiController::class, 'result'])->name('recommendation.result');
+
+        // Form Pembangunan
+        Route::get('/house-build-form', [ProyekController::class, 'create'])->name('proyek.form_bangun');
+
+        // Renovasi
+        Route::get('/renovation', [CustomerRenovasiController::class, 'index'])->name('customer.renovation');
+        Route::get('/renovation-form', [CustomerRenovasiController::class, 'create'])->name('customer.renovation_form');
+        Route::post('/renovation', [CustomerRenovasiController::class, 'store'])->name('customer.renovation.store');
+        Route::post('/renovation/{requestRenovasi}/accept-offer', [CustomerRenovasiController::class, 'acceptOffer'])->name('customer.renovation.accept');
+        Route::post('/renovation/{requestRenovasi}/negotiate', [CustomerRenovasiController::class, 'negotiate'])->name('customer.renovation.negotiate');
+        Route::post('/renovation/{requestRenovasi}/reject-offer', [CustomerRenovasiController::class, 'rejectOffer'])->name('customer.renovation.reject');
+
+        // Order history
+        Route::get('/order', function () {
+            return view('customer-layouts.order');
+        })->name('customer.order');
+
+        // Manajemen Proyek
+        Route::prefix('proyek')->group(function () {
+            Route::get('/', [ProyekController::class, 'index'])->name('proyek.index');
+            Route::get('/{id}/tracking', [CustomerTrackingProyekController::class, 'tracking'])->name('proyek.tracking');
+            Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
+            Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
+            Route::post('/bayar', [PaymentProyekController::class, 'bayar']);
+            Route::post('/payment-success', [PaymentProyekController::class, 'handleSuccess']);        });
+
+        // Material & Cart
+        Route::prefix('material')->group(function () {
+            Route::view('/cart', 'customer-layouts.cart')->name('cart.view');
+        });
+
+        Route::prefix('cart')->group(function () {
+            Route::get('/', [CartController::class, 'index']);
+            Route::post('/add', [CartController::class, 'addToCart']);
+            Route::put('/update/{id}', [CartController::class, 'updateQuantity']);
+            Route::delete('/delete/{id}', [CartController::class, 'removeFromCart']);
+            Route::delete('/remove-material/{id}', [CartController::class, 'removeByMaterial']);
+        });
+
+        // Checkout
+        Route::post('/payment/checkout', [PaymentMaterialController::class, 'checkout']);
+        Route::post('/payment/callback', [PaymentMaterialController::class, 'callback']);
+        Route::post('/proyek/payment-success', [PaymentProyekController::class, 'handleSuccess']);
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
 
-    Route::get('/verifikasi', function () {
-        return view('admin.verifikasi_dokumen');
-    })->name('admin.verifikasi');
+    Route::get('/verifikasi', [VerifikasiProyekController::class, 'index'])->name('admin.verifikasi');
+    Route::put('/verifikasi/{id}', [VerifikasiProyekController::class, 'update'])->name('admin.verifikasi.update');
 
     Route::get('/kelola-material', function () {
         return view('admin.kelola_material');
-    })->name('admin.kelola_material');
+    })->name('admin.material');
 
-    Route::get('/manajemen-mandor', function () {
-        return view('admin.manajemen_mandor');
-    })->name('admin.manajemen_mandor');
+    Route::get('/order-management', function () {
+        return view('admin.manajemen_order');
+    })->name('admin.order');
+
+    Route::get('/manajemen-mandor', [ManageMandorController::class, 'index'])->name('admin.mandor');
+    Route::post('/manajemen-mandor/assign', [ManageMandorController::class, 'assign'])->name('admin.mandor.assign');
+    Route::post('/manajemen-mandor/unassign', [ManageMandorController::class, 'unassign'])->name('admin.mandor.unassign');
 
     Route::get('/monitor-proyek', function () {
         return view('admin.monitor_proyek');
-    })->name('admin.monitor_proyek');
+    })->name('admin.monitor');
 
-    // buat urusan pdf di verifikasi dokumen, nanti tinggal ganti aja path nya sesuai kebutuhan
     Route::get('/preview/{filename}', function ($filename) {
         $path = public_path('images/aset/' . $filename);
-
-        if (!file_exists($path)) {
-            abort(404);
-        }
+        if (!file_exists($path)) abort(404);
         $mimeType = mime_content_type($path);
-
-        $isPdf = $mimeType === 'application/pdf';
-
-        return response(file_get_contents($path), 200, [
-            'Content-Type' => $mimeType,
-            'Content-Disposition' => $isPdf ? 'attachment' : 'inline',
-            'Cache-Control' => 'no-cache',
-        ]);
+        return response()->file($path, ['Content-Type' => $mimeType]);
     })->name('admin.preview');
 });
 
+/*
+|--------------------------------------------------------------------------
+| Mandor Routes
+|--------------------------------------------------------------------------
+*/
 
-// nanti buatkan auth middleware khusus mandor, biar bisa akses route mandor ini, sekarang sementara dibiarkan aja untuk testing
-Route::get('/mandor/tracking', function () {
-    return view('mandor.mandor_tracking');
-})->name('mandor.tracking');
+Route::middleware(['auth', 'mandor'])->prefix('mandor')->group(function () {
+    Route::get('/dashboard', [MandorRenovasiController::class, 'dashboard'])->name('mandor.dashboard');
+    Route::get('/tracking', [MandorRenovasiController::class, 'tracking'])->name('mandor.tracking');
+    Route::post('/renovation/{requestRenovasi}/done', [MandorRenovasiController::class, 'markDone'])->name('mandor.renovation.done');
+    Route::post('/renovation/{requestRenovasi}/negotiate', [MandorRenovasiController::class, 'negotiate'])->name('mandor.renovation.negotiate');
+    Route::post('/renovation/{requestRenovasi}/offer', [MandorRenovasiController::class, 'submitOffer'])->name('mandor.renovation.offer');
 
-Route::get('/mandor/dashboard', function () {
-    return view('mandor.mandor_dashboard');
-})->name('mandor.dashboard');
+    Route::get('/proyek/tracking', [MandorTrackingProyekController::class, 'tracking'])->name('mandor.proyek.tracking');
+    Route::post('/task/{task}/complete', [MandorTrackingProyekController::class, 'completeTask'])->name('mandor.task.complete');
+    Route::post('/proyek/{proyek}/aktivitas', [MandorTrackingProyekController::class, 'tambahAktivitas'])->name('mandor.proyek.aktivitas');
+    Route::post('/proyek/{proyek}/dokumentasi', [MandorTrackingProyekController::class, 'uploadDokumentasi'])->name('mandor.proyek.dokumentasi');
+});

@@ -6,131 +6,119 @@ use App\Models\DesainRumah;
 use Illuminate\Support\Collection;
 
 /**
- * RekomendasiService
- *
- * Pure ML Content-Based Filtering engine untuk rekomendasi rumah.
+ * RekomendasiService - Hybrid ML Recommendation Engine
  *
  * Algoritma:
- *   1. Min-Max Normalization pada semua fitur numerik
- *   2. Weighted Feature Similarity Score:
- *        score = Σ (weight_i × similarity_i)
- *   3. Bobot fitur dinamis berdasarkan PRIORITAS user
- *   4. Return Top-N hasil dengan skor tertinggi
+ *   1. Content-Based Filtering (70%):
+ *      - Min-Max Normalization pada fitur numerik
+ *      - Weighted Feature Similarity Score
+ *   2. Collaborative Filtering Simulation (15%):
+ *      - Similarity dengan designs yang match user profile
+ *   3. Material Availability Scoring (15%):
+ *      - Prefer designs dengan material yang tersedia
  *
- * Fitur yang digunakan:
- *   - lokasi        : match eksak (binary 0/1)
- *   - gaya_arsitektur : match eksak (binary 0/1)
- *   - luas_tanah    : normalized proximity  (1 - |norm_a - norm_b|)
- *   - jumlah_kamar_tidur : normalized proximity
- *   - estimasi_biaya     : normalized proximity
+ * Bobot dinamis berdasarkan prioritas user (biaya/estetik/cepat)
  */
 class RekomendasiService
 {
-    // ─────────────────────────────────────────
-    // Dataset statistics (dari CSV - static reference)
-    // ─────────────────────────────────────────
     private const STATS = [
         'luas_tanah'   => ['min' => 30,          'max' => 350],
         'jumlah_kamar' => ['min' => 1,            'max' => 10],
         'harga'        => ['min' => 100_000_000,  'max' => 2_000_000_000],
     ];
 
-    // ─────────────────────────────────────────
-    // Bobot berdasarkan prioritas user
-    // ─────────────────────────────────────────
-    private const WEIGHTS = [
-        'biaya'   => ['lokasi' => 0.10, 'gaya' => 0.10, 'luas' => 0.10, 'kamar' => 0.15, 'harga' => 0.55],
-        'estetik' => ['lokasi' => 0.20, 'gaya' => 0.30, 'luas' => 0.20, 'kamar' => 0.15, 'harga' => 0.15],
-        'cepat'   => ['lokasi' => 0.20, 'gaya' => 0.10, 'luas' => 0.35, 'kamar' => 0.15, 'harga' => 0.20],
+    private const CONTENT_WEIGHTS = [
+        'biaya'   => ['lokasi' => 0.15, 'gaya' => 0.10, 'luas' => 0.10, 'kamar' => 0.15, 'harga' => 0.50],
+        'estetik' => ['lokasi' => 0.20, 'gaya' => 0.35, 'luas' => 0.15, 'kamar' => 0.10, 'harga' => 0.20],
+        'cepat'   => ['lokasi' => 0.15, 'gaya' => 0.10, 'luas' => 0.40, 'kamar' => 0.10, 'harga' => 0.25],
     ];
 
     /**
-     * Generate top-N rekomendasi rumah berdasarkan preferensi user.
-     *
-     * @param array $preferensi {
-     *   lokasi: string,
-     *   luas_area: int,
-     *   jumlah_kamar: int,
-     *   budget: int,
-     *   prioritas: string (biaya|estetik|cepat)
-     * }
-     * @param int $topN  Jumlah rekomendasi yang dikembalikan
-     * @return Collection
+     * Main recommendation engine combining 3 scoring approaches
      */
     public function rekomendasikan(array $preferensi, int $topN = 6): Collection
     {
-        $weights = self::WEIGHTS[$preferensi['prioritas']] ?? self::WEIGHTS['biaya'];
+        // Get base content similarity scores
+        $contentScored = $this->scoreByContent($preferensi);
 
-        // Normalisasi nilai preferensi user
-        $normUser = [
-            'luas'   => $this->normalize($preferensi['luas_area'],    self::STATS['luas_tanah']),
-            'kamar'  => $this->normalize($preferensi['jumlah_kamar'], self::STATS['jumlah_kamar']),
-            'harga'  => $this->normalize($preferensi['budget'],       self::STATS['harga']),
-        ];
+        // Enhance with collaborative filtering
+        $hybridScored = $this->enhanceWithCollaborative($contentScored, $preferensi);
 
-        // Ambil semua rumah dari DB (chunk-based untuk memori efisien)
-        $scored = collect();
+        // Boost with material availability
+        $finalScored = $this->boostWithMaterialAvailability($hybridScored, $preferensi);
 
-        DesainRumah::query()->chunk(500, function ($rows) use ($preferensi, $normUser, $weights, &$scored) {
-            foreach ($rows as $desain) {
-                $score = $this->hitungSkor($desain, $preferensi, $normUser, $weights);
-
-                $scored->push([
-                    'id'            => $desain->id,
-                    'nama_rumah'    => $desain->tipe_rumah,
-                    'lokasi'        => $desain->lokasi ?? '-',
-                    'gaya_arsitektur' => $desain->gaya_arsitektur ?? '-',
-                    'deskripsi'     => $desain->deskripsi,
-                    'luas_tanah'    => $desain->luas_tanah,
-                    'luas_bangunan' => $desain->luas_bangunan,
-                    'jumlah_kamar'  => $desain->jumlah_kamar_tidur,
-                    'jumlah_kamar_mandi' => $desain->jumlah_kamar_mandi,
-                    'jumlah_lantai' => $desain->jumlah_lantai ?? 1,
-                    'tahun_bangun'  => $desain->tahun_bangun ?? now()->year,
-                    'harga'         => $desain->estimasi_biaya,
-                    'estimasi_durasi' => $desain->estimasi_durasi,
-                    'material_digunakan' => $desain->material_digunakan ?: $desain->material_utama,
-                    'fasilitas'     => $desain->fasilitas,
-                    'path_gambar_desain' => $desain->path_gambar_desain,
-                    'skor'          => round($score * 100, 2), // dalam persen
-                ]);
-            }
-        });
-
-        return $scored
+        return $finalScored
             ->sortByDesc('skor')
             ->values()
             ->take($topN);
     }
 
-    // ─────────────────────────────────────────
-    // Hitung skor kemiripan untuk 1 rumah
-    // ─────────────────────────────────────────
-    private function hitungSkor(
+    // ─────────────────────────────────────────────────────────────
+    // 1. CONTENT-BASED FILTERING (70% weight)
+    // ─────────────────────────────────────────────────────────────
+
+    private function scoreByContent(array $preferensi): Collection
+    {
+        $weights = self::CONTENT_WEIGHTS[$preferensi['prioritas']] ?? self::CONTENT_WEIGHTS['biaya'];
+
+        $normUser = [
+            'luas'   => $this->normalize($preferensi['luas_area'], self::STATS['luas_tanah']),
+            'kamar'  => $this->normalize($preferensi['jumlah_kamar'], self::STATS['jumlah_kamar']),
+            'harga'  => $this->normalize($preferensi['budget'], self::STATS['harga']),
+        ];
+
+        $scored = collect();
+
+        DesainRumah::query()->chunk(500, function ($rows) use ($preferensi, $normUser, $weights, &$scored) {
+            foreach ($rows as $desain) {
+                $score = $this->hitungSkorContent($desain, $preferensi, $normUser, $weights);
+
+                $scored->push([
+                    'id'                 => $desain->id,
+                    'nama_rumah'         => $desain->tipe_rumah,
+                    'lokasi'             => $desain->lokasi ?? '-',
+                    'gaya_arsitektur'    => $desain->gaya_arsitektur ?? '-',
+                    'deskripsi'          => $desain->deskripsi,
+                    'luas_tanah'         => $desain->luas_tanah,
+                    'luas_bangunan'      => $desain->luas_bangunan,
+                    'jumlah_kamar'       => $desain->jumlah_kamar_tidur,
+                    'jumlah_kamar_mandi' => $desain->jumlah_kamar_mandi,
+                    'jumlah_lantai'      => $desain->jumlah_lantai ?? 1,
+                    'tahun_bangun'       => $desain->tahun_bangun ?? now()->year,
+                    'harga'              => $desain->estimasi_biaya,
+                    'estimasi_durasi'    => $desain->estimasi_durasi,
+                    'material_digunakan' => $desain->material_digunakan ?: $desain->material_utama,
+                    'fasilitas'          => $desain->fasilitas,
+                    'path_gambar_desain' => $desain->path_gambar_desain,
+                    'skor_content'       => $score,
+                    'skor_collaborative' => 0.5,
+                    'skor_material'      => 0.5,
+                    'skor'               => 0,
+                ]);
+            }
+        });
+
+        return $scored;
+    }
+
+    private function hitungSkorContent(
         DesainRumah $rumah,
         array $preferensi,
         array $normUser,
         array $weights
     ): float {
-        // 1. Lokasi: exact match
         $skorLokasi = strcasecmp((string) $rumah->lokasi, (string) $preferensi['lokasi']) === 0 ? 1.0 : 0.0;
+        $skorGaya   = strcasecmp((string) $rumah->gaya_arsitektur, (string) $preferensi['gaya_arsitektur']) === 0 ? 1.0 : 0.0;
 
-        // 2. Gaya arsitektur: exact match
-        $skorGaya = strcasecmp((string) $rumah->gaya_arsitektur, (string) $preferensi['gaya_arsitektur']) === 0 ? 1.0 : 0.0;
+        $normLuas   = $this->normalize($rumah->luas_tanah, self::STATS['luas_tanah']);
+        $skorLuas   = $this->proximitySimilarity($normLuas, $normUser['luas']);
 
-        // 3. Luas tanah: proximity similarity
-        $normLuas  = $this->normalize($rumah->luas_tanah,   self::STATS['luas_tanah']);
-        $skorLuas  = $this->proximitySimilarity($normLuas,  $normUser['luas']);
+        $normKamar  = $this->normalize($rumah->jumlah_kamar_tidur, self::STATS['jumlah_kamar']);
+        $skorKamar  = $this->proximitySimilarity($normKamar, $normUser['kamar']);
 
-        // 4. Jumlah kamar: proximity similarity
-        $normKamar = $this->normalize($rumah->jumlah_kamar_tidur, self::STATS['jumlah_kamar']);
-        $skorKamar = $this->proximitySimilarity($normKamar, $normUser['kamar']);
+        $normHarga  = $this->normalize($rumah->estimasi_biaya, self::STATS['harga']);
+        $skorHarga  = $this->hargaSimilarity($normHarga, $normUser['harga']);
 
-        // 5. Harga: proximity similarity (budget sebagai batas atas ideal)
-        $normHarga = $this->normalize($rumah->estimasi_biaya, self::STATS['harga']);
-        $skorHarga = $this->hargaSimilarity($normHarga, $normUser['harga']);
-
-        // Weighted sum
         return
             $weights['lokasi'] * $skorLokasi +
             $weights['gaya']   * $skorGaya   +
@@ -139,9 +127,70 @@ class RekomendasiService
             $weights['harga']  * $skorHarga;
     }
 
-    // ─────────────────────────────────────────
-    // Min-Max Normalization → [0, 1]
-    // ─────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────
+    // 2. COLLABORATIVE FILTERING SIMULATION (15% weight)
+    // ─────────────────────────────────────────────────────────────
+
+    private function enhanceWithCollaborative(Collection $contentScored, array $preferensi): Collection
+    {
+        return $contentScored->map(function ($item) use ($preferensi) {
+            // Collaborative score: similarity to designs in same location + gaya
+            $collaboScore = 0.5;
+
+            if ($item['lokasi'] === $preferensi['lokasi']) {
+                $collaboScore += 0.25;
+            }
+            if ($item['gaya_arsitektur'] === $preferensi['gaya_arsitektur']) {
+                $collaboScore += 0.25;
+            }
+
+            // Boost if nearby price range
+            $budgetRange = $preferensi['budget'] * 0.2;
+            if (abs($item['harga'] - $preferensi['budget']) <= $budgetRange) {
+                $collaboScore += 0.1;
+            }
+
+            $item['skor_collaborative'] = min(1.0, $collaboScore);
+            return $item;
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 3. MATERIAL AVAILABILITY SCORING (15% weight)
+    // ─────────────────────────────────────────────────────────────
+
+    private function boostWithMaterialAvailability(Collection $scored, array $preferensi): Collection
+    {
+        return $scored->map(function ($item) {
+            // Query material availability for this design
+            $designMaterials = DesainRumah::find($item['id'])
+                ?->materials()
+                ?->where('stok', '>', 0)
+                ?->count() ?? 0;
+
+            $totalMaterials = DesainRumah::find($item['id'])
+                ?->materials()
+                ?->count() ?? 1;
+
+            $availabilityRatio = $totalMaterials > 0 ? $designMaterials / $totalMaterials : 0.7;
+            $item['skor_material'] = $availabilityRatio;
+
+            // Hybrid score: 70% content + 15% collaborative + 15% material
+            $item['skor'] = round(
+                ($item['skor_content'] * 0.70) +
+                ($item['skor_collaborative'] * 0.15) +
+                ($item['skor_material'] * 0.15) * 100,
+                2
+            );
+
+            return $item;
+        });
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // HELPER METHODS
+    // ─────────────────────────────────────────────────────────────
+
     private function normalize(float $value, array $stats): float
     {
         $range = $stats['max'] - $stats['min'];
@@ -149,54 +198,34 @@ class RekomendasiService
         return ($value - $stats['min']) / $range;
     }
 
-    // ─────────────────────────────────────────
-    // Proximity Similarity: semakin dekat semakin tinggi
-    // similarity = 1 - |a - b|
-    // ─────────────────────────────────────────
     private function proximitySimilarity(float $normA, float $normB): float
     {
         return max(0.0, 1.0 - abs($normA - $normB));
     }
 
-    // ─────────────────────────────────────────
-    // Harga Similarity:
-    //   - Harga di bawah/sesuai budget → high score
-    //   - Harga jauh di atas budget → penalti
-    // ─────────────────────────────────────────
     private function hargaSimilarity(float $normHarga, float $normBudget): float
     {
         $diff = $normHarga - $normBudget;
 
         if ($diff <= 0) {
-            // Harga ≤ budget: skor tinggi, semakin dekat semakin bagus
             return max(0.0, 1.0 - abs($diff) * 0.5);
         } else {
-            // Harga > budget: penalti lebih besar
             return max(0.0, 1.0 - $diff * 2.0);
         }
     }
 
-    // ─────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────
-
-    /**
-     * Format harga ke Rupiah singkat, misal: Rp 450 Jt, Rp 1,2 M
-     */
     public static function formatHarga(int $harga): string
     {
         if ($harga >= 1_000_000_000) {
             return 'Rp ' . number_format($harga / 1_000_000_000, 1, ',', '.') . ' M';
         }
-        return 'Rp ' . number_format($harga / 1_000_000, 0, ',', '.') . ' Jt';
+        $bulat = ceil($harga / 1_000_000) * 1_000_000;
+        return 'Rp ' . number_format($bulat, 0, ',', '.') . ' jt';
     }
 
-    /**
-     * Estimasi durasi konstruksi berdasarkan luas tanah (dalam bulan)
-     */
     public static function estimasiDurasi(int $luasTanah): string
     {
-        $bulan = (int) ceil($luasTanah / 30); // ~30 m² per bulan
+        $bulan = (int) ceil($luasTanah / 30);
         $bulan = max(3, min($bulan, 24));
         return $bulan . ' Bulan';
     }

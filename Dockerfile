@@ -4,10 +4,12 @@ WORKDIR /var/www
 
 # Update & install dependencies
 RUN apt-get update && apt-get install -y \
-    git unzip curl libzip-dev libonig-dev libxml2-dev libpng-dev \
+    git unzip curl libzip-dev libonig-dev libxml2-dev libpng-dev libpq-dev \
     && docker-php-ext-install \
         pdo \
         pdo_mysql \
+        pdo_pgsql \
+        pgsql \
         mbstring \
         zip \
         exif \

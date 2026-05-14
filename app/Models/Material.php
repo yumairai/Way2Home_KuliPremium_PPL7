@@ -20,4 +20,14 @@ class Material extends Model
         'satuan',
         'path_foto_material'
     ];
+
+    /**
+     * Relasi many-to-many ke DesainRumah
+     */
+    public function desainRumah()
+    {
+        return $this->belongsToMany(DesainRumah::class, 'desain_material')
+            ->withPivot('quantity', 'unit')
+            ->withTimestamps();
+    }
 }

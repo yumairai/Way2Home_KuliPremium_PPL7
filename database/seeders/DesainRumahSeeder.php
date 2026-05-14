@@ -23,7 +23,39 @@ class DesainRumahSeeder extends Seeder
         $batchSize = 200;
         $now = now();
         $gayaList = ['Minimalist', 'Modern', 'Mewah'];
+        
+        $locations = [
+            'Kota Bandung',
+            'Kabupaten Bandung',
+            'Kabupaten Bandung Barat',
+            'Kota Cimahi',
+            'Kabupaten Sumedang',
+            'Kabupaten Garut',
+            'Kota Tasikmalaya',
+            'Kabupaten Tasikmalaya',
+            'Kabupaten Cianjur',
+            'Kota Sukabumi',
+            'Kabupaten Sukabumi',
+            'Kota Bogor',
+            'Kabupaten Bogor',
+            'Kota Depok',
+            'Kota Bekasi',
+            'Kabupaten Bekasi',
+            'Kabupaten Karawang',
+            'Kabupaten Purwakarta',
+            'Kabupaten Subang',
+            'Kabupaten Indramayu',
+            'Kota Cirebon',
+            'Kabupaten Cirebon',
+            'Kabupaten Kuningan',
+            'Kabupaten Majalengka',
+            'Kabupaten Ciamis',
+            'Kota Banjar',
+            'Kabupaten Pangandaran',
+        ];
+        $locationCount = count($locations);
 
+        $rowIndex = 0;
         while (($row = fgetcsv($handle)) !== false) {
             if (count($row) < 9) {
                 continue;
@@ -31,7 +63,6 @@ class DesainRumahSeeder extends Seeder
 
             $id = (int) $row[0];
             $nama = trim($row[1]);
-            $lokasi = trim($row[2]);
             $luasTanah = (int) $row[3];
             $jumlahKamar = (int) $row[4];
             $jumlahLantai = (int) $row[5];
@@ -39,13 +70,16 @@ class DesainRumahSeeder extends Seeder
             $harga = (int) $row[7];
             $materialDigunakan = trim((string) ($row[8] ?? ''));
 
+            // Cycle through locations
+            $lokasi = $locations[$rowIndex % $locationCount];
+            
             $materialUtama = collect(explode(';', $materialDigunakan))
                 ->map(fn($m) => trim(explode(':', $m)[0] ?? ''))
                 ->filter()
                 ->first() ?? 'Material Umum';
 
             $estimasiDurasi = max(3, min((int) ceil($luasTanah / 30), 24));
-            $gaya = $gayaList[$id % count($gayaList)];
+            $gaya = $gayaList[$rowIndex % 3];
 
             $batch[] = [
                 'id' => $id,
@@ -63,20 +97,36 @@ class DesainRumahSeeder extends Seeder
                 'estimasi_durasi' => $estimasiDurasi,
                 'material_utama' => $materialUtama,
                 'material_digunakan' => $materialDigunakan,
-                'path_gambar_desain' => 'images/rekomendasi/rekom' . (($id % 3) + 1) . '.jpg',
+                'path_gambar_desain' => 'images/rekomendasi/rekom' . (($rowIndex % 3) + 1) . '.jpg',
                 'fasilitas' => 'Ruang keluarga; Dapur; Kamar utama; Carport',
                 'created_at' => $now,
                 'updated_at' => $now,
             ];
 
+            $rowIndex++;
+
             if (count($batch) >= $batchSize) {
-                DB::table('desain_rumah')->upsert($batch, ['id']);
+                DB::table('desain_rumah')->upsert($batch, ['id'], [
+                    'tipe_rumah', 'deskripsi', 'lokasi', 'gaya_arsitektur',
+                    'luas_tanah', 'luas_bangunan', 'jumlah_kamar_tidur',
+                    'jumlah_kamar_mandi', 'jumlah_lantai', 'tahun_bangun',
+                    'estimasi_biaya', 'estimasi_durasi', 'material_utama',
+                    'material_digunakan', 'path_gambar_desain', 'fasilitas',
+                    'updated_at'
+                ]);
                 $batch = [];
             }
         }
 
         if (!empty($batch)) {
-            DB::table('desain_rumah')->upsert($batch, ['id']);
+            DB::table('desain_rumah')->upsert($batch, ['id'], [
+                'tipe_rumah', 'deskripsi', 'lokasi', 'gaya_arsitektur',
+                'luas_tanah', 'luas_bangunan', 'jumlah_kamar_tidur',
+                'jumlah_kamar_mandi', 'jumlah_lantai', 'tahun_bangun',
+                'estimasi_biaya', 'estimasi_durasi', 'material_utama',
+                'material_digunakan', 'path_gambar_desain', 'fasilitas',
+                'updated_at'
+            ]);
         }
 
         fclose($handle);
