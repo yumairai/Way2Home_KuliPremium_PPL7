@@ -297,6 +297,15 @@ body {
     filter: brightness(1.02);
 }
 
+.profile-submit-btn:disabled {
+    background: var(--surface-container-high);
+    color: var(--on-surface-variant);
+    box-shadow: none;
+    cursor: not-allowed;
+    filter: none;
+    transform: none;
+}
+
 .profile-submit-btn:active {
     transform: scale(0.98);
 }
