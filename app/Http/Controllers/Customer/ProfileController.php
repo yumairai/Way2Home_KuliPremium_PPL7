@@ -52,4 +52,27 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Profile berhasil diupdate');
     }
+
+    public function updateAddressData(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'nama'    => 'required|string|max:255',
+            'telepon' => 'required|string|max:20',
+            'alamat'  => 'required|string',
+        ]);
+
+        $user->update([
+            'name'         => $request->nama,
+            'phone_number' => $request->telepon,
+            'address'      => $request->alamat,
+        ]);
+
+        $user->customer()->update([
+            'no_hp' => $request->telepon,
+        ]);
+
+        return response()->json(['status' => 'success']);
+    }
 }

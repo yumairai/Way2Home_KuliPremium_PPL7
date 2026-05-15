@@ -149,20 +149,26 @@ class PaymentMaterialController extends Controller
             return response()->json(['message' => 'Order tidak ditemukan'], 404);
         }
 
-        if ($order->status_order === 'pending') {
-            $order->update(['status_order' => 'paid']);
-        }
+        $transactionStatus = $request->transaction_status ?? 'settlement';
+        $fraudStatus = $request->fraud_status ?? 'accept';
 
-        if ($transactionStatus === 'settlement' || 
-        ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
+        if ($transactionStatus === 'settlement' ||
+            ($transactionStatus === 'capture' && $fraudStatus === 'accept')) {
             $status = 'paid';
         } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
             $status = $transactionStatus;
         } else {
             $status = 'pending';
         }
-        // Baru hapus cart setelah pembayaran sukses
-        Cart::where('user_id', $request->user()->id)->delete();
+
+        if ($order->status_order === 'pending') {
+            $order->update(['status_order' => $status]);
+        }
+
+        // Hapus cart hanya kalau benar-benar paid
+        if ($status === 'paid') {
+            Cart::where('user_id', $request->user()->id)->delete();
+        }
 
         return response()->json(['message' => 'OK']);
     }

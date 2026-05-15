@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
         return view('customer-layouts.profile', ['user' => Auth::user()]);
     })->name('customer.profile');
     Route::post('/profile', [ProfileController::class, 'update'])->name('customer.profile.update');
+    Route::post('/profile/update-address-data', [ProfileController::class, 'updateAddressData'])->name('customer.profile.updateAddressData');
 
     Route::middleware(['auth', 'customer', 'verified'])->group(function () {
 
