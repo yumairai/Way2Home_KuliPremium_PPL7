@@ -13,6 +13,7 @@ use App\Models\RequestRenovasi;
 use App\Models\Proyek;
 use App\Models\MandorActivityHistory;
 use App\Services\RenovasiService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -189,7 +190,7 @@ class RenovasiController extends Controller
         ));
     }
 
-    public function submitOffer(Request $request, RequestRenovasi $requestRenovasi)
+    public function submitOffer(Request $request, RequestRenovasi $requestRenovasi, NotificationService $notif)
     {
         $this->renovasiService->expirePendingOffers();
         $mandor = $this->currentMandor();
@@ -273,6 +274,19 @@ class RenovasiController extends Controller
         // Log aktivitas submit offer
         if ($isNewOffer) {
             MandorActivityHistory::logOfferSubmitted($mandor, $requestRenovasi, $validated['estimasi_biaya']);
+
+        // ✉️ Kirim notifikasi email ke customer
+        $penawaranForNotif = PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
+            ->where('mandor_id', $mandor->id)
+            ->with(['mandor.user', 'materialRenovasi.material'])
+            ->latest()->first();
+        if ($penawaranForNotif) {
+            $notif->kirimPenawaranRenovasi(
+                $requestRenovasi->load('customer.user'),
+                $penawaranForNotif,
+                $isNewOffer ? 'penawaran' : 'negosiasi'
+            );
+        }
         }
 
         return response()->json([
@@ -281,7 +295,7 @@ class RenovasiController extends Controller
         ]);
     }
 
-    public function negotiate(Request $request, RequestRenovasi $requestRenovasi)
+    public function negotiate(Request $request, RequestRenovasi $requestRenovasi, NotificationService $notif)
     {
         $this->renovasiService->expirePendingOffers();
         $mandor = $this->currentMandor();
@@ -336,6 +350,14 @@ class RenovasiController extends Controller
                 'nominal_tawaran' => $validated['estimasi_biaya'],
             ]);
         });
+
+        // ✉️ Kirim notifikasi negosiasi ke customer
+        $offerForNotif = $offer->load('mandor.user', 'materialRenovasi.material');
+        $notif->kirimPenawaranRenovasi(
+            $requestRenovasi->load('customer.user'),
+            $offerForNotif,
+            'negosiasi'
+        );
 
         return response()->json([
             'status' => 'success',
@@ -415,7 +437,7 @@ class RenovasiController extends Controller
         ));
     }
 
-    public function markDone(RequestRenovasi $requestRenovasi)
+    public function markDone(RequestRenovasi $requestRenovasi, NotificationService $notif)
     {
         $mandor = $this->currentMandor();
 
@@ -449,6 +471,9 @@ class RenovasiController extends Controller
             // Log aktivitas renovasi selesai
             MandorActivityHistory::logRenovationCompleted($mandor, $requestRenovasi);
         });
+
+        // ✉️ Kirim notifikasi renovasi selesai ke customer
+        $notif->kirimRenovasiSelesai($requestRenovasi->load('customer.user', 'penawaran.mandor.user'));
 
         return response()->json([
             'status' => 'success',

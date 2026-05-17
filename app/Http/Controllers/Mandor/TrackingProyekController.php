@@ -10,6 +10,7 @@ use App\Models\ProyekDokumentasi;
 use App\Models\ProgressProyek;
 use App\Models\Mandor;
 use App\Models\MandorActivityHistory;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class TrackingProyekController extends Controller
 
         abort_if(!$proyek, 404, 'Tidak ada proyek pembangunan aktif.');
 
-        $persentase = $this->hitungPersentase($proyek->tasks);
+        $persentase     = $this->hitungPersentase($proyek->tasks);
         $milestoneAktif = $proyek->tasks->firstWhere('is_selesai', false)?->milestone ?? 'Semua Selesai';
 
         $isHaveProject    = true;
@@ -52,22 +53,17 @@ class TrackingProyekController extends Controller
         $renovationData   = null;
 
         return view('mandor.mandor_tracking', compact(
-            'proyek',
-            'persentase',
-            'milestoneAktif',
-            'isHaveProject',
-            'isHaveRenovation',
-            'isAccepted',
-            'renovationData',
+            'proyek', 'persentase', 'milestoneAktif',
+            'isHaveProject', 'isHaveRenovation', 'isAccepted', 'renovationData',
         ));
     }
 
-    public function completeTask(ProyekMilestone $task)
+    public function completeTask(ProyekMilestone $task, NotificationService $notif)
     {
         $mandor = $this->currentMandor();
         abort_if($task->proyek->mandor_id !== $mandor->id, 403);
 
-        $proyek = $task->proyek;
+        $proyek = $task->proyek->load('customer.user', 'detailBangun');
         $tasks  = $proyek->tasks()->orderBy('urutan')->get();
         $milestoneAktif = $tasks->firstWhere('is_selesai', false)?->milestone ?? null;
 
@@ -75,9 +71,10 @@ class TrackingProyekController extends Controller
 
         $task->update(['is_selesai' => true]);
 
-        $tasks = $proyek->tasks()->orderBy('urutan')->get();
-        $persentase = $this->hitungPersentase($tasks);
+        $tasks          = $proyek->tasks()->orderBy('urutan')->get();
+        $persentase     = $this->hitungPersentase($tasks);
         $milestoneAktif = $tasks->firstWhere('is_selesai', false)?->milestone ?? 'Semua Selesai';
+        $isSelesai      = $persentase === 100;
 
         ProgressProyek::updateOrCreate(
             ['proyek_id' => $proyek->id],
@@ -88,26 +85,27 @@ class TrackingProyekController extends Controller
             ]
         );
 
-        if ($persentase === 100) {
+        if ($isSelesai) {
             DB::transaction(function () use ($proyek, $mandor) {
-                $proyek->update([
-                    'status_proyek' => 'Selesai',
-                    'mandor_id'     => null,
-                ]);
+                $proyek->update(['status_proyek' => 'Selesai', 'mandor_id' => null]);
                 $mandor->update(['status' => 'aktif']);
                 MandorActivityHistory::logCompletedProject($mandor, $proyek);
             });
         }
 
+        // ✉️ Kirim notifikasi progress ke customer
+        $notif->kirimProgressPembangunan($proyek, $milestoneAktif, $persentase, $isSelesai);
+
         return response()->json([
             'success'         => true,
             'persentase'      => $persentase,
             'milestone_aktif' => $milestoneAktif,
-            'is_done'         => $persentase === 100,
-            'message'         => $persentase === 100 ? 'Proyek selesai!' : 'Task berhasil diselesaikan.',
+            'is_done'         => $isSelesai,
+            'message'         => $isSelesai ? 'Proyek selesai!' : 'Task berhasil diselesaikan.',
         ]);
     }
-    public function tambahAktivitas(Request $request, Proyek $proyek)
+
+    public function tambahAktivitas(Request $request, Proyek $proyek, NotificationService $notif)
     {
         $mandor = $this->currentMandor();
         abort_if($proyek->mandor_id !== $mandor->id, 403);
@@ -122,6 +120,10 @@ class TrackingProyekController extends Controller
             'judul'     => $request->judul,
             'deskripsi' => $request->deskripsi,
         ]);
+
+        // ✉️ Kirim notifikasi aktivitas ke customer
+        $proyekWithRelations = $proyek->load('customer.user', 'progress');
+        $notif->kirimAktivitasProyek($proyekWithRelations, $request->judul, $request->deskripsi);
 
         return response()->json([
             'success'   => true,
@@ -150,7 +152,7 @@ class TrackingProyekController extends Controller
 
         $dok = ProyekDokumentasi::create([
             'proyek_id'    => $proyek->id,
-            'path_foto'    => $storagePath, // simpan path saja
+            'path_foto'    => $storagePath,
             'storage_path' => $storagePath,
         ]);
 
