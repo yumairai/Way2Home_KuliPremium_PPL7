@@ -95,7 +95,7 @@ class RenovasiController extends Controller
                         ];
                     })->values(),
                     'has_customer_negotiation' => $hasCustomerNegotiation,
-                    'can_send_negotiation' => $isMandorAvailable && $hasCustomerNegotiation,
+                    'can_send_negotiation' => !$isMandorAvailable && $hasCustomerNegotiation,
                     'can_take_renovation' => $isMandorAvailable && !$hasCustomerNegotiation && !$currentOffer,
                 ];
             })
