@@ -75,6 +75,29 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    async function showAlert(message) {
+        if (window.W2HDialog?.alert) {
+            await window.W2HDialog.alert(message);
+            return;
+        }
+        window.alert(message);
+    }
+
+    async function showSuccess(message) {
+        if (window.W2HDialog?.success) {
+            await window.W2HDialog.success(message);
+            return;
+        }
+        window.alert(message);
+    }
+
+    async function showConfirm(message) {
+        if (window.W2HDialog?.confirm) {
+            return await window.W2HDialog.confirm(message);
+        }
+        return window.confirm(message);
+    }
+
     function applyStateToCard(cardEl, nextState) {
         var config = stateConfig[nextState];
         if (!config) {
@@ -113,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
         setPanelVisibility(cardEl, nextState);
     }
 
-    document.addEventListener('click', function (event) {
+    document.addEventListener('click', async function (event) {
         var transitionButton = event.target.closest('[data-transition-state]');
 
         if (transitionButton) {
@@ -128,18 +151,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     var isActionable = transitionButton.getAttribute('data-service-action') === '1';
 
                     if (!requestId) {
-                        alert('Data request tidak valid.');
+                        await showAlert('Data request tidak valid.');
                         return;
                     }
 
                     if (!isActionable) {
-                        alert('Penawaran jasa sudah tidak tersedia.');
+                        await showAlert('Penawaran jasa sudah tidak tersedia.');
                         return;
                     }
 
-                    postJson('/renovation/' + requestId + '/accept-offer').then(function (result) {
+                    postJson('/renovation/' + requestId + '/accept-offer').then(async function (result) {
                         if (!result.ok) {
-                            alert(result.data.message || 'Gagal mengambil jasa renovasi.');
+                            await showAlert(result.data.message || 'Gagal mengambil jasa renovasi.');
                             return;
                         }
 
@@ -147,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         window.location.reload();
                     });
                 } else if (nextState === 'completed') {
-                    alert('Status selesai diperbarui oleh mandor setelah pekerjaan selesai.');
+                    await showAlert('Status selesai diperbarui oleh mandor setelah pekerjaan selesai.');
                 } else {
                     applyStateToCard(requestCard, nextState);
                 }
@@ -171,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var negotiateRequestId = negotiateCard.getAttribute('data-request-id');
             if (!negotiateRequestId) {
-                alert('Data request tidak valid.');
+                await showAlert('Data request tidak valid.');
                 return;
             }
 
@@ -181,20 +204,20 @@ document.addEventListener('DOMContentLoaded', function () {
             var priceValue = priceInput ? String(priceInput.value || '').trim() : '';
 
             if (messageValue.length < 5) {
-                alert('Pesan negosiasi minimal 5 karakter.');
+                await showAlert('Pesan negosiasi minimal 5 karakter.');
                 return;
             }
 
             postJson('/renovation/' + negotiateRequestId + '/negotiate', {
                 pesan: messageValue,
                 nominal_tawaran: priceValue !== '' ? Number(priceValue) : null,
-            }).then(function (result) {
+            }).then(async function (result) {
                 if (!result.ok) {
-                    alert(result.data.message || 'Gagal mengirim negosiasi.');
+                    await showAlert(result.data.message || 'Gagal mengirim negosiasi.');
                     return;
                 }
 
-                alert(result.data.message || 'Negosiasi berhasil dikirim.');
+                await showSuccess(result.data.message || 'Negosiasi berhasil dikirim.');
                 window.location.reload();
             });
             return;
@@ -210,23 +233,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var rejectRequestId = rejectCard.getAttribute('data-request-id');
             if (!rejectRequestId) {
-                alert('Data request tidak valid.');
+                await showAlert('Data request tidak valid.');
                 return;
             }
 
-            if (!confirm('Yakin ingin menolak penawaran saat ini?')) {
+            var confirmed = await showConfirm('Yakin ingin menolak penawaran saat ini?');
+            if (!confirmed) {
                 return;
             }
 
             postJson('/renovation/' + rejectRequestId + '/reject-offer', {
                 pesan: 'Penawaran ditolak oleh customer.',
-            }).then(function (result) {
+            }).then(async function (result) {
                 if (!result.ok) {
-                    alert(result.data.message || 'Gagal menolak penawaran.');
+                    await showAlert(result.data.message || 'Gagal menolak penawaran.');
                     return;
                 }
 
-                alert(result.data.message || 'Penawaran berhasil ditolak.');
+                await showSuccess(result.data.message || 'Penawaran berhasil ditolak.');
                 window.location.reload();
             });
             return;
@@ -258,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
 
         var message = alertButton.getAttribute('data-alert-message') || 'Fitur ini akan segera tersedia.';
-        alert(message);
+        await showAlert(message);
     });
 
     var detailModal = document.getElementById('requestDetailModal');
