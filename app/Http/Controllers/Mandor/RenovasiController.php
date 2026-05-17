@@ -16,6 +16,7 @@ use App\Services\RenovasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\SupabaseStorageService;
 
 class RenovasiController extends Controller
 {
@@ -351,46 +352,17 @@ class RenovasiController extends Controller
 
     public function tracking()
     {
-        $this->renovasiService->expirePendingOffers();
-        $mandor = $this->currentMandor();
-
-        // Cek proyek pembangunan aktif — redirect kalau ada
-        $proyekBangun = Proyek::where('mandor_id', $mandor->id)
-            ->where('status_proyek', 'In Progress')
-            ->where('jenis_proyek', 'Bangun Rumah')
-            ->exists();
-
-        if ($proyekBangun) {
-            return redirect()->route('mandor.proyek.tracking');
-        }
-
-        // Sisanya tidak diubah
-        $acceptedOffer = PenawaranRenovasi::with(['requestRenovasi.customer.user', 'materialRenovasi.material'])
-            ->where('mandor_id', $mandor->id)
-            ->where('status_penawaran', 'diterima')
-            ->whereHas('requestRenovasi', fn($query) => $query->where('status_request', '!=', 'selesai'))
-            ->latest()
-            ->first();
-
-        $pendingOffer = PenawaranRenovasi::with('requestRenovasi.customer.user')
-            ->where('mandor_id', $mandor->id)
-            ->where('status_penawaran', 'pending')
-            ->latest()
-            ->first();
-
-        $isHaveProject    = false;
-        $isHaveRenovation = (bool) ($acceptedOffer || $pendingOffer);
-        $isAccepted       = (bool) $acceptedOffer;
-
-        $offer          = $acceptedOffer ?? $pendingOffer;
-        $renovationData = null;
-
         if ($offer && $offer->requestRenovasi) {
             $materialsTotal = $offer->materialRenovasi->sum(function ($item) {
                 $price = (int) ($item->material?->harga ?? 0);
                 return $price * (int) $item->jumlah;
             });
-
+        
+            // Ambil proyek_id dari DetailProyekRenovasi
+            $detailProyek = \App\Models\DetailProyekRenovasi::where('request_renovasi_id', $offer->requestRenovasi->id)
+                ->latest()
+                ->first();
+        
             $renovationData = [
                 'request_id'     => sprintf('REV-%03d', $offer->requestRenovasi->id),
                 'customer_name'  => $offer->requestRenovasi->customer?->user?->name ?? 'Customer',
@@ -403,15 +375,20 @@ class RenovasiController extends Controller
                 'photos'         => $offer->requestRenovasi->getFotoDetailUrls()
                     ?: [asset('images/aset/user-dummy.jpg')],
                 'request_db_id'  => $offer->requestRenovasi->id,
+                'proyek_id'      => $detailProyek?->proyek_id, // ← TAMBAHAN INI
             ];
         }
-
-        // Tambah proyek & persentase null supaya blade tidak error
+        
+        $proyekRenovasi = $detailProyek?->proyek_id
+            ? \App\Models\Proyek::with('dokumentasi')->find($detailProyek->proyek_id)
+            : null;
+        
         return view('mandor.mandor_tracking', compact(
             'isHaveProject',
             'isHaveRenovation',
             'isAccepted',
             'renovationData',
+            'proyekRenovasi',  
         ));
     }
 

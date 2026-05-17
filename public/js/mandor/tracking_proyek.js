@@ -21,116 +21,133 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
 
 // ── Renovasi documentation (frontend only) ───
 (function () {
-    const input = document.getElementById('renovation-doc-input');
-    const dropzone = document.getElementById('renovation-dropzone');
-    const previewGrid = document.getElementById('renovation-preview-grid');
-    const dropzoneError = document.getElementById('renovation-dropzone-error');
-
-    if (!input || !dropzone || !previewGrid || !dropzoneError) return;
-
-    let previewCounter = 0;
-    const MAX_FILE_SIZE = 2 * 1024 * 1024;
-
-    const clearDropzoneError = () => {
-        dropzone.classList.remove('is-error');
-        dropzoneError.textContent = '';
+    var uploadSection  = document.querySelector('[data-proyek-id]');
+    if (!uploadSection) return; // Bukan halaman renovasi (atau proyek_id tidak ada)
+ 
+    var proyekId       = uploadSection.getAttribute('data-proyek-id');
+    if (!proyekId) return;
+ 
+    var input          = document.getElementById('renovation-doc-input');
+    var dropzone       = document.getElementById('renovation-dropzone');
+    var previewGrid    = document.getElementById('renovation-preview-grid');
+    var dropzoneError  = document.getElementById('renovation-dropzone-error');
+ 
+    if (!input || !dropzone || !previewGrid) return;
+ 
+    var MAX_FILE_SIZE  = 5 * 1024 * 1024; // 5MB — sama dengan bangun
+    var UPLOAD_URL     = '/mandor/proyek/' + proyekId + '/dokumentasi'; // route yang sama!
+ 
+    var clearError = function () {
+        if (dropzoneError) {
+            dropzoneError.textContent = '';
+            dropzone.classList.remove('is-error');
+        }
     };
-
-    const setDropzoneError = (message) => {
-        dropzone.classList.add('is-error');
-        dropzoneError.textContent = message;
+ 
+    var setError = function (msg) {
+        if (dropzoneError) {
+            dropzoneError.textContent = msg;
+            dropzone.classList.add('is-error');
+        }
     };
-
-    const createPreviewCard = (file) => {
-        const blobUrl = URL.createObjectURL(file);
-        const previewId = `renovation-preview-${previewCounter++}`;
-
-        const card = document.createElement('div');
-        card.className = 'mandor-reno-preview-card';
-        card.dataset.previewId = previewId;
-        card.dataset.blobUrl = blobUrl;
-        card.innerHTML = `
-            <button type="button" class="mandor-reno-preview-remove" aria-label="Hapus foto dokumentasi">close</button>
-            <img class="mandor-reno-preview-image" src="${blobUrl}" alt="Preview dokumentasi renovasi">
-            <p class="mandor-reno-preview-name">${file.name}</p>
-        `;
-
-        const removeButton = card.querySelector('.mandor-reno-preview-remove');
-        if (removeButton) {
-            removeButton.addEventListener('click', () => {
-                URL.revokeObjectURL(blobUrl);
-                card.remove();
+ 
+    var appendPhotoCard = function (fotoUrl, tanggal) {
+        var card = document.createElement('div');
+        card.className = 'mandor-doc-photo-card';
+        card.innerHTML =
+            '<img src="' + fotoUrl + '" alt="Dokumentasi renovasi" class="mandor-doc-photo" loading="lazy">' +
+            '<div class="mandor-doc-overlay"><span class="mandor-doc-caption">' + tanggal + '</span></div>';
+ 
+        // Sisipkan setelah foto existing (sebelum foto lain yang baru diupload)
+        if (previewGrid.firstChild) {
+            previewGrid.insertBefore(card, previewGrid.firstChild);
+        } else {
+            previewGrid.appendChild(card);
+        }
+    };
+ 
+    var appendLoadingCard = function () {
+        var card = document.createElement('div');
+        card.className = 'mandor-doc-photo-card mandor-doc-loading';
+        card.innerHTML = '<span class="material-symbols-outlined spinning">progress_activity</span>';
+        previewGrid.insertBefore(card, previewGrid.firstChild);
+        return card;
+    };
+ 
+    var uploadFile = function (file) {
+        clearError();
+ 
+        if (!file.type.startsWith('image/')) {
+            setError('File harus berupa gambar.');
+            return;
+        }
+ 
+        if (file.size > MAX_FILE_SIZE) {
+            setError('Ukuran foto ' + file.name + ' melebihi 5MB.');
+            return;
+        }
+ 
+        var loadingCard = appendLoadingCard();
+        var formData = new FormData();
+        formData.append('foto', file);
+ 
+        fetch(UPLOAD_URL, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: formData,
+        })
+        .then(function (res) {
+            return res.json().then(function (data) {
+                return { ok: res.ok, data: data };
             });
-        }
-
-        previewGrid.appendChild(card);
-    };
-
-    const handleFiles = (fileList) => {
-        const files = Array.from(fileList || []);
-        if (!files.length) return;
-
-        let hasInvalidSize = false;
-        let addedCount = 0;
-
-        files.forEach((file) => {
-            if (!file.type.startsWith('image/')) {
+        })
+        .then(function (result) {
+            loadingCard.remove();
+            if (!result.ok) {
+                setError(result.data.message || 'Gagal upload foto.');
                 return;
             }
-
-            if (file.size > MAX_FILE_SIZE) {
-                hasInvalidSize = true;
-                return;
-            }
-
-            addedCount += 1;
-            createPreviewCard(file);
+            // uploadDokumentasi di controller return { foto_url, tanggal }
+            appendPhotoCard(result.data.foto_url, result.data.tanggal);
+        })
+        .catch(function () {
+            loadingCard.remove();
+            setError('Koneksi gagal. Coba lagi.');
         });
-
-        if (hasInvalidSize && !addedCount) {
-            setDropzoneError('Ukuran foto melebihi 2 MB. Silakan pilih foto yang lebih kecil.');
-            return;
-        }
-
-        if (hasInvalidSize) {
-            setDropzoneError('Ada foto yang melebihi 2 MB, foto tersebut tidak ditampilkan ke preview.');
-            return;
-        }
-
-        clearDropzoneError();
     };
-
-    input.addEventListener('change', () => {
-        handleFiles(input.files);
-        input.value = '';
+ 
+    var handleFiles = function (fileList) {
+        Array.from(fileList || []).forEach(uploadFile);
+    };
+ 
+    input.addEventListener('change', function () {
+        handleFiles(this.files);
+        this.value = '';
     });
-
-    dropzone.addEventListener('click', () => input.click());
-    dropzone.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            input.click();
-        }
+ 
+    dropzone.addEventListener('click', function () { input.click(); });
+    dropzone.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
     });
-
-    ['dragenter', 'dragover'].forEach((eventName) => {
-        dropzone.addEventListener(eventName, (event) => {
-            event.preventDefault();
-            clearDropzoneError();
+ 
+    ['dragenter', 'dragover'].forEach(function (ev) {
+        dropzone.addEventListener(ev, function (e) {
+            e.preventDefault();
+            clearError();
             dropzone.classList.add('is-dragover');
         });
     });
-
-    ['dragleave', 'drop'].forEach((eventName) => {
-        dropzone.addEventListener(eventName, (event) => {
-            event.preventDefault();
-            if (eventName === 'drop') {
-                const droppedFiles = event.dataTransfer?.files;
-                if (droppedFiles && droppedFiles.length) {
-                    handleFiles(droppedFiles);
-                }
-            }
+ 
+    ['dragleave', 'drop'].forEach(function (ev) {
+        dropzone.addEventListener(ev, function (e) {
+            e.preventDefault();
             dropzone.classList.remove('is-dragover');
+            if (ev === 'drop' && e.dataTransfer && e.dataTransfer.files.length) {
+                handleFiles(e.dataTransfer.files);
+            }
         });
     });
 })();

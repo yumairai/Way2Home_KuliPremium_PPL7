@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\SupabaseStorageService;
+
 
 class RequestRenovasi extends Model
 {
@@ -28,34 +30,46 @@ class RequestRenovasi extends Model
         ];
     }
 
-    public function getFotoDetailPaths(): array
-    {
-        $rawValue = $this->path_foto_detail;
-
-        if (blank($rawValue)) {
-            return [];
-        }
-
-        if (is_array($rawValue)) {
-            return array_values(array_filter($rawValue));
-        }
-
-        $decodedValue = json_decode($rawValue, true);
-        if (json_last_error() === JSON_ERROR_NONE && is_array($decodedValue)) {
-            return array_values(array_filter($decodedValue));
-        }
-
-        return [$rawValue];
-    }
-
     public function getFotoDetailUrls(): array
     {
-        return array_map(
-            fn(string $path) => asset('storage/' . $path),
-            $this->getFotoDetailPaths()
-        );
+        $paths = $this->getPhotoPaths();
+    
+        if (empty($paths)) {
+            return [];
+        }
+    
+        $supabase = app(SupabaseStorageService::class);
+        $urls = [];
+    
+        foreach ($paths as $path) {
+            try {
+                $urls[] = $supabase->getSignedUrl($path, 3600);
+            } catch (\Throwable) {
+                // Skip foto yang gagal di-sign daripada error ke seluruh halaman
+            }
+        }
+    
+        return $urls;
     }
-
+    
+    // Tambahkan helper private ini juga (jika belum ada):
+    
+    private function getPhotoPaths(): array
+    {
+        if (empty($this->path_foto_detail)) {
+            return [];
+        }
+    
+        // Kalau sudah di-cast sebagai array di $casts
+        if (is_array($this->path_foto_detail)) {
+            return array_filter($this->path_foto_detail);
+        }
+    
+        // Kalau masih JSON string
+        $decoded = json_decode($this->path_foto_detail, true);
+        return is_array($decoded) ? array_filter($decoded) : [];
+    }
+ 
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');

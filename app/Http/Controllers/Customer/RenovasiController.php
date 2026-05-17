@@ -13,10 +13,14 @@ use App\Services\RenovasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\SupabaseStorageService;
 
 class RenovasiController extends Controller
 {
-    public function __construct(private readonly RenovasiService $renovasiService) {}
+    public function __construct(
+        private readonly RenovasiService $renovasiService,
+        private readonly SupabaseStorageService $supabase
+    ) {}
 
     public function index()
     {
@@ -127,7 +131,11 @@ class RenovasiController extends Controller
             if ($request->hasFile('foto_detail')) {
                 foreach ((array) $request->file('foto_detail') as $photoFile) {
                     if ($photoFile && $photoFile->isValid()) {
-                        $photoPaths[] = $photoFile->store('renovasi/request', 'public');
+                        $photoPaths[] = $this->supabase->uploadPrivate(
+                            $photoFile,
+                            $customer->user_id,
+                            'renovasi-request'
+                        );
                     }
                 }
             }
