@@ -48,9 +48,9 @@
     </article>
 @endsection
 @section('content')
-@push('styles')
-    <link rel="stylesheet" href="{{ asset('css/admin/kelola_material.css') }}">
-@endpush
+    @push('styles')
+        <link rel="stylesheet" href="{{ asset('css/admin/kelola_material.css') }}">
+    @endpush
 
     {{-- Toolbar --}}
     <div class="mat-toolbar">
@@ -76,15 +76,14 @@
                     <th>Stok</th>
                     <th>Satuan</th>
                     <th>Status</th>
-                    <th>Aksi</th>
+                    <th style="padding-left: 4.5rem;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($materials as $mat)
                     <tr>
                         <td>
-                            <img class="mat-foto" src="{{ $mat->path_foto_material }}"
-                                alt="{{ $mat->nama_material }}">
+                            <img class="mat-foto" src="{{ $mat->path_foto_material }}" alt="{{ $mat->nama_material }}">
                         </td>
                         <td style="font-weight:600;">{{ $mat->nama_material }}</td>
                         <td>{{ $mat->kategori }}</td>
@@ -108,8 +107,7 @@
                                 <form method="POST" action="{{ route('admin.material.destroy', $mat->id) }}"
                                     class="hapus-form">
                                     @csrf @method('DELETE')
-                                    <button type="button" class="mat-btn hapus"
-                                        onclick="konfirmasiHapus(this)">
+                                    <button type="button" class="mat-btn hapus" onclick="konfirmasiHapus(this)">
                                         <span class="material-symbols-outlined" style="font-size:15px;">delete</span>
                                         Hapus
                                     </button>
@@ -252,59 +250,72 @@
 @endsection
 
 @push('scripts')
-<script>
-    // ── Modal Tambah ──
-    function openModal()  { document.getElementById('modalTambah').classList.add('open'); }
-    function closeModal() { document.getElementById('modalTambah').classList.remove('open'); }
-
-    // ── Modal Edit ──
-    function openEditModal(id, nama, kategori, harga, stok, satuan, deskripsi) {
-        const form = document.getElementById('editForm');
-        form.action = `/admin/kelola-material/${id}`;
-        document.getElementById('edit_nama').value      = nama;
-        document.getElementById('edit_harga').value     = harga;
-        document.getElementById('edit_stok').value      = stok;
-        document.getElementById('edit_satuan').value    = satuan;
-        document.getElementById('edit_deskripsi').value = deskripsi;
-
-        const sel = document.getElementById('edit_kategori');
-        for (let opt of sel.options) {
-            if (opt.value === kategori) { opt.selected = true; break; }
+    <script>
+        // ── Modal Tambah ──
+        function openModal() {
+            document.getElementById('modalTambah').classList.add('open');
         }
 
-        document.getElementById('modalEdit').classList.add('open');
-    }
-    function closeEditModal() { document.getElementById('modalEdit').classList.remove('open'); }
+        function closeModal() {
+            document.getElementById('modalTambah').classList.remove('open');
+        }
 
-    // Tutup modal klik backdrop
-    ['modalTambah', 'modalEdit'].forEach(id => {
-        document.getElementById(id).addEventListener('click', function(e) {
-            if (e.target === this) this.classList.remove('open');
+        // ── Modal Edit ──
+        function openEditModal(id, nama, kategori, harga, stok, satuan, deskripsi) {
+            const form = document.getElementById('editForm');
+            form.action = `/admin/kelola-material/${id}`;
+            document.getElementById('edit_nama').value = nama;
+            document.getElementById('edit_harga').value = harga;
+            document.getElementById('edit_stok').value = stok;
+            document.getElementById('edit_satuan').value = satuan;
+            document.getElementById('edit_deskripsi').value = deskripsi;
+
+            const sel = document.getElementById('edit_kategori');
+            for (let opt of sel.options) {
+                if (opt.value === kategori) {
+                    opt.selected = true;
+                    break;
+                }
+            }
+
+            document.getElementById('modalEdit').classList.add('open');
+        }
+
+        function closeEditModal() {
+            document.getElementById('modalEdit').classList.remove('open');
+        }
+
+        // Tutup modal klik backdrop
+        ['modalTambah', 'modalEdit'].forEach(id => {
+            document.getElementById(id).addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('open');
+            });
         });
-    });
 
-    // ── Search filter ──
-    document.getElementById('matSearch').addEventListener('input', function () {
-        const q = this.value.toLowerCase();
-        document.querySelectorAll('#matTable tbody tr').forEach(row => {
-            const nama = row.cells[1]?.textContent.toLowerCase() ?? '';
-            row.style.display = nama.includes(q) ? '' : 'none';
+        // ── Search filter ──
+        document.getElementById('matSearch').addEventListener('input', function() {
+            const q = this.value.toLowerCase();
+            document.querySelectorAll('#matTable tbody tr').forEach(row => {
+                const nama = row.cells[1]?.textContent.toLowerCase() ?? '';
+                row.style.display = nama.includes(q) ? '' : 'none';
+            });
         });
-    });
 
-    // ── Blokir scroll di input number ──
-    document.addEventListener('wheel', function (e) {
-        if (e.target.type === 'number') {
-            e.preventDefault();
-        }
-    }, { passive: false });
+        // ── Blokir scroll di input number ──
+        document.addEventListener('wheel', function(e) {
+            if (e.target.type === 'number') {
+                e.preventDefault();
+            }
+        }, {
+            passive: false
+        });
 
-    // ── Konfirmasi hapus ──
-    async function konfirmasiHapus(btn) {
-        const confirmed = await W2HDialog.confirm('Hapus material ini? Tindakan ini tidak bisa dibatalkan.');
-        if (confirmed) {
-            btn.closest('.hapus-form').submit();
+        // ── Konfirmasi hapus ──
+        async function konfirmasiHapus(btn) {
+            const confirmed = await W2HDialog.confirm('Hapus material ini? Tindakan ini tidak bisa dibatalkan.');
+            if (confirmed) {
+                btn.closest('.hapus-form').submit();
+            }
         }
-    }
-</script>
+    </script>
 @endpush
