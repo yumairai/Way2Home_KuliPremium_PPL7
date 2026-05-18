@@ -25,13 +25,15 @@ $cicilanAktif = $cicilans->first(
 $statusDokumen = match($statusProyek) {
     'Menunggu Verifikasi' => 'pending',
     'Revisi Dokumen'      => 'revision',
+    'Dibatalkan'          => 'canceled',
     default               => 'approved',
 };
 
 $isMandor = !in_array($statusProyek, [
-    'Menunggu Verifikasi', 'Revisi Dokumen', 'Pembayaran DP', 'Pengalokasian Mandor'
+    'Menunggu Verifikasi', 'Revisi Dokumen', 'Pembayaran DP', 'Pengalokasian Mandor', 'Dibatalkan'
 ]);
 $isProyek = $isMandor;
+$isCanceled = $statusProyek === 'Dibatalkan';
 @endphp
 
 <div class="project-main">
@@ -61,6 +63,11 @@ $isProyek = $isMandor;
                 <span class="status-badge pending">
                     <span class="material-symbols-outlined" style='font-variation-settings:"FILL" 1'>error</span>
                     Menunggu
+                </span>
+                @elseif ($statusDokumen === 'canceled')
+                <span class="status-badge" style="background-color: #ffebee; color: #c62828;">
+                    <span class="material-symbols-outlined" style='font-variation-settings:"FILL" 1'>cancel</span>
+                    Dibatalkan
                 </span>
                 @elseif ($statusDokumen === 'approved')
                 <span class="status-badge verified">
@@ -115,6 +122,17 @@ $isProyek = $isMandor;
                 </div>
             </div>
 
+            @elseif ($statusDokumen === 'canceled')
+            <div class="information-container" style="background-color: #ffebee; border: 1px solid #c62828;">
+                <div class="information-icon-box" style="background-color: #ffcdd2; color: #c62828;">
+                    <span class="material-symbols-outlined">cancel</span>
+                </div>
+                <div class="information-content">
+                    <h3 style="color: #c62828;">Proyek Dibatalkan</h3>
+                    <p>Proyek ini telah dibatalkan dan tidak dapat dilanjutkan.</p>
+                </div>
+            </div>
+
             @elseif ($statusDokumen === 'approved' && !$sudahBayarDP)
             <div class="information-container verified">
                 <div class="information-icon-box verified">
@@ -153,8 +171,15 @@ $isProyek = $isMandor;
 
             {{-- ── Action Buttons ── --}}
             <div class="button-group">
+                @if ($isCanceled)
+                <button class="btn-action btn-cancel" disabled style="opacity: 0.7; cursor: not-allowed;">
+                    <span class="material-symbols-outlined">cancel</span>
+                    Proyek Dibatalkan
+                </button>
+                @else
                 <button class="btn-action btn-cancel" id="cancelBtn"
-                    data-proyek="{{ $isProyek ? 'true' : 'false' }}">
+                    data-proyek="{{ $isProyek ? 'true' : 'false' }}"
+                    data-id="{{ $proyek->id }}">
                     <span class="material-symbols-outlined">cancel</span>
                     Batalkan Proyek
                 </button>
@@ -165,7 +190,7 @@ $isProyek = $isMandor;
                     data-pembayaran-id="{{ $dp?->id }}"
                     data-nominal="{{ $dp?->jumlah_bayar ?? 0 }}"
                     data-label="Down Payment"
-                    {{ $statusDokumen !== 'approved' ? 'disabled' : '' }}>
+                    {{ ($statusDokumen !== 'approved' || $isCanceled) ? 'disabled' : '' }}>
                     <span class="material-symbols-outlined">payments</span>
                     Bayar DP
                 </button>
@@ -178,6 +203,7 @@ $isProyek = $isMandor;
                     <span class="material-symbols-outlined">analytics</span>
                     Pantau Progress
                 </button>
+                @endif
                 @endif
             </div>
 

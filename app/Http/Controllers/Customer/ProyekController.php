@@ -219,4 +219,28 @@ class ProyekController extends Controller
         }
     }
 
+    public function batal($id)
+    {
+        $customer = Auth::user()->customer;
+        $proyek = Proyek::where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->first();
+
+        if (!$proyek) {
+            return response()->json(['status' => 'error', 'message' => 'Proyek tidak ditemukan.'], 404);
+        }
+
+        // Cek jika proyek sudah In Progress atau Selesai
+        if (in_array($proyek->status_proyek, ['In Progress', 'Selesai'])) {
+            return response()->json(['status' => 'error', 'message' => 'Proyek yang sudah berjalan tidak dapat dibatalkan.'], 422);
+        }
+
+        $proyek->update(['status_proyek' => 'Dibatalkan']);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Proyek berhasil dibatalkan.'
+        ]);
+    }
+
 }

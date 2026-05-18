@@ -142,6 +142,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/dokumentasi/{dok}', [CustomerTrackingProyekController::class, 'getDokumentasiUrl'])->name('proyek.dokumentasi.url'); // ← sudah benar posisinya
             Route::get('/{id}/tracking', [CustomerTrackingProyekController::class, 'tracking'])->name('proyek.tracking');
             Route::get('/{id}', [ProyekController::class, 'show'])->name('proyek.show');
+            Route::post('/{id}/batal', [ProyekController::class, 'batal'])->name('proyek.batal');
             Route::post('/ajukan', [ProyekController::class, 'store'])->name('proyek.store');
             Route::post('/bayar', [PaymentProyekController::class, 'bayar']);
             Route::post('/payment-success', [PaymentProyekController::class, 'handleSuccess']);

@@ -63,8 +63,41 @@ document.addEventListener('DOMContentLoaded', () => {
             const isActive = cancelBtn.getAttribute('data-proyek') === 'true';
             if (isActive) {
                 await W2HDialog.alert('Mohon maaf, proyek Anda telah aktif dan tidak dapat dibatalkan.');
-            } else {
-                await W2HDialog.alert('Proyek dibatalkan!');
+                return;
+            }
+
+            const konfirmasi = await W2HDialog.confirm('Apakah Anda yakin ingin membatalkan proyek ini? Tindakan ini tidak dapat dibatalkan.');
+            if (!konfirmasi) return;
+
+            const proyekId = cancelBtn.getAttribute('data-id');
+            const originalHTML = cancelBtn.innerHTML;
+            cancelBtn.disabled = true;
+            cancelBtn.innerHTML = '<span class="material-symbols-outlined">hourglass_top</span> Memproses...';
+
+            try {
+                const response = await fetch(`/proyek/${proyekId}/batal`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await W2HDialog.success(result.message || 'Proyek berhasil dibatalkan!');
+                    window.location.reload();
+                } else {
+                    await W2HDialog.error(result.message || 'Gagal membatalkan proyek.');
+                    cancelBtn.disabled = false;
+                    cancelBtn.innerHTML = originalHTML;
+                }
+            } catch (error) {
+                await W2HDialog.error('Terjadi kesalahan koneksi.');
+                cancelBtn.disabled = false;
+                cancelBtn.innerHTML = originalHTML;
             }
         });
     }
