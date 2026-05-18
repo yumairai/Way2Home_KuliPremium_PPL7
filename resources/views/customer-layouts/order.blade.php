@@ -84,8 +84,17 @@
                     </div>
                 </article>
             @empty
-                <div style="padding: 3rem; text-align: center;">
-                    <p>Belum ada pesanan. Yuk belanja material!</p>
+                <div class="empty-state">
+                    <div class="empty-state-copy">
+                        <h2 class="empty-state-title">Keranjang order kamu masih kosong</h2>
+                        <p class="empty-state-text">
+                            Saat ini belum ada order material yang tercatat. Mulai jelajahi marketplace untuk
+                            memilih material yang kamu butuhkan.
+                        </p>
+                    </div>
+                    <a class="empty-state-action" href="{{ route('material.index') }}">
+                        <span>Mulai Belanja</span>
+                    </a>
                 </div>
             @endforelse
         </section>
@@ -95,7 +104,7 @@
 @push('scripts')
     <script>
         document.querySelectorAll('[data-order-card]').forEach((card) => {
-            const button     = card.querySelector('.order-card-toggle');
+            const button = card.querySelector('.order-card-toggle');
             const toggleText = card.querySelector('[data-toggle-text]');
             button.addEventListener('click', () => {
                 const expanded = card.classList.toggle('is-expanded');
