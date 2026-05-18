@@ -33,13 +33,6 @@
                     </div>
                     <button class="search-btn">Cari Sekarang</button>
                 </div>
-                <!-- Category Quick Links -->
-                <div class="quick-links">
-                    <span class="quick-links-label">Populer:</span>
-                    <a class="quick-link-tag" href="#">Semen Merah Putih</a>
-                    <a class="quick-link-tag" href="#">Besi Beton 10mm</a>
-                    <a class="quick-link-tag" href="#">Bata Ringan</a>
-                </div>
             </div>
         </div>
     </section>
@@ -58,24 +51,36 @@
                         <p class="filter-label">Kategori</p>
                         <div class="checkbox-group">
                             <label class="checkbox-label">
-                                <input checked class="checkbox-input" type="checkbox" />
-                                <span>Semen</span>
+                                <input class="checkbox-input" type="checkbox" value="Struktur" />
+                                <span>Struktur</span>
                             </label>
                             <label class="checkbox-label">
-                                <input class="checkbox-input" type="checkbox" />
-                                <span>Bata & Mortar</span>
+                                <input class="checkbox-input" type="checkbox" value="Dinding" />
+                                <span>Dinding</span>
                             </label>
                             <label class="checkbox-label">
-                                <input class="checkbox-input" type="checkbox" />
-                                <span>Pasir & Kerikil</span>
+                                <input class="checkbox-input" type="checkbox" value="Atap" />
+                                <span>Atap</span>
                             </label>
                             <label class="checkbox-label">
-                                <input class="checkbox-input" type="checkbox" />
-                                <span>Besi & Logam</span>
+                                <input class="checkbox-input" type="checkbox" value="Sanitasi" />
+                                <span>Sanitasi</span>
                             </label>
                             <label class="checkbox-label">
-                                <input class="checkbox-input" type="checkbox" />
-                                <span>Cat & Finishing</span>
+                                <input class="checkbox-input" type="checkbox" value="Finishing" />
+                                <span>Finishing</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input class="checkbox-input" type="checkbox" value="Material Dasar" />
+                                <span>Material Dasar</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input class="checkbox-input" type="checkbox" value="Elektrikal" />
+                                <span>Elektrikal</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input class="checkbox-input" type="checkbox" value="Kusen & Pintu" />
+                                <span>Kusen & Pintu</span>
                             </label>
                         </div>
                     </div>
@@ -85,29 +90,18 @@
                         <div class="current-price-display">
                             <span id="currentPriceLabel">Rp 0</span>
                         </div>
-                        <input class="price-range-slider" id="priceRange" max="10000000" min="0" step="100000"
-                            value="0" type="range" />
+                        <input class="price-range-slider" id="priceRange" max="1000000" min="0" step="25000"
+                            value="1000000" type="range" />
                         <div class="price-range-labels">
                             <span>Rp 0</span>
-                            <span>Rp 10jt+</span>
-                        </div>
-                    </div>
-                    <!-- Ketersediaan -->
-                    <div class="filter-section">
-                        <p class="filter-label">Ketersediaan</p>
-                        <div class="radio-group">
-                            <label class="radio-label">
-                                <input checked class="radio-input" name="stock" type="radio" />
-                                <span>Stok Tersedia</span>
-                            </label>
-                            <label class="radio-label">
-                                <input class="radio-input" name="stock" type="radio" />
-                                <span>Pre-order</span>
-                            </label>
+                            <span>Rp 1jt++</span>
                         </div>
                     </div>
                 </div>
-                <button class="reset-filter-btn">Apply Filter</button>
+                <div class="filter-action-group">
+                    <button class="reset-filter-btn" type="button">Apply Filter</button>
+                    <button class="clear-filter-btn" type="button">Reset Filter</button>
+                </div>
             </div>
         </aside>
         <!-- Product Grid -->
@@ -120,10 +114,9 @@
                 <div class="product-sort">
                     <span>Urutkan:</span>
                     <select class="sort-select">
-                        <option>Terpopuler</option>
-                        <option>Terbaru</option>
-                        <option>Harga Terendah</option>
-                        <option>Harga Tertinggi</option>
+                        <option value="">Harga</option>
+                        <option value="harga_rendah">Harga Terendah</option>
+                        <option value="harga_tinggi">Harga Tertinggi</option>
                     </select>
                 </div>
             </div>

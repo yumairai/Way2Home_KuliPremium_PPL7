@@ -20,33 +20,117 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Pasang Event Listener untuk Filter & Search
     const searchBtn = document.querySelector('.search-btn');
+    const searchInput = document.querySelector('.search-input');
     const applyFilterBtn = document.querySelector('.reset-filter-btn'); // Tombol "Apply Filter"
+    const clearFilterBtn = document.querySelector('.clear-filter-btn');
+    const sortSelect = document.querySelector('.sort-select');
 
-    if (searchBtn) searchBtn.addEventListener('click', () => applyFilters());
+    if (searchBtn) searchBtn.addEventListener('click', () => applySearchOnly());
+    if (searchInput) {
+        searchInput.value = urlParams.get('search') || '';
+    }
+    if (searchInput) {
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                applySearchOnly();
+            }
+        });
+        searchInput.addEventListener('input', () => debouncedApplySearchOnly());
+    }
     if (applyFilterBtn) applyFilterBtn.addEventListener('click', () => applyFilters());
+    if (clearFilterBtn) clearFilterBtn.addEventListener('click', () => resetFilters());
+    if (sortSelect) sortSelect.addEventListener('change', () => handleSortChange());
+
+    initPriceSlider();
 });
 
 // FUNGSI FILTER: Mengumpulkan input dan panggil fetch
 async function applyFilters() {
-    const search = document.querySelector('.search-input').value;
     const price = document.getElementById('priceRange').value;
     const sort = document.querySelector('.sort-select').value;
 
     // Ambil kategori yang diceklis
     const categories = Array.from(document.querySelectorAll('.checkbox-input:checked'))
-        .map(cb => cb.nextElementSibling.innerText);
+        .map(cb => (cb.value && cb.value.trim()) ? cb.value : (cb.nextElementSibling ? cb.nextElementSibling.innerText : ''))
+        .filter(Boolean);
+
+    // Ambil stok yang dipilih (ready | preorder)
+    const stokEl = document.querySelector('.radio-input:checked');
+    const stokValue = stokEl ? stokEl.value : null;
 
     let params = new URLSearchParams();
-    if (search) params.append('search', search);
-    if (price > 0) params.append('harga_max', price);
+    params.append('harga_max', price);
     categories.forEach(c => params.append('kategori[]', c));
+    if (stokValue) params.append('stok', stokValue);
 
-    // Mapping Sort
-    const sortMap = { 'Harga Terendah': 'harga_rendah', 'Harga Tertinggi': 'harga_tinggi', 'Terbaru': 'terbaru' };
-    params.append('sort', sortMap[sort] || 'terbaru');
+    params.append('sort', sort || 'terbaru');
 
     const newUrl = '/material/materials?' + params.toString();
     await fetchMaterials(newUrl);
+}
+
+async function applySearchOnly() {
+    const search = document.querySelector('.search-input').value.trim();
+    const sort = document.querySelector('.sort-select').value;
+
+    if (!search) {
+        await fetchMaterials('/material/materials');
+        return;
+    }
+
+    const params = new URLSearchParams();
+    params.append('search', search);
+    params.append('sort', sort || 'terbaru');
+
+    const newUrl = '/material/materials?' + params.toString();
+    await fetchMaterials(newUrl);
+}
+
+function handleSortChange() {
+    const search = document.querySelector('.search-input').value.trim();
+    if (search) {
+        applySearchOnly();
+        return;
+    }
+
+    applyFilters();
+}
+
+let searchDebounceTimer;
+
+function debouncedApplySearchOnly() {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        applySearchOnly();
+    }, 350);
+}
+
+async function resetFilters() {
+    const searchInput = document.querySelector('.search-input');
+    const sortSelect = document.querySelector('.sort-select');
+    const priceSlider = document.getElementById('priceRange');
+    const categoryInputs = document.querySelectorAll('.checkbox-input');
+    const stockReady = document.querySelector('.radio-input[value="ready"]');
+
+    if (searchInput) searchInput.value = '';
+    if (sortSelect) sortSelect.value = '';
+
+    categoryInputs.forEach((input) => {
+        input.checked = false;
+    });
+
+    if (stockReady) {
+        stockReady.checked = true;
+    }
+
+    if (priceSlider) {
+        priceSlider.value = priceSlider.max;
+        updatePriceSliderUI(priceSlider);
+    }
+
+    window.history.replaceState({}, '', window.location.pathname);
+    await fetchMaterials('/material/materials');
 }
 
 // FUNGSI UTAMA: Ambil data Material & Cart
@@ -121,11 +205,19 @@ async function fetchMaterials(url) {
         });
 
         renderPagination(resMat);
+        syncBrowserUrlWithRequest(url);
 
     } catch (error) {
         console.error('Error:', error);
         productGrid.innerHTML = '<p>Gagal memuat data.</p>';
     }
+}
+
+function syncBrowserUrlWithRequest(requestUrl) {
+    const queryIndex = requestUrl.indexOf('?');
+    const queryString = queryIndex >= 0 ? requestUrl.slice(queryIndex + 1) : '';
+    const browserUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+    window.history.replaceState({}, '', browserUrl);
 }
 
 // FUNGSI PAGINATION
@@ -283,10 +375,33 @@ function debouncedUpdateFloatingCart() {
 const slider = document.getElementById('priceRange');
 if (slider) {
     slider.addEventListener('input', function () {
-        const val = this.value;
-        const label = document.getElementById('currentPriceLabel');
-        const percentage = (val - this.min) / (this.max - this.min) * 100;
-        this.style.background = `linear-gradient(to right, #004796 ${percentage}%, #e0e0e0 ${percentage}%)`;
-        label.textContent = val > 0 ? `RP 0 - ${new Intl.NumberFormat('id-ID').format(val)}` : "RP 0";
+        updatePriceSliderUI(this);
     });
+}
+
+function initPriceSlider() {
+    if (slider) {
+        slider.value = slider.max;
+        updatePriceSliderUI(slider);
+    }
+}
+
+function updatePriceSliderUI(input) {
+    const label = document.getElementById('currentPriceLabel');
+    if (!label) return;
+
+    const val = Number(input.value);
+    const min = Number(input.min);
+    const max = Number(input.max);
+    const percentage = ((val - min) / (max - min)) * 100;
+
+    input.style.background = `linear-gradient(to right, #004796 ${percentage}%, #e0e0e0 ${percentage}%)`;
+
+    if (val >= max) {
+        label.textContent = `RP 0 - ${new Intl.NumberFormat('id-ID').format(val)}++`;
+    } else if (val > 0) {
+        label.textContent = `RP 0 - ${new Intl.NumberFormat('id-ID').format(val)}`;
+    } else {
+        label.textContent = 'RP 0';
+    }
 }
