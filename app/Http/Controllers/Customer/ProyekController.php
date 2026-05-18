@@ -69,8 +69,8 @@ class ProyekController extends Controller
     {
         // 1. Validasi input
         $request->validate([
-            'package'          => 'required|in:paket-komplit,paket-standar',
-            'alamat_proyek'    => 'required|string',
+            'package'          => 'required|in:paket-komplit,material-only',
+            'alamat_proyek'    => 'required_if:package,paket-komplit|nullable|string',
             'desain_id'        => 'required|exists:desain_rumah,id',
             'sertifikat_tanah' => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
             'ktp_pemilik'      => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
@@ -129,6 +129,45 @@ class ProyekController extends Controller
         }
 
         // 4. Semua file berhasil → baru masuk DB transaction
+        if ($request->package === 'material-only') {
+            $desain = \App\Models\DesainRumah::find($request->desain_id);
+            if ($desain && $desain->material_digunakan) {
+                $materials = explode(';', $desain->material_digunakan);
+                foreach ($materials as $materialStr) {
+                    if (empty(trim($materialStr))) continue;
+                    $parts = explode(':', $materialStr);
+                    if (count($parts) >= 1) {
+                        $namaMaterial = trim($parts[0]);
+                        $qty = 1;
+                        if (count($parts) == 2) {
+                            preg_match('/(\d+)/', trim($parts[1]), $matches);
+                            if (isset($matches[1])) $qty = (int)$matches[1];
+                        }
+
+                        $material = \App\Models\Material::where('nama_material', 'LIKE', '%' . $namaMaterial . '%')->first();
+                        if ($material) {
+                            $cartItem = \App\Models\Cart::where('user_id', Auth::id())
+                                ->where('material_id', $material->id)
+                                ->first();
+                            if ($cartItem) {
+                                $cartItem->increment('jumlah', $qty);
+                            } else {
+                                \App\Models\Cart::create([
+                                    'user_id' => Auth::id(),
+                                    'material_id' => $material->id,
+                                    'jumlah' => $qty
+                                ]);
+                            }
+                        }
+                    }
+                }
+            }
+            return response()->json([
+                'status'    => 'success',
+                'message_2' => 'Bahan material berhasil ditambahkan ke keranjang!',
+            ], 200);
+        }
+
         DB::beginTransaction();
 
         try {

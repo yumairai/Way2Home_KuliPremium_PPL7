@@ -18,9 +18,11 @@ const packageInfo = document.getElementById('package-info');
 const labelAlamat = document.getElementById('label-alamat');
 const mainSubmitBtn = document.getElementById('mainSubmitBtn');
 const sectionDokumen = document.getElementById('sectionDokumen');
+const sectionAlamat = document.getElementById('sectionAlamat');
 const alamatInput = document.getElementById('alamatProyek');
 const alamatError = document.getElementById('alamat-error');
 const desainInput = document.getElementById('desain_id');
+const infoBox = document.querySelector('.info-box');
 let submitAttempted = false;
 
 function getSelectedPackage() {
@@ -172,6 +174,11 @@ function setAddressError(message) {
 }
 
 function validateAddress(showMissingError) {
+    if (getSelectedPackage() === 'material-only') {
+        setAddressError('');
+        return true;
+    }
+
     if (!alamatInput || !alamatInput.value.trim()) {
         setAddressError(showMissingError ? 'Alamat lengkap proyek wajib diisi.' : '');
         return false;
@@ -182,6 +189,10 @@ function validateAddress(showMissingError) {
 }
 
 function hasAnyUserInput() {
+    if (getSelectedPackage() === 'material-only') {
+        return true;
+    }
+
     const addressFilled = Boolean(alamatInput && alamatInput.value.trim());
     const documentFilled = documentFields.some(field => {
         const input = document.getElementById(field.id);
@@ -253,10 +264,13 @@ function updatePackageUi() {
             submitMsgText.innerText = 'Tim logistik kami akan mengirimkan invoice material dalam 1x24 jam.';
         }
         if (packageInfo) {
-            packageInfo.innerHTML = '<strong>Info:</strong> Anda hanya perlu mengunggah alamat tujuan pengiriman.';
+            packageInfo.innerHTML = '<strong>Info:</strong> Anda akan diarahkan ke keranjang untuk proses pemesanan.';
         }
-        if (labelAlamat) {
-            labelAlamat.innerText = 'Alamat Lengkap Pengiriman';
+        if (sectionAlamat) {
+            sectionAlamat.style.display = 'none';
+        }
+        if (infoBox) {
+            infoBox.style.display = 'none';
         }
     } else {
         if (submitBtnText) {
@@ -268,6 +282,12 @@ function updatePackageUi() {
         if (packageInfo) {
             packageInfo.innerHTML = '<strong>Info:</strong> Anda perlu mengunggah alamat lengkap dan dokumen pendukung.';
         }
+        if (sectionAlamat) {
+            sectionAlamat.style.display = 'block';
+        }
+        if (infoBox) {
+            infoBox.style.display = 'block';
+        }
         if (labelAlamat) {
             labelAlamat.innerText = 'Alamat Lengkap Proyek';
         }
@@ -276,8 +296,10 @@ function updatePackageUi() {
     if (sectionDokumen) {
         if (selectedPackage === 'paket-komplit') {
             sectionDokumen.classList.add('show');
+            sectionDokumen.style.display = 'block';
         } else {
             sectionDokumen.classList.remove('show');
+            sectionDokumen.style.display = 'none';
         }
     }
 
@@ -375,7 +397,7 @@ if (mainSubmitBtn) {
                 // pergi ke halaman sesuai paket
                 if (selectedPackage === 'material-only') {
                     await W2HDialog.success("Berhasil! " + data.message_2);
-                    setTimeout(() => window.location.href = "/material", 1500);
+                    setTimeout(() => window.location.href = "/material/cart", 1500);
                 } else {
                     await W2HDialog.success("Berhasil! " + data.message_1);
                     setTimeout(() => window.location.href = "/proyek", 1500);
@@ -437,6 +459,35 @@ function initializeForm() {
 
     updatePackageUi();
     syncSubmitButtonState();
+
+    // 4. Intercept navigasi pindah halaman (klik link) menggunakan event delegation
+    document.body.addEventListener('click', async (e) => {
+        const link = e.target.closest('a');
+        if (link) {
+            const href = link.getAttribute('href');
+            // Pastikan link valid dan bukan action di halaman yang sama
+            if (href && href !== '#' && !href.startsWith('javascript:') && !href.startsWith('mailto:')) {
+                // Jika sudah mulai submit, biarkan navigasi
+                if (submitAttempted) return;
+
+                // Cegah link diklik langsung
+                e.preventDefault();
+                
+                // Tampilkan alert W2HDialog
+                if (typeof W2HDialog !== 'undefined' && typeof W2HDialog.confirm === 'function') {
+                    const confirmLeave = await W2HDialog.confirm("Data pada form ini tidak akan tersimpan. Yakin ingin meninggalkan halaman?");
+                    if (confirmLeave) {
+                        window.location.href = href;
+                    }
+                } else {
+                    // Fallback browser native dialog
+                    if (confirm("Data pada form ini tidak akan tersimpan. Yakin ingin meninggalkan halaman?")) {
+                        window.location.href = href;
+                    }
+                }
+            }
+        }
+    });
 }
 
 if (document.readyState === 'loading') {

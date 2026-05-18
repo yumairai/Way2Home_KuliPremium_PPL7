@@ -125,7 +125,7 @@
             <input type="hidden" id="desain_id" value="{{ $desain->id }}">
 
             <!-- Address Input -->
-            <div class="form-group">
+            <div class="form-group" id="sectionAlamat">
                 <label class="form-label" id="label-alamat">Alamat Lengkap Proyek</label>
                 <textarea id="alamatProyek" placeholder="Masukkan alamat lengkap di wilayah Jawa Barat" rows="3"></textarea>
                 <p class="field-error" id="alamat-error" aria-live="polite"></p>
