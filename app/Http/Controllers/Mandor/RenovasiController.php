@@ -382,6 +382,9 @@ class RenovasiController extends Controller
         ])
         ->where('mandor_id', $mandor->id)
         ->where('status_penawaran', 'diterima')
+        ->whereHas('requestRenovasi', function ($query) {
+            $query->where('status_request', '!=', 'selesai');
+        })
         ->latest()
         ->first();
 
