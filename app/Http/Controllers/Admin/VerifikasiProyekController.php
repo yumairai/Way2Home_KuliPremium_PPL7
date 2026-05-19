@@ -91,7 +91,8 @@ class VerifikasiProyekController extends Controller
         });
 
         // ✉️ Kirim notifikasi email ke customer
-        $notif->kirimStatusProyek($proyek, $statusFinal, $request->catatan_admin);
+        // Ensure parameters are strings to satisfy type expectations (avoid null)
+        $notif->kirimStatusProyek($proyek, (string) $statusFinal, (string) ($request->catatan_admin ?? ''));
 
         return redirect()->back()->with('success', 'Verifikasi berhasil diperbarui dan notifikasi telah dikirim ke customer.');
     }

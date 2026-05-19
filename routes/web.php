@@ -17,6 +17,7 @@ use App\Http\Controllers\Customer\ProfileController;
 use App\Http\Controllers\Customer\TrackingProyekController as CustomerTrackingProyekController;
 use App\Http\Controllers\Admin\VerifikasiProyekController;
 use App\Http\Controllers\Admin\ManageMandorController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Mandor\RenovasiController as MandorRenovasiController;
 use App\Http\Controllers\Mandor\TrackingProyekController as MandorTrackingProyekController;
 use App\Http\Controllers\Admin\ManageMaterialController;
@@ -80,7 +81,7 @@ Route::post('/email/verification-notification', function (Request $request) {
 Route::get('/test-email', function () {
     Mail::raw('Test email verification', function ($message) {
         $message->to('your-email@example.com')
-                ->subject('Test Verification');
+            ->subject('Test Verification');
     });
 
     return 'Email sent';
@@ -175,9 +176,7 @@ Route::middleware(['auth'])->group(function () {
 */
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::get('/verifikasi', [VerifikasiProyekController::class, 'index'])->name('admin.verifikasi');
     Route::put('/verifikasi/{id}', [VerifikasiProyekController::class, 'update'])->name('admin.verifikasi.update');

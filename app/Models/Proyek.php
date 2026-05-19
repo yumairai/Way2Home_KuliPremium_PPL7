@@ -35,34 +35,39 @@ class Proyek extends Model
         return $this->hasOne(DetailProyekBangun::class, 'proyek_id');
     }
 
+    public function detailRenovasi()
+    {
+        return $this->hasOne(DetailProyekRenovasi::class, 'proyek_id');
+    }
+
     public function pembayaranProyek()
     {
         return $this->hasMany(PembayaranProyek::class, 'proyek_id')->orderBy('periode');
     }
-    
+
     // Shortcut: hanya DP (periode 0)
     public function pembayaranDP()
     {
         return $this->hasOne(PembayaranProyek::class, 'proyek_id')->where('periode', 0);
     }
-    
+
     // Shortcut: hanya cicilan (periode 1-3)
     public function cicilanProyek()
     {
         return $this->hasMany(PembayaranProyek::class, 'proyek_id')->where('periode', '>', 0)->orderBy('periode');
     }
-    
+
     // ─── Generate DP (dipanggil saat proyek pertama dibuat) ───────────
-    
+
     public function generateDP(): void
     {
         if ($this->pembayaranProyek()->where('periode', 0)->exists()) {
             return;
         }
-    
+
         $estimasiBiaya = $this->detailBangun->desainRumah->estimasi_biaya;
         $nominalDP     = (int) round($estimasiBiaya * 0.30);
-    
+
         PembayaranProyek::create([
             'proyek_id'           => $this->id,
             'periode'             => 0,
@@ -71,9 +76,9 @@ class Proyek extends Model
             'status_pembayaran'   => 'belum_bayar',
         ]);
     }
-    
+
     // ─── Generate 3 Cicilan (dipanggil saat mandor dialokasikan) ──────
-    
+
     public function generateCicilan(): void
     {
         if ($this->cicilanProyek()->exists()) {
@@ -127,7 +132,6 @@ class Proyek extends Model
 
     public function progress()
     {
-        return $this->hasOne(ProgressProyek::class, 'proyek_id')->latest();
+        return $this->hasOne(ProgressProyek::class, 'proyek_id')->latest('tanggal_update');
     }
-
 }
