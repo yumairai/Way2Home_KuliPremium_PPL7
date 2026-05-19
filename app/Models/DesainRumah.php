@@ -37,4 +37,12 @@ class DesainRumah extends Model
     {
         return $this->hasMany(DetailProyekBangun::class, 'desain_rumah_id');
     }
+
+    /**
+     * Relasi ke gambar bulk (12 gambar per desain)
+     */
+    public function gambarBulk()
+    {
+        return $this->hasMany(DesainGambarBulk::class, 'desain_rumah_id');
+    }
 }

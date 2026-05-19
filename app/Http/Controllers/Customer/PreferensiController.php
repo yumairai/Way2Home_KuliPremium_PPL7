@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PreferensiRumah;
 use App\Models\RekomendasiRumah;
+use App\Models\DesignImageGlobal;
 use App\Services\RekomendasiService;
 use Illuminate\Support\Facades\Auth;
 
@@ -100,6 +101,10 @@ class PreferensiController extends Controller
 
     /**
      * Tampilkan halaman hasil rekomendasi.
+     * 
+     * Each of 3 recommended designs gets 1 image from the global 12 images
+     * Image is selected by matching the design's gaya_arsitektur with kategori
+     * and using the ranking position (1st, 2nd, 3rd)
      */
     public function result()
     {
@@ -125,11 +130,22 @@ class PreferensiController extends Controller
                     ->orderByDesc('skor_rekomendasi')
                     ->take(3)
                     ->get()
-                    ->map(function ($item) {
+                    ->map(function ($item, $index) {
                         $desain = $item->desainRumah;
 
                         if (!$desain) {
                             return null;
+                        }
+
+                        // Get image from global 12 images pool
+                        // Match by gaya_arsitektur and position (1, 2, 3)
+                        $imagePosition = $index + 1; // 1, 2, 3
+                        $kategori = $desain->gaya_arsitektur ?? 'Modern';
+                        $gambarPath = DesignImageGlobal::getImageByCategory($kategori, $imagePosition);
+
+                        // Fallback to random image if not found
+                        if (!$gambarPath) {
+                            $gambarPath = DesignImageGlobal::getRandomImageByCategory($kategori);
                         }
 
                         return [
@@ -148,7 +164,7 @@ class PreferensiController extends Controller
                             'estimasi_durasi' => $desain->estimasi_durasi,
                             'material_digunakan' => $desain->material_digunakan ?: $desain->material_utama,
                             'fasilitas' => $desain->fasilitas,
-                            'path_gambar_desain' => $desain->path_gambar_desain,
+                            'path_gambar_desain' => $gambarPath ? asset($gambarPath) : $desain->path_gambar_desain,
                             'skor' => round((float) $item->skor_rekomendasi, 2),
                         ];
                     })
@@ -171,5 +187,32 @@ class PreferensiController extends Controller
         }
 
         return view('customer-layouts.rekomendasi_rumah', compact('hasil', 'preferensi'));
+    }
+
+    /**
+     * Handle design selection - user picks one design
+     */
+    public function select(Request $request)
+    {
+        $request->validate([
+            'desain_id' => 'required|integer|exists:desain_rumah,id',
+            'preferensi_id' => 'required|integer',
+        ]);
+
+        $preferensiId = $request->preferensi_id;
+        $selectedDesainId = $request->desain_id;
+
+        // Update rekomendasi status to mark which one is selected
+        RekomendasiRumah::where('preferensi_rumah_id', $preferensiId)
+            ->update(['is_selected' => false]);
+
+        RekomendasiRumah::where('preferensi_rumah_id', $preferensiId)
+            ->where('desain_rumah_id', $selectedDesainId)
+            ->update(['is_selected' => true]);
+
+        return response()->json([
+            'message' => 'Desain rumah berhasil dipilih!',
+            'desain_id' => $selectedDesainId,
+        ], 200);
     }
 }

@@ -13,6 +13,11 @@ class RekomendasiRumah extends Model
         'preferensi_rumah_id',
         'desain_rumah_id',
         'skor_rekomendasi',
+        'is_selected',
+    ];
+
+    protected $casts = [
+        'is_selected' => 'boolean',
     ];
 
     public function preferensiRumah(): BelongsTo
