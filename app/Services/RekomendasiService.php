@@ -32,7 +32,7 @@ class RekomendasiService
     private const STATS = [
         'luas_tanah'   => ['min' => 30,          'max' => 350],
         'jumlah_kamar' => ['min' => 1,            'max' => 10],
-        'harga'        => ['min' => 100_000_000,  'max' => 2_000_000_000],
+        'harga'        => ['min' => 22_500,       'max' => 15_718_461_000],
     ];
 
     // ─────────────────────────────────────────
