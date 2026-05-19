@@ -215,6 +215,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 */
 
 Route::middleware(['auth', 'mandor'])->prefix('mandor')->group(function () {
+    Route::get('/tracking-redirect', function () {
+
+        $mandor = auth()->user()->mandor;
+
+        $hasBangun = \App\Models\Proyek::where('mandor_id', $mandor->id)
+            ->where('status_proyek', 'In Progress')
+            ->where('jenis_proyek', 'Bangun Rumah')
+            ->exists();
+
+        if ($hasBangun) {
+            return redirect()->route('mandor.proyek.tracking');
+        }
+
+        return redirect()->route('mandor.tracking');
+
+    })->name('mandor.tracking.redirect');
     Route::get('/dashboard', [MandorRenovasiController::class, 'dashboard'])->name('mandor.dashboard');
     Route::get('/tracking', [MandorRenovasiController::class, 'tracking'])->name('mandor.tracking');
     Route::post('/renovation/{requestRenovasi}/done', [MandorRenovasiController::class, 'markDone'])->name('mandor.renovation.done');

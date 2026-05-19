@@ -179,34 +179,6 @@ class RenovasiController extends Controller
 
         $activeProjectLabel = $activeBangunLabel ?? $activeRenovasiLabel ?? 'Tidak ada proyek aktif';
 
-        /**
-         * =========================
-         * MY OFFERS (PENDING & ACCEPTED)
-         * =========================
-         */
-        $myOffers = PenawaranRenovasi::with('requestRenovasi.customer.user', 'materialRenovasi.material')
-            ->where('mandor_id', $mandor->id)
-            ->whereIn('status_penawaran', ['pending', 'diterima'])
-            ->whereHas('requestRenovasi', fn($q) => $q->where('status_request', '!=', 'selesai'))
-            ->latest()
-            ->get()
-            ->map(function (PenawaranRenovasi $offer) {
-                $materials = $offer->materialRenovasi->sum(function ($item) {
-                    return ((int) $item->material?->harga ?? 0) * (int) $item->jumlah;
-                });
-                $total = (int) $offer->estimasi_biaya + $materials;
-
-                return [
-                    'id' => sprintf('REV-%03d', $offer->requestRenovasi->id),
-                    'db_id' => $offer->requestRenovasi->id,
-                    'customer_name' => $offer->requestRenovasi->customer?->user?->name ?? 'Customer',
-                    'status' => $offer->status_penawaran === 'diterima' ? 'Diterima' : 'Menunggu Approval',
-                    'biaya_total' => $this->renovasiService->formatRupiah($total),
-                    'created_at' => $offer->created_at->format('d M Y'),
-                ];
-            })
-            ->values();
-
         return view('mandor.mandor_dashboard', compact(
             'renovationRequests',
             'requestMap',
@@ -215,8 +187,7 @@ class RenovasiController extends Controller
             'completedProjects',
             'requestCount',
             'activityHistory',
-            'activeProjectLabel',
-            'myOffers'
+            'activeProjectLabel'
         ));
     }
 
@@ -305,18 +276,18 @@ class RenovasiController extends Controller
         if ($isNewOffer) {
             MandorActivityHistory::logOfferSubmitted($mandor, $requestRenovasi, $validated['estimasi_biaya']);
 
-            // ✉️ Kirim notifikasi email ke customer
-            $penawaranForNotif = PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
-                ->where('mandor_id', $mandor->id)
-                ->with(['mandor.user', 'materialRenovasi.material'])
-                ->latest()->first();
-            if ($penawaranForNotif) {
-                $notif->kirimPenawaranRenovasi(
-                    $requestRenovasi->load('customer.user'),
-                    $penawaranForNotif,
-                    $isNewOffer ? 'penawaran' : 'negosiasi'
-                );
-            }
+        // ✉️ Kirim notifikasi email ke customer
+        $penawaranForNotif = PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
+            ->where('mandor_id', $mandor->id)
+            ->with(['mandor.user', 'materialRenovasi.material'])
+            ->latest()->first();
+        if ($penawaranForNotif) {
+            $notif->kirimPenawaranRenovasi(
+                $requestRenovasi->load('customer.user'),
+                $penawaranForNotif,
+                $isNewOffer ? 'penawaran' : 'negosiasi'
+            );
+        }
         }
 
         return response()->json([
@@ -405,63 +376,68 @@ class RenovasiController extends Controller
     {
         $mandor = $this->currentMandor();
 
-        // Ambil penawaran renovasi (pending atau diterima) untuk mandor ini
-        $offer = \App\Models\PenawaranRenovasi::with('requestRenovasi', 'materialRenovasi.material')
-            ->where('mandor_id', $mandor->id)
-            ->whereIn('status_penawaran', ['pending', 'diterima'])
-            ->whereHas('requestRenovasi', function ($query) {
-                $query->where('status_request', '!=', 'selesai');
-            })
-            ->latest()
-            ->first();
+        $offer = PenawaranRenovasi::with([
+            'requestRenovasi.customer.user',
+            'materialRenovasi.material'
+        ])
+        ->where('mandor_id', $mandor->id)
+        ->where('status_penawaran', 'diterima')
+        ->latest()
+        ->first();
 
         $isHaveProject = false;
         $isHaveRenovation = false;
         $isAccepted = false;
         $renovationData = null;
-        $detailProyek = null;
+        $proyekRenovasi = null;
 
         if ($offer && $offer->requestRenovasi) {
+
             $isHaveRenovation = true;
-            $isAccepted = $offer->status_penawaran === 'diterima';
+            $isAccepted = true;
 
             $materialsTotal = $offer->materialRenovasi->sum(function ($item) {
                 $price = (int) ($item->material?->harga ?? 0);
                 return $price * (int) $item->jumlah;
             });
 
-            // Ambil proyek_id dari DetailProyekRenovasi (hanya jika accepted)
-            $detailProyek = $isAccepted
-                ? DetailProyekRenovasi::where('request_renovasi_id', $offer->requestRenovasi->id)->latest()->first()
-                : null;
+            $detailProyek = DetailProyekRenovasi::where(
+                'request_renovasi_id',
+                $offer->requestRenovasi->id
+            )->latest()->first();
 
             $renovationData = [
                 'request_id'     => sprintf('REV-%03d', $offer->requestRenovasi->id),
                 'customer_name'  => $offer->requestRenovasi->customer?->user?->name ?? 'Customer',
                 'customer_phone' => $offer->requestRenovasi->customer?->user?->phone_number ?? '-',
-                'biaya_total'    => $this->renovasiService->formatRupiah((int) $offer->estimasi_biaya + $materialsTotal),
-                'biaya_renovasi' => $this->renovasiService->formatRupiah((int) $offer->estimasi_biaya),
-                'tanggal_mulai'  => optional($offer->updated_at ?? $offer->created_at)->format('d M Y'),
+                'biaya_total'    => $this->renovasiService->formatRupiah(
+                    (int) $offer->estimasi_biaya + $materialsTotal
+                ),
+                'biaya_renovasi' => $this->renovasiService->formatRupiah(
+                    (int) $offer->estimasi_biaya
+                ),
+                'tanggal_mulai'  => optional(
+                    $offer->updated_at ?? $offer->created_at
+                )->format('d M Y'),
                 'deskripsi'      => $offer->requestRenovasi->deskripsi_renovasi,
                 'analisis'       => $offer->analisis_dari_mandor,
                 'photos'         => $offer->requestRenovasi->getFotoDetailUrls()
                     ?: [asset('images/aset/user-dummy.jpg')],
                 'request_db_id'  => $offer->requestRenovasi->id,
                 'proyek_id'      => $detailProyek?->proyek_id,
-                'status_penawaran' => $offer->status_penawaran,
             ];
-        }
 
-        $proyekRenovasi = $detailProyek?->proyek_id
-            ? \App\Models\Proyek::with('dokumentasi')->find($detailProyek->proyek_id)
-            : null;
+            $proyekRenovasi = $detailProyek?->proyek_id
+                ? Proyek::with('dokumentasi')->find($detailProyek->proyek_id)
+                : null;
+        }
 
         return view('mandor.mandor_tracking', compact(
             'isHaveProject',
             'isHaveRenovation',
             'isAccepted',
             'renovationData',
-            'proyekRenovasi',
+            'proyekRenovasi'
         ));
     }
 

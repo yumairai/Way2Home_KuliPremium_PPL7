@@ -6,7 +6,7 @@
                 <a class="mandor-toplink {{ Route::is('mandor.dashboard') ? 'active' : '' }}"
                     href="{{ route('mandor.dashboard') }}">Dashboard</a>
                 <a class="mandor-toplink {{ Route::is('mandor.tracking', 'mandor.proyek.tracking') ? 'active' : '' }}"
-                    href="{{ route('mandor.tracking') }}">Tracking</a>
+                    href="{{ route('mandor.tracking.redirect') }}">Tracking</a>
             </div>
         </div>
         <div class="mandor-account-row">
