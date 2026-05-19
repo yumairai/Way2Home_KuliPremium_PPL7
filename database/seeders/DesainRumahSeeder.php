@@ -2,11 +2,14 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Concerns\CalculatesMaterialCost;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class DesainRumahSeeder extends Seeder
 {
+    use CalculatesMaterialCost;
+
     public function run(): void
     {
         $csvPath = database_path('data/dummy_rumah_bandung_2000_v2.csv');
@@ -23,6 +26,7 @@ class DesainRumahSeeder extends Seeder
         $batchSize = 200;
         $now = now();
         $gayaList = ['Minimalist', 'Modern', 'Mewah'];
+        $materialPriceMap = $this->loadMaterialPriceMap();
 
         while (($row = fgetcsv($handle)) !== false) {
             if (count($row) < 9) {
@@ -36,8 +40,8 @@ class DesainRumahSeeder extends Seeder
             $jumlahKamar = (int) $row[4];
             $jumlahLantai = (int) $row[5];
             $tahunBangun = (int) $row[6];
-            $harga = (int) $row[7];
             $materialDigunakan = trim((string) ($row[8] ?? ''));
+            $harga = $this->calculateMaterialCost($materialDigunakan, $materialPriceMap, $id);
 
             $materialUtama = collect(explode(';', $materialDigunakan))
                 ->map(fn($m) => trim(explode(':', $m)[0] ?? ''))
@@ -46,6 +50,11 @@ class DesainRumahSeeder extends Seeder
 
             $estimasiDurasi = max(3, min((int) ceil($luasTanah / 30), 24));
             $gaya = $gayaList[$id % count($gayaList)];
+            
+            // Gunakan design-placeholder: {gaya}-design-{1-3}.jpg
+            $gayadx = strtolower($gaya);
+            $imgNum = (($id - 1) % 3) + 1;
+            $pathGambar = "images/design-placeholder/{$gayadx}-design-{$imgNum}.jpg";
 
             $batch[] = [
                 'id' => $id,
@@ -63,7 +72,7 @@ class DesainRumahSeeder extends Seeder
                 'estimasi_durasi' => $estimasiDurasi,
                 'material_utama' => $materialUtama,
                 'material_digunakan' => $materialDigunakan,
-                'path_gambar_desain' => 'images/rekomendasi/rekom' . (($id % 3) + 1) . '.jpg',
+                'path_gambar_desain' => $pathGambar,
                 'fasilitas' => 'Ruang keluarga; Dapur; Kamar utama; Carport',
                 'created_at' => $now,
                 'updated_at' => $now,

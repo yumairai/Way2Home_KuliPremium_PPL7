@@ -2,11 +2,14 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\Concerns\CalculatesMaterialCost;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class RumahDatasetSeeder extends Seeder
 {
+    use CalculatesMaterialCost;
+
     public function run(): void
     {
         $csvPath = database_path('data/dummy_rumah_bandung_2000_v2.csv');
@@ -22,9 +25,13 @@ class RumahDatasetSeeder extends Seeder
         $batch = [];
         $batchSize = 200;
         $now = now();
+        $materialPriceMap = $this->loadMaterialPriceMap();
 
         while (($row = fgetcsv($handle)) !== false) {
             if (count($row) < 9) continue;
+
+            $materialDigunakan = trim((string) ($row[8] ?? ''));
+            $harga = $this->calculateMaterialCost($materialDigunakan, $materialPriceMap, (int) $row[0]);
 
             $batch[] = [
                 'id'                 => (int) $row[0],
@@ -34,8 +41,8 @@ class RumahDatasetSeeder extends Seeder
                 'jumlah_kamar'       => (int) $row[4],
                 'jumlah_lantai'      => (int) $row[5],
                 'tahun_bangun'       => (int) $row[6],
-                'harga'              => (int) $row[7],
-                'material_digunakan' => $row[8] ?? null,
+                'harga'              => $harga,
+                'material_digunakan' => $materialDigunakan,
                 'created_at'         => $now,
                 'updated_at'         => $now,
             ];
