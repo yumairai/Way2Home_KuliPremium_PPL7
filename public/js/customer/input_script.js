@@ -74,7 +74,7 @@ submitBtn.addEventListener("click", async (e) => {
 
     // Loading state
     submitBtn.disabled = true;
-    submitBtn.textContent = "⏳ Memproses ML Engine...";
+    submitBtn.textContent = "Memproses ML Engine...";
 
     const payload = {
         lokasi: document.getElementById('lokasi').value,
@@ -99,7 +99,7 @@ submitBtn.addEventListener("click", async (e) => {
         const result = await response.json();
 
         if (response.ok) {
-            submitBtn.textContent = "✅ Rekomendasi Siap! Mengalihkan...";
+            submitBtn.textContent = "Rekomendasi Siap! Mengalihkan...";
             setTimeout(() => {
                 window.location.href = "/recommendation/result";
             }, 500);
