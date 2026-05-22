@@ -238,6 +238,12 @@
                          <span class="material-symbols-outlined mandor-icon-primary-container">assignment</span>
                          Task List
                      </h3>
+                     @if (!empty($unpaidMessage))
+                         <div class="mandor-unpaid-warning" style="background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #ffeeba;">
+                             <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; margin-right: 4px;">warning</span>
+                             {{ $unpaidMessage }}
+                         </div>
+                     @endif
                      <div class="mandor-task-list" id="task-list">
                          @foreach ($proyek->tasks->sortBy('is_selesai') as $task)
                              <div class="mandor-task-item {{ $task->is_selesai ? 'completed' : '' }}"
@@ -250,7 +256,7 @@
                                      <span class="mandor-task-item-text">{{ $task->nama_task }}</span>
                                  </div>
                                  @if (!$task->is_selesai)
-                                     @if ($task->milestone === $milestoneAktif)
+                                     @if ($task->milestone === $milestoneAktif && empty($unpaidMessage))
                                          <button class="mandor-complete-btn"
                                              onclick="completeTask({{ $task->id }}, this)">
                                              Complete

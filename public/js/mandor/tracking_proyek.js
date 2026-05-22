@@ -208,39 +208,28 @@ async function completeTask(taskId, btn) {
         innerText: 'Done'
     }));
 
+    if (data.is_done) {
+        await W2HDialog.success('Semua task selesai! Proyek telah selesai.');
+        window.location.href = '/mandor/dashboard';
+        return;
+    }
+
+    // Jika milestone berubah, reload halaman supaya peringatan cicilan terupdate dengan benar dari backend
+    if (data.is_milestone_changed) {
+        window.location.reload();
+        return;
+    }
+
     // Update progress
     document.getElementById('persentase-text').innerText = `${data.persentase}%`;
     document.getElementById('persentase-fill').style.width = `${data.persentase}%`;
     document.getElementById('milestone-text').innerText = data.milestone_aktif;
 
-    // Unlock tombol di milestone yang sekarang aktif
-    unlockMilestone(data.milestone_aktif);
-
     // Reorder task list — completed pindah ke bawah
     reorderAndRenderTasks(isExpanded);
-
-    if (data.persentase === 100) {
-        await W2HDialog.success('Semua task selesai! Proyek telah selesai.');
-        window.location.href = '/mandor/dashboard';
-    }
 }
 
-function unlockMilestone(milestoneAktif) {
-    const taskItems = document.querySelectorAll('.mandor-task-item');
-    taskItems.forEach(item => {
-        const btn = item.querySelector('.mandor-complete-btn');
-        if (!btn || !btn.disabled) return;
 
-        const taskMilestone = item.dataset.milestone;
-        if (taskMilestone === milestoneAktif) {
-            const taskId = item.id.replace('task-', '');
-            btn.disabled = false;
-            btn.onclick = function () {
-                completeTask(taskId, btn);
-            };
-        }
-    });
-}
 
 // ── Tambah Aktivitas ───────────────────────────
 async function tambahAktivitas(proyekId) {

@@ -92,8 +92,8 @@ class Proyek extends Model
         // Skema Persentase Tetap
         $skema = [
             ['periode' => 1, 'persen' => 0.25, 'titik_waktu' => 0.25], // 25% dari total durasi
-            ['periode' => 2, 'persen' => 0.25, 'titik_waktu' => 0.60], // 60% dari total durasi
-            ['periode' => 3, 'persen' => 0.20, 'titik_waktu' => 1.00], // Akhir durasi (100%)
+            ['periode' => 2, 'persen' => 0.25, 'titik_waktu' => 0.50], // 50% dari total durasi
+            ['periode' => 3, 'persen' => 0.20, 'titik_waktu' => 0.75], // 75% dari total durasi (sebelum finishing)
         ];
 
         $rows = [];

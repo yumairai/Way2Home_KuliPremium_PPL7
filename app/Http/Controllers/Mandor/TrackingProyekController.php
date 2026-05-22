@@ -47,6 +47,27 @@ class TrackingProyekController extends Controller
         $persentase     = $this->hitungPersentase($proyek->tasks);
         $milestoneAktif = $proyek->tasks->firstWhere('is_selesai', false)?->milestone ?? 'Semua Selesai';
 
+        $syaratPembayaran = [
+            'Fondasi'   => 0,
+            'Struktur'  => 0,
+            'Atap'      => 1,
+            'MEP'       => 2,
+            'Finishing' => 3,
+        ];
+
+        $unpaidMessage = null;
+        if ($milestoneAktif !== 'Semua Selesai') {
+            $periodeDibutuhkan = $syaratPembayaran[$milestoneAktif] ?? 0;
+            if ($periodeDibutuhkan > 0) {
+                $cekPembayaran = \App\Models\PembayaranProyek::where('proyek_id', $proyek->id)
+                    ->where('periode', $periodeDibutuhkan)
+                    ->first();
+                if (!$cekPembayaran || $cekPembayaran->status_pembayaran !== 'berhasil') {
+                    $unpaidMessage = "Pelanggan belum melunasi pembayaran Cicilan Periode $periodeDibutuhkan. Anda tidak dapat menyelesaikan task ini.";
+                }
+            }
+        }
+
         $isHaveProject    = true;
         $isHaveRenovation = false;
         $isAccepted       = false;
@@ -54,7 +75,7 @@ class TrackingProyekController extends Controller
 
         return view('mandor.mandor_tracking', compact(
             'proyek', 'persentase', 'milestoneAktif',
-            'isHaveProject', 'isHaveRenovation', 'isAccepted', 'renovationData',
+            'isHaveProject', 'isHaveRenovation', 'isAccepted', 'renovationData', 'unpaidMessage'
         ));
     }
 
@@ -68,6 +89,30 @@ class TrackingProyekController extends Controller
         $milestoneAktif = $tasks->firstWhere('is_selesai', false)?->milestone ?? null;
 
         abort_if($task->milestone !== $milestoneAktif, 403, 'Task ini bukan bagian dari milestone aktif.');
+
+        // ─── Pengecekan Syarat Pembayaran ────────────────────────────
+        $syaratPembayaran = [
+            'Fondasi'   => 0, // Syarat: DP Lunas (periode 0)
+            'Struktur'  => 0, // Syarat: DP Lunas (periode 0)
+            'Atap'      => 1, // Syarat: Cicilan 1 Lunas (periode 1)
+            'MEP'       => 2, // Syarat: Cicilan 2 Lunas (periode 2)
+            'Finishing' => 3, // Syarat: Cicilan 3 Lunas (periode 3)
+        ];
+
+        $periodeDibutuhkan = $syaratPembayaran[$task->milestone] ?? 0;
+
+        if ($periodeDibutuhkan > 0) {
+            $cekPembayaran = \App\Models\PembayaranProyek::where('proyek_id', $proyek->id)
+                ->where('periode', $periodeDibutuhkan)
+                ->first();
+
+            if (!$cekPembayaran || $cekPembayaran->status_pembayaran !== 'berhasil') {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Tidak dapat menyelesaikan task ini. Pelanggan belum melunasi pembayaran Cicilan Periode {$periodeDibutuhkan}.",
+                ], 403);
+            }
+        }
 
         $task->update(['is_selesai' => true]);
 
@@ -96,12 +141,15 @@ class TrackingProyekController extends Controller
         // ✉️ Kirim notifikasi progress ke customer
         $notif->kirimProgressPembangunan($proyek, $milestoneAktif, $persentase, $isSelesai);
 
+        $isMilestoneChanged = $task->milestone !== $milestoneAktif;
+
         return response()->json([
-            'success'         => true,
-            'persentase'      => $persentase,
-            'milestone_aktif' => $milestoneAktif,
-            'is_done'         => $isSelesai,
-            'message'         => $isSelesai ? 'Proyek selesai!' : 'Task berhasil diselesaikan.',
+            'success'              => true,
+            'persentase'           => $persentase,
+            'milestone_aktif'      => $milestoneAktif,
+            'is_done'              => $isSelesai,
+            'is_milestone_changed' => $isMilestoneChanged,
+            'message'              => $isSelesai ? 'Proyek selesai!' : 'Task berhasil diselesaikan.',
         ]);
     }
 
