@@ -10,6 +10,7 @@ use App\Models\DesainRumah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ProyekController extends Controller
@@ -36,13 +37,18 @@ class ProyekController extends Controller
     public function index()
     {
         $customer = Auth::user()->customer;
-        $proyek   = Proyek::where('customer_id', $customer->id)->where('jenis_proyek', 'Bangun Rumah')->first();
+        $proyeks  = Proyek::with([
+            'detailBangun.desainRumah',
+            'detailBangun.dokumenProyek',
+            'pembayaranProyek',
+        ])
+            ->where('customer_id', $customer->id)
+            ->where('jenis_proyek', 'Bangun Rumah')
+            ->get();
 
-        if ($proyek) {
-            return redirect()->route('proyek.show', $proyek->id);
-        }
+        $proyek = $proyeks->first();
 
-        return redirect()->route('customer-layouts.dashboard');
+        return view('customer-layouts.proyek.show', compact('proyek', 'proyeks'));
     }
 
     public function show($id)
@@ -110,12 +116,11 @@ class ProyekController extends Controller
                         throw new \Exception("Upload gagal: path kosong");
                     }
 
-                    \Log::info('UPLOAD SUCCESS', [
+                    Log::info('UPLOAD SUCCESS', [
                         'label' => $label,
                         'path' => $path,
                     ]);
                     $uploadedFiles[] = ['path' => $path, 'label' => $label];
-
                 } catch (\Exception $e) {
                     foreach ($uploadedFiles as $uploaded) {
                         $storageService->deletePrivate($uploaded['path']);
@@ -197,14 +202,13 @@ class ProyekController extends Controller
 
             $proyek->load('detailBangun.desainRumah');
             $proyek->generateDP();
-            
+
             return response()->json([
                 'status'    => 'success',
                 'message_1' => 'Pengajuan pembangunan berhasil dikirim!',
                 'message_2' => 'Pengajuan pemesanan material berhasil dikirim!',
                 'data'      => $proyek
             ], 201);
-
         } catch (\Throwable $e) {
             DB::rollback();
 
@@ -242,5 +246,4 @@ class ProyekController extends Controller
             'message' => 'Proyek berhasil dibatalkan.'
         ]);
     }
-
 }
