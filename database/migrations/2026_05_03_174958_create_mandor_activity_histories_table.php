@@ -25,19 +25,22 @@ return new class extends Migration
             $table->index(['activity_type', 'reference_type']);
         });
 
-        // Tambahkan constraint untuk activity_type di PostgreSQL
-        \Illuminate\Support\Facades\DB::statement("
-            ALTER TABLE mandor_activity_histories
-            ADD CONSTRAINT mandor_activity_histories_activity_type_check
-            CHECK (activity_type IN (
-                'assigned_project',
-                'completed_project',
-                'offer_submitted',
-                'negotiation_received',
-                'offer_accepted',
-                'renovation_completed'
-            ))
-        ");
+        // SQLite in-memory tidak mendukung ALTER TABLE ... ADD CONSTRAINT untuk CHECK constraint.
+        // Tetap pasang constraint ini di database yang mendukung agar validasi schema tetap terjaga.
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            \Illuminate\Support\Facades\DB::statement("
+                ALTER TABLE mandor_activity_histories
+                ADD CONSTRAINT mandor_activity_histories_activity_type_check
+                CHECK (activity_type IN (
+                    'assigned_project',
+                    'completed_project',
+                    'offer_submitted',
+                    'negotiation_received',
+                    'offer_accepted',
+                    'renovation_completed'
+                ))
+            ");
+        }
     }
 
     /**

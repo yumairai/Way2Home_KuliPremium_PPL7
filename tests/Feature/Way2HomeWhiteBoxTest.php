@@ -10,10 +10,29 @@ use Carbon\Carbon;
 use Mockery;
 
 // --- MODEL IMPORTS ---
-use App\Models\{User, Customer, Mandor, DesainRumah, DetailProyekBangun, DokumenProyek,
-    RequestRenovasi, PenawaranRenovasi, Proyek, DetailProyekRenovasi, Material, Cart,
-    OrderMaterial, DetailOrder, PembayaranProyek, ProyekMilestone, ProyekAktivitas,
-    ProyekDokumentasi, ProgressProyek, NegosiasiRenovasi, MandorActivityHistory};
+use App\Models\{
+    User,
+    Customer,
+    Mandor,
+    DesainRumah,
+    DetailProyekBangun,
+    DokumenProyek,
+    RequestRenovasi,
+    PenawaranRenovasi,
+    Proyek,
+    DetailProyekRenovasi,
+    Material,
+    Cart,
+    OrderMaterial,
+    DetailOrder,
+    PembayaranProyek,
+    ProyekMilestone,
+    ProyekAktivitas,
+    ProyekDokumentasi,
+    ProgressProyek,
+    NegosiasiRenovasi,
+    MandorActivityHistory
+};
 
 // --- SERVICE IMPORTS ---
 use App\Services\{RekomendasiService, NotificationService, SupabaseStorageService};
@@ -21,6 +40,8 @@ use App\Services\{RekomendasiService, NotificationService, SupabaseStorageServic
 class Way2HomeWhiteBoxTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected Mockery\MockInterface $supabaseMock;
 
     // ────────────────────────────────────────────────────────────────────────
     // SETUP & HELPERS
@@ -32,7 +53,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         Storage::fake('public');
         Storage::fake('local');
         Mail::fake();
-        
+
         // Mock default Supabase behavior unless explicitly overridden
         $this->supabaseMock = Mockery::mock(SupabaseStorageService::class);
         $this->app->instance(SupabaseStorageService::class, $this->supabaseMock);
@@ -40,7 +61,7 @@ class Way2HomeWhiteBoxTest extends TestCase
 
     protected function createUser(array $attributes = []): User
     {
-        return User::create(array_merge([
+        return User::forceCreate(array_merge([
             'name' => 'John Doe',
             'email' => 'user_' . uniqid() . '@way2home.id',
             'password' => Hash::make('Secret123!'),
@@ -141,7 +162,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonPath('redirect', route('customer-layouts.dashboard'));
+            ->assertJsonPath('redirect', route('customer-layouts.dashboard'));
     }
 
     /** @test */
@@ -158,7 +179,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(401)
-                 ->assertJson(['message' => 'Email atau Password Salah']);
+            ->assertJson(['message' => 'Email atau Password Salah']);
     }
 
     /** @test */
@@ -170,7 +191,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(401)
-                 ->assertJson(['message' => 'Email atau Password Salah']);
+            ->assertJson(['message' => 'Email atau Password Salah']);
     }
 
     /** @test */
@@ -185,7 +206,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(201)
-                 ->assertJson(['message' => 'Register berhasil, cek email untuk verifikasi.']);
+            ->assertJson(['message' => 'Register berhasil, cek email untuk verifikasi.']);
 
         $this->assertDatabaseHas('users', ['email' => 'new@way2home.id']);
         $user = User::where('email', 'new@way2home.id')->first();
@@ -206,7 +227,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['email']);
+            ->assertJsonValidationErrors(['email']);
     }
 
     /** @test */
@@ -221,7 +242,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['password']);
+            ->assertJsonValidationErrors(['password']);
     }
 
     /** @test */
@@ -294,7 +315,7 @@ class Way2HomeWhiteBoxTest extends TestCase
     {
         $service = new RekomendasiService();
         $result = $this->callPrivateMethod($service, 'hargaSimilarity', [0.7, 0.5]);
-        $this->assertEquals(0.6, $result); // 1.0 - 0.2 * 2.0 = 0.6
+        $this->assertEqualsWithDelta(0.6, $result, 0.000001); // 1.0 - 0.2 * 2.0 = 0.6
     }
 
     /** @test */
@@ -523,7 +544,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['sertifikat_tanah']);
+            ->assertJsonValidationErrors(['sertifikat_tanah']);
     }
 
     /** @test */
@@ -543,7 +564,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJsonValidationErrors(['sertifikat_tanah']);
+            ->assertJsonValidationErrors(['sertifikat_tanah']);
     }
 
     /** @test */
@@ -721,8 +742,8 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonPath('status', 'success')
-                 ->assertJsonPath('token', 'mock-snap-token-123');
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('token', 'mock-snap-token-123');
 
         $this->assertDatabaseHas('order_material', [
             'customer_id' => $customer->id,
@@ -741,7 +762,7 @@ class Way2HomeWhiteBoxTest extends TestCase
     {
         $user = $this->createUser();
         $customer = $this->createCustomer($user);
-        
+
         OrderMaterial::create([
             'customer_id' => $customer->id,
             'order_id_midtrans' => 'W2H-123-456',
@@ -764,9 +785,9 @@ class Way2HomeWhiteBoxTest extends TestCase
         $response = $this->actingAs($user)->postJson('/payment/checkout');
 
         $response->assertStatus(200)
-                 ->assertJsonPath('status', 'success')
-                 ->assertJsonPath('token', 'existing-snap-token')
-                 ->assertJsonPath('order_id', 'W2H-123-456');
+            ->assertJsonPath('status', 'success')
+            ->assertJsonPath('token', 'existing-snap-token')
+            ->assertJsonPath('order_id', 'W2H-123-456');
     }
 
     /** @test */
@@ -778,7 +799,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         $response = $this->actingAs($user)->postJson('/payment/checkout');
 
         $response->assertStatus(400)
-                 ->assertJson(['message' => 'Keranjang Anda kosong.']);
+            ->assertJson(['message' => 'Keranjang Anda kosong.']);
     }
 
     /** @test */
@@ -923,7 +944,7 @@ class Way2HomeWhiteBoxTest extends TestCase
             'budget_estimasi' => 'Rp 5.000.000',
             'alamat' => 'Jl. Dago No. 15',
             'foto_detail' => [
-                UploadedFile::fake()->image('damage.jpg')
+                UploadedFile::fake()->create('damage.jpg', 100, 'image/jpeg')
             ]
         ]);
 
@@ -1133,8 +1154,8 @@ class Way2HomeWhiteBoxTest extends TestCase
         $response = $this->actingAs($mandorUser)->postJson("/mandor/task/{$t1->id}/complete");
 
         $response->assertStatus(200)
-                 ->assertJsonPath('success', true)
-                 ->assertJsonPath('persentase', 15);
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('persentase', 15);
 
         $this->assertDatabaseHas('progress_proyek', [
             'proyek_id' => $proyek->id,
@@ -1178,8 +1199,8 @@ class Way2HomeWhiteBoxTest extends TestCase
         $response = $this->actingAs($mandorUser)->postJson("/mandor/task/{$mepTask->id}/complete");
 
         $response->assertStatus(403)
-                 ->assertJsonPath('success', false)
-                 ->assertJsonPath('message', 'Tidak dapat menyelesaikan task ini. Pelanggan belum melunasi pembayaran Cicilan Periode 2.');
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Tidak dapat menyelesaikan task ini. Pelanggan belum melunasi pembayaran Cicilan Periode 2.');
     }
 
     /** @test */
@@ -1232,7 +1253,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         $response = $this->actingAs($mandorUser)->postJson("/mandor/task/{$tLast->id}/complete");
 
         $response->assertStatus(200)
-                 ->assertJsonPath('is_done', true);
+            ->assertJsonPath('is_done', true);
 
         $proyek->refresh();
         $mandor->refresh();
@@ -1261,7 +1282,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonPath('success', true);
+            ->assertJsonPath('success', true);
 
         $this->assertDatabaseHas('proyek_aktivitas', [
             'proyek_id' => $proyek->id,
@@ -1315,7 +1336,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(200)
-                 ->assertJsonPath('snap_token', 'mock-snap-token-dp');
+            ->assertJsonPath('snap_token', 'mock-snap-token-dp');
 
         $pembayaran->refresh();
         $this->assertEquals('pending', $pembayaran->status_pembayaran);
@@ -1364,7 +1385,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         $desain = $this->createDesainRumah(['estimasi_biaya' => 300_000_000]);
         $proyek = $this->createProyek($customer);
         DetailProyekBangun::create(['proyek_id' => $proyek->id, 'desain_rumah_id' => $desain->id]);
-        
+
         $proyek->generateDP();
         $proyek->generateCicilan();
 
@@ -1375,7 +1396,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         ]);
 
         $response->assertStatus(422)
-                 ->assertJson(['message' => 'Harap selesaikan pembayaran sebelumnya terlebih dahulu.']);
+            ->assertJson(['message' => 'Harap selesaikan pembayaran sebelumnya terlebih dahulu.']);
     }
 
     /** @test */
@@ -1432,7 +1453,7 @@ class Way2HomeWhiteBoxTest extends TestCase
         $this->createCustomer($user);
 
         $response = $this->actingAs($user)->get('/mandor/dashboard');
-        
+
         $response->assertRedirect(route('home'));
         $response->assertSessionHas('error', 'Anda tidak punya akses ke halaman mandor.');
     }
@@ -1441,7 +1462,7 @@ class Way2HomeWhiteBoxTest extends TestCase
     public function test_wb058_admin_accessing_admin_route_succeeds(): void
     {
         $user = $this->createUser(['role' => 'admin']);
-        
+
         $response = $this->actingAs($user)->get('/admin/dashboard');
         $response->assertStatus(200);
     }

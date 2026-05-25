@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Services\SupabaseStorageService;
+use Illuminate\Validation\ValidationException;
 
 class RenovasiController extends Controller
 {
@@ -153,6 +154,8 @@ class RenovasiController extends Controller
             return redirect()
                 ->route('customer.renovation')
                 ->with('success', 'Request renovasi berhasil dikirim.');
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
             return back()
                 ->withInput()
@@ -170,7 +173,7 @@ class RenovasiController extends Controller
         $offer = PenawaranRenovasi::with('mandor')
             ->where('request_renovasi_id', $requestRenovasi->id)
             ->where('status_penawaran', 'pending')
-            ->latest()
+            ->orderByDesc('id')
             ->first();
 
         if (!$offer || $this->renovasiService->isOfferExpired($offer)) {
