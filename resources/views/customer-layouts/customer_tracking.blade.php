@@ -11,6 +11,16 @@
 @endpush
 @section('content')
     <main class="tracking-page">
+        @if($proyek->status_proyek === 'Selesai')
+        <div style="background-color: #ecfdf5; color: #065f46; padding: 16px 24px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; border: 1px solid #a7f3d0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+            <span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;">check_circle</span>
+            <div>
+                <h3 style="margin: 0 0 4px 0; font-size: 1.1rem; font-weight: 700;">Proyek Telah Selesai </h3>
+                <p style="margin: 0; font-size: 0.95rem; opacity: 0.9;">Seluruh tahapan pembangunan rumah Anda telah selesai dikerjakan. Anda masih dapat melihat riwayat dan dokumentasi proyek di halaman ini.</p>
+            </div>
+        </div>
+        @endif
+
         <div class="tracking-grid tracking-grid-hero">
             <div class="tracking-card tracking-hero-card">
                 <div class="tracking-hero-blur"></div>

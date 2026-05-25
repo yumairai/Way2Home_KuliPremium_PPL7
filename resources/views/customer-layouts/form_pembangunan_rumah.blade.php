@@ -127,9 +127,12 @@
             <!-- Address Input -->
             <div class="form-group" id="sectionAlamat">
                 <label class="form-label" id="label-alamat">Alamat Lengkap Proyek</label>
-                <textarea id="alamatProyek" placeholder="Masukkan alamat lengkap di wilayah Jawa Barat" rows="3"></textarea>
+                <textarea id="alamatProyek" placeholder="Masukkan alamat lengkap di wilayah Jawa Barat" rows="3">{{ old('alamat_proyek', $alamat ?? '') }}</textarea>
                 <p class="field-error" id="alamat-error" aria-live="polite"></p>
             </div>
+            @if(isset($old_proyek_id) && $old_proyek_id)
+                <input type="hidden" id="old_proyek_id" name="old_proyek_id" value="{{ $old_proyek_id }}">
+            @endif
             <!-- dokumen kebutuhan pembangunan rumah -->
             <div class="form-group" id="sectionDokumen">
                 <label class="form-label">Dokumen Pendukung (1 file Max 2MB)</label>

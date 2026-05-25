@@ -31,7 +31,10 @@ class ProyekController extends Controller
 
         abort_if(!$desain, 404, 'Data desain rumah belum tersedia.');
 
-        return view('customer-layouts.form_pembangunan_rumah', compact('desain'));
+        $alamat = $request->query('alamat', '');
+        $old_proyek_id = $request->query('old_proyek_id', '');
+
+        return view('customer-layouts.form_pembangunan_rumah', compact('desain', 'alamat', 'old_proyek_id'));
     }
 
     public function index()
@@ -202,6 +205,12 @@ class ProyekController extends Controller
 
             $proyek->load('detailBangun.desainRumah');
             $proyek->generateDP();
+
+            if ($request->filled('old_proyek_id')) {
+                Proyek::where('id', $request->old_proyek_id)
+                      ->where('customer_id', $customer->id)
+                      ->update(['status_proyek' => 'Dibatalkan']);
+            }
 
             return response()->json([
                 'status'    => 'success',

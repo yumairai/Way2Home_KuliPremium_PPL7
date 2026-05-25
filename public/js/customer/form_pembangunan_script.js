@@ -372,6 +372,11 @@ if (mainSubmitBtn) {
         formData.append('desain_id', desainInput.value);
         formData.append('package', selectedPackage);
 
+        const oldProyekIdInput = document.getElementById('old_proyek_id');
+        if (oldProyekIdInput && oldProyekIdInput.value) {
+            formData.append('old_proyek_id', oldProyekIdInput.value);
+        }
+
         // Masukkan semua file yang ada ke dalam FormData
         const fileInputs = ['sertifikat_tanah', 'ktp_pemilik', 'imb_pbg', 'surat_kuasa'];
         fileInputs.forEach(id => {
