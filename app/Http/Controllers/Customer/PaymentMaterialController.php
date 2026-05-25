@@ -45,6 +45,18 @@ class PaymentMaterialController extends Controller
             return response()->json(['message' => 'Keranjang Anda kosong.'], 400);
         }
 
+        $insufficientItems = [];
+        foreach ($cartItems as $item) {
+            if ($item->jumlah > $item->material->stok) {
+                $insufficientItems[] = $item->material->nama_material . ' (Stok tersisa: ' . $item->material->stok . ')';
+            }
+        }
+
+        if (!empty($insufficientItems)) {
+            $msg = 'Maaf, stok tidak cukup untuk: ' . implode(', ', $insufficientItems);
+            return response()->json(['status' => 'error', 'message' => $msg], 400);
+        }
+
         $existingPending = OrderMaterial::where('customer_id', $customer->id)
             ->where('status_order', 'pending')
             ->latest()
@@ -161,13 +173,24 @@ class PaymentMaterialController extends Controller
             $status = 'pending';
         }
 
-        if ($order->status_order === 'pending') {
-            $order->update(['status_order' => $status]);
+        // Hapus cart hanya kalau benar-benar paid
+        if ($status === 'paid' && $order->status_order !== 'paid') {
+            Cart::where('user_id', $request->user()->id)->delete();
+            
+            // Kurangi stok material
+            $detailOrders = DetailOrder::where('order_material_id', $order->id)->get();
+            foreach ($detailOrders as $detail) {
+                $material = \App\Models\Material::find($detail->material_id);
+                if ($material) {
+                    $material->stok -= $detail->jumlah;
+                    if ($material->stok < 0) $material->stok = 0;
+                    $material->save();
+                }
+            }
         }
 
-        // Hapus cart hanya kalau benar-benar paid
-        if ($status === 'paid') {
-            Cart::where('user_id', $request->user()->id)->delete();
+        if ($order->status_order === 'pending') {
+            $order->update(['status_order' => $status]);
         }
 
         return response()->json(['message' => 'OK']);

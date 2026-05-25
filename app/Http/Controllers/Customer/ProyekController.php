@@ -239,6 +239,12 @@ class ProyekController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Proyek yang sudah berjalan tidak dapat dibatalkan.'], 422);
         }
 
+        // Cek DP apakah sudah dibayar
+        $dp = $proyek->pembayaranProyek()->where('periode', 0)->first();
+        if ($dp && $dp->status_pembayaran === 'berhasil') {
+            return response()->json(['status' => 'error', 'message' => 'Proyek tidak dapat dibatalkan karena DP sudah dibayar.'], 422);
+        }
+
         $proyek->update(['status_proyek' => 'Dibatalkan']);
 
         return response()->json([

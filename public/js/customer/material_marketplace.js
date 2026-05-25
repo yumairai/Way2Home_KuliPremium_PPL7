@@ -160,23 +160,29 @@ async function fetchMaterials(url) {
         materials.forEach(item => {
             const cartItem = cartData.find(c => c.material_id === item.id);
             const statusBadge = item.stok > 0
-                ? '<div class="product-badge badge-ready">Ready Stock</div>'
-                : '<div class="product-badge badge-preorder">Pre Order</div>';
+                ? `<div class="product-badge badge-ready">Sisa Stok: ${item.stok}</div>`
+                : '<div class="product-badge badge-preorder">Stok Habis</div>';
 
             let actionHtml = '';
-            if (isLoggedIn && cartItem) {
+            if (item.stok <= 0) {
+                actionHtml = `
+                    <button class="add-to-cart-btn" disabled style="opacity:0.5; cursor:not-allowed;">
+                        Stok Habis
+                    </button>`;
+            } else if (isLoggedIn && cartItem) {
+                const disablePlus = cartItem.jumlah >= item.stok ? 'disabled' : '';
                 actionHtml = `
                     <div class="cart-quantity">
-                        <button class="cart-quantity-btn" onclick="updateCartQty(${item.id}, ${cartItem.jumlah - 1})">-</button>
+                        <button class="cart-quantity-btn" onclick="updateCartQty(${item.id}, ${cartItem.jumlah - 1}, ${item.stok})">-</button>
                         <input type="number" class="cart-quantity-input" value="${cartItem.jumlah}" 
-                            min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                            onchange="updateCartQtyDirect(${item.id}, this.value)" 
-                            onblur="updateCartQtyDirect(${item.id}, this.value)">
-                        <button class="cart-quantity-btn" onclick="updateCartQty(${item.id}, ${cartItem.jumlah + 1})">+</button>
+                            min="1" max="${item.stok}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(parseInt(this.value) > ${item.stok}) { this.value = ${item.stok}; let err = document.getElementById('stock-error-${item.id}'); if(err) { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 2000); } }"
+                            onchange="updateCartQtyDirect(${item.id}, this.value, ${item.stok})" 
+                            onblur="updateCartQtyDirect(${item.id}, this.value, ${item.stok})">
+                        <button class="cart-quantity-btn" onclick="updateCartQty(${item.id}, ${cartItem.jumlah + 1}, ${item.stok})" ${disablePlus}>+</button>
                     </div>`;
             } else {
                 actionHtml = `
-                    <button class="add-to-cart-btn" onclick="handleInitialAdd(${item.id})">
+                    <button class="add-to-cart-btn" onclick="handleInitialAdd(${item.id}, ${item.stok})">
                         Tambah <img src="/images/icon/trolley.png" alt="Troli">
                     </button>`;
             }
@@ -198,6 +204,7 @@ async function fetchMaterials(url) {
                                 <span class="product-price-value">${item.harga.toLocaleString('id-ID')}</span>
                                 <span class="product-price-unit">/${item.satuan}</span>
                             </div>
+                            <div id="stock-error-${item.id}" style="color: #ff3b30; font-size: 11px; margin-top: -15px; margin-bottom: 8px; display: none;">Melebihi stok maksimal (${item.stok})</div>
                             <div id="action-${item.id}">${actionHtml}</div>
                         </div>
                     </div>
@@ -241,7 +248,7 @@ function renderPagination(result) {
 }
 
 // LOGIKA KERANJANG
-async function handleInitialAdd(id) {
+async function handleInitialAdd(id, maxStock) {
     const isLoggedIn = document.body.getAttribute('data-user-logged-in') === 'true';
     if (!isLoggedIn) {
         await W2HDialog.alert('Silakan login terlebih dahulu!');
@@ -249,16 +256,23 @@ async function handleInitialAdd(id) {
         return;
     }
 
+    if (maxStock <= 0) {
+        await W2HDialog.alert('Maaf, stok habis.');
+        return;
+    }
+
+    const disablePlus = 1 >= maxStock ? 'disabled' : '';
+
     // Optimistic: Langsung update UI sebelum network call
     const productCard = document.getElementById(`action-${id}`);
     productCard.innerHTML = `
         <div class="cart-quantity">
-            <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 0)">-</button>
+            <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 0, ${maxStock})">-</button>
             <input type="number" class="cart-quantity-input" value="1" 
-                min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                onchange="updateCartQtyDirect(${id}, this.value)" 
-                onblur="updateCartQtyDirect(${id}, this.value)">
-            <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 2)">+</button>
+                min="1" max="${maxStock}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(parseInt(this.value) > ${maxStock}) { this.value = ${maxStock}; let err = document.getElementById('stock-error-${id}'); if(err) { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 2000); } }"
+                onchange="updateCartQtyDirect(${id}, this.value, ${maxStock})" 
+                onblur="updateCartQtyDirect(${id}, this.value, ${maxStock})">
+            <button class="cart-quantity-btn" onclick="updateCartQty(${id}, 2, ${maxStock})" ${disablePlus}>+</button>
         </div>`;
 
     // Network call di background tanpa menunggu
@@ -279,21 +293,27 @@ async function handleInitialAdd(id) {
     }, 0);
 }
 
-async function updateCartQty(id, newQty) {
+async function updateCartQty(id, newQty, maxStock) {
     const container = document.getElementById(`action-${id}`);
+
+    if (newQty > maxStock) {
+        await W2HDialog.alert('Maaf, stok tidak cukup. Sisa stok: ' + maxStock);
+        newQty = maxStock;
+    }
 
     // Optimistic: Update UI dulu
     if (newQty < 1) {
-        container.innerHTML = `<button class="add-to-cart-btn" onclick="handleInitialAdd(${id})">Tambah <img src="/images/icon/trolley.png"></button>`;
+        container.innerHTML = `<button class="add-to-cart-btn" onclick="handleInitialAdd(${id}, ${maxStock})">Tambah <img src="/images/icon/trolley.png"></button>`;
     } else {
+        const disablePlus = newQty >= maxStock ? 'disabled' : '';
         container.innerHTML = `
             <div class="cart-quantity">
-                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty - 1})">-</button>
+                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty - 1}, ${maxStock})">-</button>
                 <input type="number" class="cart-quantity-input" value="${newQty}" 
-                    min="1" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                    onchange="updateCartQtyDirect(${id}, this.value)" 
-                    onblur="updateCartQtyDirect(${id}, this.value)">
-                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty + 1})">+</button>
+                    min="1" max="${maxStock}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(parseInt(this.value) > ${maxStock}) { this.value = ${maxStock}; let err = document.getElementById('stock-error-${id}'); if(err) { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 2000); } }"
+                    onchange="updateCartQtyDirect(${id}, this.value, ${maxStock})" 
+                    onblur="updateCartQtyDirect(${id}, this.value, ${maxStock})">
+                <button class="cart-quantity-btn" onclick="updateCartQty(${id}, ${newQty + 1}, ${maxStock})" ${disablePlus}>+</button>
             </div>`;
     }
 
@@ -320,16 +340,20 @@ async function updateCartQty(id, newQty) {
 }
 
 // Update quantity langsung dari input (saat user ketik dan selesai)
-async function updateCartQtyDirect(id, value) {
-    const newQty = parseInt(value);
+async function updateCartQtyDirect(id, value, maxStock) {
+    let newQty = parseInt(value);
 
     // Jika 0 atau kurang, hapus dari cart
     if (isNaN(newQty) || newQty <= 0) {
-        await updateCartQty(id, 0); // 0 akan trigger remove
+        await updateCartQty(id, 0, maxStock); // 0 akan trigger remove
         return;
     }
 
-    await updateCartQty(id, newQty);
+    if (newQty > maxStock) {
+        newQty = maxStock;
+    }
+
+    await updateCartQty(id, newQty, maxStock);
 }
 
 // Global debounce timer untuk updateFloatingCart

@@ -209,7 +209,8 @@
                             </button>
                         @else
                             <button class="btn-action btn-cancel" id="cancelBtn"
-                                data-proyek="{{ $isProyek ? 'true' : 'false' }}" data-id="{{ $proyek->id }}">
+                                data-proyek="{{ $isProyek ? 'true' : 'false' }}" data-id="{{ $proyek->id }}"
+                                @if($sudahBayarDP) disabled style="opacity: 0.7; cursor: not-allowed;" title="Proyek tidak dapat dibatalkan setelah DP dibayar" @endif>
                                 <span class="material-symbols-outlined">cancel</span>
                                 Batalkan Proyek
                             </button>
