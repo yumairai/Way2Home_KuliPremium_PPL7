@@ -100,10 +100,7 @@
                                         <span>{{ $rumah['jumlah_kamar'] }} Kamar &nbsp;·&nbsp;
                                             {{ $rumah['jumlah_lantai'] }} Lantai</span>
                                     </div>
-                                    <div class="detail-row">
-                                        <span class="icon">Tahun:</span>
-                                        <span><strong>{{ $rumah['tahun_bangun'] }}</strong></span>
-                                    </div>
+                            
                                 </div>
                             </div>
                         </div>

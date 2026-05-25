@@ -6,20 +6,20 @@
                 <img src="{{ asset('images/aset/logo-w2h.png') }}" alt="Logo Way2Home">
                 <span class="footer-brand-name">Way2Home</span>
             </div>
-            <p class="footer-brand-text">© 2026 Way2Home Construction
-                Platform. Architectural Excellence.</p>
+            <p class="footer-brand-text">Platform konstruksi digital untuk pembangunan rumah, renovasi, dan material.</p>
         </div>
         <div class="footer-links">
-            <a href="#">Tentang Kami</a>
-            <a href="#">Proyek</a>
-            <a href="#">Karir</a>
-            <a href="#">Kontak</a>
-            <a href="#">Privasi</a>
+            <a href="{{ route('home') }}">Beranda</a>
+            <a href="{{ url('/recommendation') }}">Desain</a>
+            <a href="{{ url('/material') }}">Material</a>
+            <a href="{{ url('/renovation') }}">Renovasi</a>
+            <a href="https://wa.me/6281384310179" target="_blank" rel="noopener noreferrer">Kontak</a>
         </div>
         <div class="footer-actions">
-            <div class="footer-icon-btn">
+            <a class="footer-icon-btn" href="https://wa.me/6281384310179" target="_blank" rel="noopener noreferrer"
+                aria-label="Hubungi Way2Home via WhatsApp">
                 <img src="{{ asset('images/icon/whatsapp.png') }}" alt="WhatsApp">
-            </div>
+            </a>
         </div>
     </div>
 </footer>
