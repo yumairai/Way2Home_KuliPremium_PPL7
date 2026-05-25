@@ -96,10 +96,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="cart-item-price">Rp ${harga.toLocaleString('id-ID')}</span>
                         <div class="cart-quantity">
                             <button class="cart-quantity-btn" onclick="changeQty(${item.id}, ${item.jumlah - 1})">-</button>
-                            <span class="cart-quantity-value">${item.jumlah}</span>
-                            <button class="cart-quantity-btn" onclick="changeQty(${item.id}, ${item.jumlah + 1})">+</button>
+                            <input type="number" class="cart-quantity-input" value="${item.jumlah}" 
+                                min="1" max="${material.stok}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(parseInt(this.value) > ${material.stok}) { this.value = ${material.stok}; let err = document.getElementById('cart-error-${item.id}'); if(err) { err.style.display = 'block'; setTimeout(() => err.style.display = 'none', 2000); } }"
+                                onchange="changeQtyDirect(${item.id}, this.value, ${material.stok})" 
+                                onblur="changeQtyDirect(${item.id}, this.value, ${material.stok})">
+                            <button class="cart-quantity-btn" onclick="changeQty(${item.id}, ${item.jumlah + 1})" ${item.jumlah >= material.stok ? 'disabled' : ''}>+</button>
                         </div>
                     </div>
+                    <div id="cart-error-${item.id}" style="color: #ff3b30; font-size: 11px; text-align: right; margin-top: 4px; display: none;">Melebihi stok maksimal (${material.stok})</div>
                 </div>
             </div>`;
         }).join('');
@@ -203,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         });
                     } else {
-                        W2HDialog.error("Gagal mendapatkan token: " + data.message);
+                        W2HDialog.error(data.message || "Gagal mendapatkan token.");
                         checkoutBtn.disabled = false;
                         checkoutBtn.innerText = 'Konfirmasi & Bayar';
                     }
@@ -248,10 +252,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     loadCart();
                 } else {
                     const errData = await res.json();
+                    W2HDialog.error(errData.message || "Gagal memperbarui jumlah.");
                     console.error("Gagal Update:", errData);
                 }
             })
             .catch(err => console.error("Network Error:", err));
+    };
+
+    window.changeQtyDirect = function(id, value, maxStock) {
+        let newQty = parseInt(value);
+        if (isNaN(newQty) || newQty <= 0) {
+            window.changeQty(id, 0);
+            return;
+        }
+        if (newQty > maxStock) {
+            newQty = maxStock;
+        }
+        window.changeQty(id, newQty);
     };
 
     // Fungsi hapus item
