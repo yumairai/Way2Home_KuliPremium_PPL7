@@ -56,7 +56,7 @@ class MandorActivityHistory extends Model
             'activity_type' => 'completed_project',
             'reference_type' => 'proyek',
             'reference_id' => $proyek->id,
-            'description' => "Menyelesaikan proyek pembangunan " . ($proyek->id ?? 'Unknown'),
+            'description' => "Menyelesaikan proyek pembangunan # " . ($proyek->id ?? 'Unknown'),
             'metadata' => [
                 'project_name' => $proyek->id,
                 'customer_name' => $proyek->customer?->user?->name,
