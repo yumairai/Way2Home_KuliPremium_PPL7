@@ -40,9 +40,9 @@ class MandorActivityHistory extends Model
             'activity_type' => 'assigned_project',
             'reference_type' => 'proyek',
             'reference_id' => $proyek->id,
-            'description' => "Diassign proyek pembangunan " . ($proyek->detailBangun?->nama_proyek ?? 'Unknown'),
+            'description' => "Diassign ke proyek pembangunan #" . ($proyek->id ?? 'Unknown'),
             'metadata' => [
-                'project_name' => $proyek->detailBangun?->nama_proyek,
+                'project_name' => $proyek->id,
                 'customer_name' => $proyek->customer?->user?->name,
                 'location' => $proyek->alamat_proyek
             ]
@@ -56,9 +56,9 @@ class MandorActivityHistory extends Model
             'activity_type' => 'completed_project',
             'reference_type' => 'proyek',
             'reference_id' => $proyek->id,
-            'description' => "Menyelesaikan proyek pembangunan " . ($proyek->detailBangun?->nama_proyek ?? 'Unknown'),
+            'description' => "Menyelesaikan proyek pembangunan " . ($proyek->id ?? 'Unknown'),
             'metadata' => [
-                'project_name' => $proyek->detailBangun?->nama_proyek,
+                'project_name' => $proyek->id,
                 'customer_name' => $proyek->customer?->user?->name,
                 'location' => $proyek->alamat_proyek
             ]
