@@ -9,8 +9,8 @@
     <div class="rekomendasi-rumah">
         <div class="rekom-header">
             <div>
-                <span class="ai-badge">
-                    Content-Based Filtering · Pure ML Engine
+                <div class="ai-badge">
+                    K-Nearest Neighbors (KNN) · Weighted Euclidean Distance
                 </span>
             </div>
             <h1>REKOMENDASI RUMAH</h1>
@@ -44,12 +44,10 @@
             <div class="card-container">
                 @foreach ($hasil as $index => $rumah)
                     @php
-                        $skor = $rumah['skor'];
-                        $skorClass = $skor >= 70 ? 'skor-high' : ($skor >= 50 ? 'skor-mid' : 'skor-low');
-                        $harga = \App\Services\RekomendasiService::formatHarga($rumah['harga']);
-                        $durasi = !empty($rumah['estimasi_durasi'])
-                            ? (int) $rumah['estimasi_durasi'] . ' Bulan'
-                            : \App\Services\RekomendasiService::estimasiDurasi($rumah['luas_tanah']);
+                        $mlScore = $rumah['ml_score'] ?? 0;
+                        $skorClass = $mlScore >= 70 ? 'skor-high' : ($mlScore >= 50 ? 'skor-mid' : 'skor-low');
+                        $harga = number_format($rumah['estimasi_biaya'] ?? 0, 0, ',', '.');
+                        $durasi = (!empty($rumah['estimasi_durasi']) ? (int) $rumah['estimasi_durasi'] : 12) . ' Bulan';
                         $materials = collect(explode(';', $rumah['material_digunakan'] ?? ''))
                             ->map(fn($m) => trim($m))
                             ->filter()
@@ -64,13 +62,13 @@
 
                     <div class="card">
                         <div class="card-photo">
-                            <img src="{{ $photo }}" alt="Foto {{ $rumah['nama_rumah'] }}" loading="lazy">
+                            <img src="{{ $photo }}" alt="Foto {{ $rumah['tipe_rumah'] }}" loading="lazy">
 
                             <span class="rank-badge">Desain {{ $index + 1 }}</span>
-                            <span class="skor-badge {{ $skorClass }}">{{ $skor }}% Match</span>
+                            <span class="skor-badge {{ $skorClass }}">{{ number_format($mlScore, 1) }}% Match</span>
 
                             <div class="card-overlay">
-                                <h2>{{ $rumah['nama_rumah'] }}</h2>
+                                <h2>{{ $rumah['tipe_rumah'] }}</h2>
 
                                 {{-- Progressive summary: show only duration & price; other details hidden until expanded --}}
                                 <div class="detail-row">
@@ -79,7 +77,7 @@
                                 </div>
                                 <div class="detail-row">
                                     <span class="icon">Harga:</span>
-                                    <span><strong>{{ $harga }}</strong></span>
+                                    <span><strong>Rp {{ $harga }}</strong></span>
                                 </div>
 
                                 <div class="card-extra" aria-hidden="true" style="display:none;">
@@ -100,7 +98,10 @@
                                         <span>{{ $rumah['jumlah_kamar'] }} Kamar &nbsp;·&nbsp;
                                             {{ $rumah['jumlah_lantai'] }} Lantai</span>
                                     </div>
-                            
+                                    <div class="detail-row">
+                                        <span class="icon">Luas Bangunan:</span>
+                                        <span><strong>{{ $rumah['luas_bangunan'] }} m²</strong></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -108,13 +109,13 @@
                         {{-- Tombol aksi di bawah kartu --}}
                         <div class="card-footer-btns">
                             <button class="btn-pilih"
-                                onclick="pilihRumah({{ $rumah['id'] }}, '{{ addslashes($rumah['nama_rumah']) }}')">
+                                onclick="pilihRumah({{ $rumah['id'] }}, '{{ addslashes($rumah['tipe_rumah']) }}')">
                                 Pilih Desain
                             </button>
                             <button class="btn-detail btn-toggle-details" type="button">Detail</button>
                             @if ($materials->isNotEmpty())
                                 <button class="btn-detail"
-                                    onclick="lihatMaterial({{ $materials->toJson() }}, '{{ addslashes($rumah['nama_rumah']) }}')">
+                                    onclick="lihatMaterial({{ $materials->toJson() }}, '{{ addslashes($rumah['tipe_rumah']) }}')">
                                     Material
                                 </button>
                             @endif
