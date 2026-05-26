@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Mandor;
+use App\Models\MandorActivityHistory;
 use App\Models\Proyek;
 use App\Models\ProyekDokumentasi;
 use Illuminate\Support\Facades\Auth;
@@ -23,11 +25,11 @@ class TrackingProyekController extends Controller
             'detailBangun.desainRumah',
             'mandor.user',
         ])
-        ->where('customer_id', $customer->id)
-        ->where('id', $id)
-        ->whereIn('status_proyek', ['In Progress', 'Selesai'])
-        ->where('jenis_proyek', 'Bangun Rumah')
-        ->first();
+            ->where('customer_id', $customer->id)
+            ->where('id', $id)
+            ->whereIn('status_proyek', ['In Progress', 'Selesai'])
+            ->where('jenis_proyek', 'Bangun Rumah')
+            ->first();
 
         abort_if(!$proyek, 404);
 
@@ -88,13 +90,56 @@ class TrackingProyekController extends Controller
                 ->format('d M Y');
         }
 
+        $normalizePhoneNumber = function (?string $phoneNumber): ?string {
+            if (!$phoneNumber) {
+                return null;
+            }
+
+            $digits = preg_replace('/\D+/', '', $phoneNumber);
+            if (!$digits) {
+                return null;
+            }
+
+            if (str_starts_with($digits, '0')) {
+                $digits = '62' . substr($digits, 1);
+            } elseif (!str_starts_with($digits, '62')) {
+                $digits = '62' . ltrim($digits, '0');
+            }
+
+            return $digits;
+        };
+
+        $mandorForContact = $proyek->mandor;
+        if (!$mandorForContact || !$mandorForContact->user) {
+            $mandorHistory = MandorActivityHistory::where('reference_type', 'proyek')
+                ->where('reference_id', $proyek->id)
+                ->whereIn('activity_type', ['assigned_project', 'completed_project'])
+                ->latest()
+                ->first();
+
+            if ($mandorHistory) {
+                $mandorForContact = Mandor::with('user')->find($mandorHistory->mandor_id);
+            }
+        }
+
+        $mandorContactName = $mandorForContact?->user?->name ?? 'Belum Ditentukan';
+        $mandorContactNumber = $mandorForContact?->user?->phone_number;
+        $mandorContactWaUrl = ($normalizedMandorNumber = $normalizePhoneNumber($mandorContactNumber))
+            ? "https://wa.me/{$normalizedMandorNumber}"
+            : null;
+        $mandorContactAvatar = $mandorForContact?->user?->avatar;
+
+        $adminMainContactName = 'Admin Utama';
+        $adminMainContactNumber = '081384310179';
+        $adminMainContactWaUrl = 'https://wa.me/6281384310179';
+
         $statusMilestone = [];
         foreach ($daftarMilestone as $nama) {
             $tasks   = $proyek->tasks->where('milestone', $nama);
             $total   = $tasks->count();
             $selesai = $tasks->where('is_selesai', true)->count();
 
-            $statusMilestone[$nama] = match(true) {
+            $statusMilestone[$nama] = match (true) {
                 $total === 0        => 'pending',
                 $selesai === $total => 'completed',
                 $selesai > 0        => 'in-progress',
@@ -125,6 +170,13 @@ class TrackingProyekController extends Controller
             'milestoneBerikutnya',
             'estimasiSelesai',
             'milestones',
+            'mandorContactName',
+            'mandorContactNumber',
+            'mandorContactWaUrl',
+            'mandorContactAvatar',
+            'adminMainContactName',
+            'adminMainContactNumber',
+            'adminMainContactWaUrl',
         ));
     }
 
