@@ -121,10 +121,10 @@
                                 <p>{{ $catatanAdmin ?? 'Dokumen Anda memerlukan perbaikan. Mohon unggah ulang dokumen yang sesuai.' }}
                                 </p>
                             </div>
-                            <button class="btn-upload revision">
+                            <a href="{{ route('proyek.form_bangun', ['desain_id' => $desain->id, 'alamat' => $proyek->alamat_proyek, 'old_proyek_id' => $proyek->id]) }}" class="btn-upload revision" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                                 <span class="material-symbols-outlined">upload_file</span>
                                 Upload Ulang
-                            </button>
+                            </a>
                         </div>
                     @elseif ($statusDokumen === 'pending')
                         <div class="information-container pending">
@@ -295,7 +295,7 @@
                     {{ !$cicilanAktif ? 'disabled' : '' }}>
                     <span class="material-symbols-outlined">payments</span>
                     @if (!$cicilanAktif)
-                        Semua Cicilan Lunas 🎉
+                        Semua Cicilan Sudah Lunas
                     @elseif ($cicilanAktif->status_pembayaran === 'pending')
                         Selesaikan Pembayaran Periode {{ $cicilanAktif->periode }}
                     @else

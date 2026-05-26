@@ -25,7 +25,7 @@ class TrackingProyekController extends Controller
         ])
         ->where('customer_id', $customer->id)
         ->where('id', $id)
-        ->where('status_proyek', 'In Progress')
+        ->whereIn('status_proyek', ['In Progress', 'Selesai'])
         ->where('jenis_proyek', 'Bangun Rumah')
         ->first();
 
