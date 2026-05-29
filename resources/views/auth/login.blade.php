@@ -58,7 +58,10 @@
                         <!-- <a href="#">Lupa Password?</a> -->
                     </div>
 
-                    <button type="submit" class="btn-login">Masuk</button>
+                    <button type="submit" class="btn-login" id="loginBtn">
+                        <span class="btn-login__text">Masuk</span>
+                        <span class="btn-login__spinner" aria-hidden="true"></span>
+                    </button>
 
                     <p class="register">
                         Belum punya akun? <a href="{{ route('register') }}">Daftar</a>
@@ -106,15 +109,25 @@
             document.getElementById('remember_me').checked = true;
         }
 
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        const loginBtn = document.getElementById('loginBtn');
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             AuthApp.clearErrors();
 
-            AuthApp.login({
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                remember: document.getElementById('remember_me')?.checked
-            });
+            loginBtn.classList.add('is-loading');
+            loginBtn.disabled = true;
+
+            try {
+                await AuthApp.login({
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    remember: document.getElementById('remember_me')?.checked
+                });
+            } finally {
+                loginBtn.classList.remove('is-loading');
+                loginBtn.disabled = false;
+            }
         });
     </script>
 </body>

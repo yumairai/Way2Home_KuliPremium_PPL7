@@ -85,7 +85,10 @@
                             Ketentuan</label>
                     </div>
 
-                    <button type="submit" class="btn-login">Daftar Sekarang</button>
+                    <button type="submit" class="btn-login" id="registerBtn">
+                        <span class="btn-login__text">Daftar Sekarang</span>
+                        <span class="btn-login__spinner" aria-hidden="true"></span>
+                    </button>
 
                     <p class="register">
                         Sudah punya akun? <a href="{{ route('login') }}">Login di sini</a>
@@ -158,7 +161,9 @@
                 'phone_number');
         });
 
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
+        const registerBtn = document.getElementById('registerBtn');
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             AuthApp.clearErrors();
 
@@ -170,7 +175,15 @@
                 password_confirmation: document.getElementById('password_confirmation').value
             };
 
-            AuthApp.register(formData);
+            registerBtn.classList.add('is-loading');
+            registerBtn.disabled = true;
+
+            try {
+                await AuthApp.register(formData);
+            } finally {
+                registerBtn.classList.remove('is-loading');
+                registerBtn.disabled = false;
+            }
         });
     </script>
 </body>
