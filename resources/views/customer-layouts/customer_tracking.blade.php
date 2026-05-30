@@ -102,12 +102,16 @@
                             <p class="tracking-contact-number">{{ $mandorContactNumber ?? 'Nomor belum tersedia' }}</p>
                         </div>
                         @if ($mandorContactWaUrl)
-                            <a class="tracking-contact-chat material-symbols-outlined tracking-icon-md"
-                                href="{{ $mandorContactWaUrl }}" target="_blank" rel="noopener noreferrer"
-                                aria-label="Hubungi {{ $mandorContactName }} via WhatsApp">chat_bubble</a>
+                            <a class="tracking-contact-chat" href="{{ $mandorContactWaUrl }}" target="_blank"
+                                rel="noopener noreferrer" aria-label="Hubungi {{ $mandorContactName }} via WhatsApp">
+                                <img src="{{ asset('images/icon/whatsapp.png') }}" alt="WhatsApp"
+                                    style="width: 1.25rem; height: 1.25rem; object-fit: contain; display: block;" />
+                            </a>
                         @else
-                            <span class="tracking-contact-chat material-symbols-outlined tracking-icon-md"
-                                aria-hidden="true">chat_bubble</span>
+                            <span class="tracking-contact-chat" aria-hidden="true">
+                                <img src="{{ asset('images/icon/whatsapp.png') }}" alt=""
+                                    style="width: 1.25rem; height: 1.25rem; object-fit: contain; display: block; opacity: 0.5;" />
+                            </span>
                         @endif
                     </div>
                     <div class="tracking-contact-item">
@@ -121,9 +125,11 @@
                             <p class="tracking-contact-role">Admin Utama</p>
                             <p class="tracking-contact-number">{{ $adminMainContactNumber }}</p>
                         </div>
-                        <a class="tracking-contact-chat material-symbols-outlined tracking-icon-md"
-                            href="{{ $adminMainContactWaUrl }}" target="_blank" rel="noopener noreferrer"
-                            aria-label="Hubungi {{ $adminMainContactName }} via WhatsApp">chat_bubble</a>
+                        <a class="tracking-contact-chat" href="{{ $adminMainContactWaUrl }}" target="_blank"
+                            rel="noopener noreferrer" aria-label="Hubungi {{ $adminMainContactName }} via WhatsApp">
+                            <img src="{{ asset('images/icon/whatsapp.png') }}" alt="WhatsApp"
+                                style="width: 1.25rem; height: 1.25rem; object-fit: contain; display: block;" />
+                        </a>
                     </div>
                 </div>
             </div>

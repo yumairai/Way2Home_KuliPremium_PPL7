@@ -74,6 +74,10 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        const submitBtn = this;
+        submitBtn.classList.add('is-loading');
+        submitBtn.disabled = true;
+
         fetch('/admin/manajemen-mandor/assign', {
             method: 'POST',
             headers: {
@@ -95,8 +99,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     }, 1500);
                 } else {
                     W2HDialog.error(data.message);
+                    submitBtn.classList.remove('is-loading');
+                    submitBtn.disabled = false;
                 }
             })
-            .catch(() => W2HDialog.error('Terjadi kesalahan server.'));
+            .catch(() => {
+                submitBtn.classList.remove('is-loading');
+                submitBtn.disabled = false;
+                W2HDialog.error('Terjadi kesalahan server.');
+            });
     });
 });

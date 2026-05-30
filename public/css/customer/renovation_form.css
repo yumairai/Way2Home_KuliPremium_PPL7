@@ -444,6 +444,11 @@ body {
     transition: background-color 0.2s ease, transform 0.15s ease;
 }
 
+.rf-submit-btn.is-loading {
+    cursor: wait;
+    opacity: 0.92;
+}
+
 .rf-submit-btn:hover {
     background: #e89a03;
 }
@@ -454,6 +459,31 @@ body {
 
 .rf-submit-icon {
     font-size: 1.1rem;
+}
+
+.rf-submit-btn__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(43, 51, 97, 0.25);
+    border-top-color: var(--dark-text);
+    display: none;
+    animation: rf-submit-spin 0.8s linear infinite;
+}
+
+.rf-submit-btn.is-loading .rf-submit-btn__spinner {
+    display: inline-block;
+}
+
+.rf-submit-btn.is-loading .rf-submit-btn__text,
+.rf-submit-btn.is-loading .rf-submit-icon {
+    opacity: 0.95;
+}
+
+@keyframes rf-submit-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .rf-footer {

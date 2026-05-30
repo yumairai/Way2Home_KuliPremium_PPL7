@@ -187,7 +187,10 @@
                     <button type="button" class="modal-btn modal-btn-approve">Verifikasi</button>
                 </div>
                 <div class="modal-footer-buttons-right">
-                    <button type="submit" class="modal-btn modal-btn-submit" disabled>Submit</button>
+                    <button type="submit" class="modal-btn modal-btn-submit" disabled>
+                        <span class="modal-btn-submit__text">Submit</span>
+                        <span class="modal-btn-submit__spinner" aria-hidden="true"></span>
+                    </button>
                 </div>
             </div>
         </form>

@@ -160,14 +160,23 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
 
+                    transitionButton.classList.add('is-loading');
+                    transitionButton.disabled = true;
+
                     postJson('/renovation/' + requestId + '/accept-offer').then(async function (result) {
                         if (!result.ok) {
+                            transitionButton.classList.remove('is-loading');
+                            transitionButton.disabled = false;
                             await showAlert(result.data.message || 'Gagal mengambil jasa renovasi.');
                             return;
                         }
 
                         applyStateToCard(requestCard, nextState);
                         window.location.reload();
+                    }).catch(async function () {
+                        transitionButton.classList.remove('is-loading');
+                        transitionButton.disabled = false;
+                        await showAlert('Terjadi kesalahan server.');
                     });
                 } else if (nextState === 'completed') {
                     await showAlert('Status selesai diperbarui oleh mandor setelah pekerjaan selesai.');
@@ -242,16 +251,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            rejectOfferButton.classList.add('is-loading');
+            rejectOfferButton.disabled = true;
+
             postJson('/renovation/' + rejectRequestId + '/reject-offer', {
                 pesan: 'Penawaran ditolak oleh customer.',
             }).then(async function (result) {
                 if (!result.ok) {
+                    rejectOfferButton.classList.remove('is-loading');
+                    rejectOfferButton.disabled = false;
                     await showAlert(result.data.message || 'Gagal menolak penawaran.');
                     return;
                 }
 
                 await showSuccess(result.data.message || 'Penawaran berhasil ditolak.');
                 window.location.reload();
+            }).catch(async function () {
+                rejectOfferButton.classList.remove('is-loading');
+                rejectOfferButton.disabled = false;
+                await showAlert('Terjadi kesalahan server.');
             });
             return;
         }

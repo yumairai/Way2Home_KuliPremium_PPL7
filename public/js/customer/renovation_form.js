@@ -11,6 +11,7 @@
     const fotoError = document.getElementById('foto-error');
     const form = document.querySelector('.rf-form-body');
     const budgetInput = document.querySelector('.rf-input-budget');
+    const submitBtn = document.getElementById('rf-submit-btn');
 
     if (!uploadBox || !input || !previewGrid) return;
 
@@ -192,6 +193,11 @@
                 setError('Mohon unggah minimal 1 gambar kerusakan.');
                 uploadBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return false;
+            }
+
+            if (submitBtn) {
+                submitBtn.classList.add('is-loading');
+                submitBtn.disabled = true;
             }
             // allow submit
             return true;

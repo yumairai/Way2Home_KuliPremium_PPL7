@@ -11,7 +11,7 @@ function approveAllDocs() {
         item.classList.add('verified');
 
         const statusEl = item.querySelector('.doc-status');
-        statusEl.textContent = 'Terverifikasi';
+        statusEl.textContent = 'disetujui';
         statusEl.className = 'doc-status status-verified';
 
         item.querySelector('.doc-status-input').value = 'disetujui';
@@ -200,9 +200,12 @@ document.addEventListener('DOMContentLoaded', function () {
         checkSubmitEligibility();
     });
 
-    // Tombol Submit — kirim form ke controller
-    document.querySelector('.modal-btn-submit').addEventListener('click', async function () {
-        if (this.disabled) return;
+    // Submit form — tampilkan spinner lalu kirim ke controller
+    document.getElementById('doc-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const submitBtn = document.querySelector('.modal-btn-submit');
+        if (!submitBtn || submitBtn.disabled) return;
 
         const hasRejected = document.querySelectorAll('.doc-item.rejected').length > 0;
         const alasan = document.getElementById('alasan_penolakan').value.trim();
@@ -218,7 +221,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const statusProyek = hasRejected ? 'Revisi Dokumen' : 'Pembayaran DP';
         document.getElementById('status-proyek-input').value = statusProyek;
 
-        document.getElementById('doc-form').submit();
+        submitBtn.classList.add('is-loading');
+        submitBtn.disabled = true;
+
+        this.submit();
     });
 
     // Re-check saat admin mengetik alasan penolakan

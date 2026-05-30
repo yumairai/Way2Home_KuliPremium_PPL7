@@ -244,7 +244,8 @@
                     <button class="dashboard-review-action-btn dashboard-review-action-btn-secondary" type="button"
                         data-tracking-url="{{ route('mandor.tracking') }}" id="dashboard-review-take-btn" disabled
                         aria-disabled="true">
-                        Ambil Renovasi
+                        <span class="dashboard-review-action-btn__text">Ambil Renovasi</span>
+                        <span class="dashboard-review-action-btn__spinner" aria-hidden="true"></span>
                     </button>
                 </div>
             </div>

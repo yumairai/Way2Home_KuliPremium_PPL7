@@ -80,8 +80,9 @@
                 </div>
                 <!-- Submit Button -->
                 <div class="rf-submit-wrap">
-                    <button class="rf-submit-btn" type="submit">
-                        <span>Submit Request</span>
+                    <button class="rf-submit-btn" type="submit" id="rf-submit-btn">
+                        <span class="rf-submit-btn__text">Submit Request</span>
+                        <span class="rf-submit-btn__spinner" aria-hidden="true"></span>
                         <span class="material-symbols-outlined rf-submit-icon" data-icon="send">send</span>
                     </button>
                 </div>

@@ -111,54 +111,53 @@
                          </div>
                      </section>
 
-                    <section class="mandor-reno-card mandor-reno-card-upload"
-                        data-proyek-id="{{ $renovationData['proyek_id'] ?? '' }}">
-                    
-                        <div class="mandor-reno-head-row">
-                            <div class="mandor-reno-head">
-                                <div class="mandor-reno-icon-wrap mandor-reno-icon-wrap-primary">
-                                    <span class="material-symbols-outlined" data-icon="upload">upload</span>
-                                </div>
-                                <h2 class="mandor-reno-title">Dokumentasi Renovasi</h2>
-                            </div>
-                            <label class="mandor-reno-upload-btn" for="renovation-doc-input">
-                                <span class="material-symbols-outlined">add_photo_alternate</span>
-                                Pilih Foto
-                            </label>
-                            <input type="file" id="renovation-doc-input" class="mandor-reno-file-input"
-                                accept="image/jpg,image/jpeg,image/png" multiple>
-                        </div>
-                    
-                        <div class="mandor-reno-dropzone" id="renovation-dropzone"
-                            role="button" tabindex="0" aria-label="Area unggah dokumentasi renovasi">
-                            <span class="material-symbols-outlined mandor-reno-dropzone-icon">cloud_upload</span>
-                            <p class="mandor-reno-dropzone-title">Drag & Drop</p>
-                            <p class="mandor-reno-dropzone-hint">Format JPG, PNG. Maks 5MB per foto</p>
-                        </div>
-                    
-                        <p class="mandor-reno-dropzone-error" id="renovation-dropzone-error" aria-live="polite"></p>
-                    
-                        <div class="mandor-reno-preview-grid" id="renovation-preview-grid" aria-live="polite">
-                            @foreach ($proyekRenovasi?->dokumentasi ?? [] as $dok)
-                                <div class="mandor-doc-photo-card">
-                                    <img src="{{ route('mandor.dokumentasi.url', $dok->id) }}"
-                                        alt="Dokumentasi renovasi"
-                                        class="mandor-doc-photo"
-                                        loading="lazy">
-                                    <div class="mandor-doc-overlay">
-                                        <span class="mandor-doc-caption">{{ $dok->created_at->format('d M Y') }}</span>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    </section>
+                     <section class="mandor-reno-card mandor-reno-card-upload"
+                         data-proyek-id="{{ $renovationData['proyek_id'] ?? '' }}">
+
+                         <div class="mandor-reno-head-row">
+                             <div class="mandor-reno-head">
+                                 <div class="mandor-reno-icon-wrap mandor-reno-icon-wrap-primary">
+                                     <span class="material-symbols-outlined" data-icon="upload">upload</span>
+                                 </div>
+                                 <h2 class="mandor-reno-title">Dokumentasi Renovasi</h2>
+                             </div>
+                             <label class="mandor-reno-upload-btn" for="renovation-doc-input">
+                                 <span class="material-symbols-outlined">add_photo_alternate</span>
+                                 Pilih Foto
+                             </label>
+                             <input type="file" id="renovation-doc-input" class="mandor-reno-file-input"
+                                 accept="image/jpg,image/jpeg,image/png" multiple>
+                         </div>
+
+                         <div class="mandor-reno-dropzone" id="renovation-dropzone" role="button" tabindex="0"
+                             aria-label="Area unggah dokumentasi renovasi">
+                             <span class="material-symbols-outlined mandor-reno-dropzone-icon">cloud_upload</span>
+                             <p class="mandor-reno-dropzone-title">Drag & Drop</p>
+                             <p class="mandor-reno-dropzone-hint">Format JPG, PNG. Maks 5MB per foto</p>
+                         </div>
+
+                         <p class="mandor-reno-dropzone-error" id="renovation-dropzone-error" aria-live="polite"></p>
+
+                         <div class="mandor-reno-preview-grid" id="renovation-preview-grid" aria-live="polite">
+                             @foreach ($proyekRenovasi?->dokumentasi ?? [] as $dok)
+                                 <div class="mandor-doc-photo-card">
+                                     <img src="{{ route('mandor.dokumentasi.url', $dok->id) }}" alt="Dokumentasi renovasi"
+                                         class="mandor-doc-photo" loading="lazy">
+                                     <div class="mandor-doc-overlay">
+                                         <span class="mandor-doc-caption">{{ $dok->created_at->format('d M Y') }}</span>
+                                     </div>
+                                 </div>
+                             @endforeach
+                         </div>
+                     </section>
                  </div>
                  <!-- Footer Action -->
                  <div class="mandor-reno-footer-action">
                      <div class="mandor-reno-btn-wrap">
                          <button class="mandor-reno-action-btn" id="mark-renovation-done-btn"
                              data-request-id="{{ $renovationData['request_db_id'] ?? '' }}">
-                             Tandai Renovasi Selesai
+                             <span class="mandor-reno-action-btn__text">Tandai Renovasi Selesai</span>
+                             <span class="mandor-reno-action-btn__spinner" aria-hidden="true"></span>
                          </button>
                      </div>
                  </div>
@@ -239,8 +238,10 @@
                          Task List
                      </h3>
                      @if (!empty($unpaidMessage))
-                         <div class="mandor-unpaid-warning" style="background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #ffeeba;">
-                             <span class="material-symbols-outlined" style="vertical-align: middle; font-size: 18px; margin-right: 4px;">warning</span>
+                         <div class="mandor-unpaid-warning"
+                             style="background-color: #fff3cd; color: #856404; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; border: 1px solid #ffeeba;">
+                             <span class="material-symbols-outlined"
+                                 style="vertical-align: middle; font-size: 18px; margin-right: 4px;">warning</span>
                              {{ $unpaidMessage }}
                          </div>
                      @endif
@@ -330,15 +331,15 @@
                      <span class="mandor-upload-text">Upload Foto Baru</span>
                      <p class="mandor-upload-hint">Format JPG, PNG (Max 5MB)</p>
                  </label>
-                @foreach ($proyek->dokumentasi as $dok)
-                    <div class="mandor-doc-photo-card">
-                        <img src="{{ route('mandor.dokumentasi.url', $dok->id) }}" 
-                            alt="Dokumentasi" class="mandor-doc-photo">
-                        <div class="mandor-doc-overlay">
-                            <span class="mandor-doc-caption">{{ $dok->created_at->format('d M Y') }}</span>
-                        </div>
-                    </div>
-                @endforeach
+                 @foreach ($proyek->dokumentasi as $dok)
+                     <div class="mandor-doc-photo-card">
+                         <img src="{{ route('mandor.dokumentasi.url', $dok->id) }}" alt="Dokumentasi"
+                             class="mandor-doc-photo">
+                         <div class="mandor-doc-overlay">
+                             <span class="mandor-doc-caption">{{ $dok->created_at->format('d M Y') }}</span>
+                         </div>
+                     </div>
+                 @endforeach
              </div>
          </section>
      @endif

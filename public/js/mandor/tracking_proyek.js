@@ -7,57 +7,72 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
     doneButton.addEventListener('click', async function () {
         const requestId = doneButton.getAttribute('data-request-id');
         if (!requestId) return;
-        const response = await fetch(`/mandor/renovation/${requestId}/done`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-            body: JSON.stringify({})
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) { await W2HDialog.error(data.message || 'Gagal menandai renovasi selesai.'); return; }
-        await W2HDialog.success(data.message || 'Renovasi berhasil ditandai selesai.');
-        window.location.reload();
+        doneButton.classList.add('is-loading');
+        doneButton.disabled = true;
+
+        try {
+            const response = await fetch(`/mandor/renovation/${requestId}/done`, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                body: JSON.stringify({})
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                doneButton.classList.remove('is-loading');
+                doneButton.disabled = false;
+                await W2HDialog.error(data.message || 'Gagal menandai renovasi selesai.');
+                return;
+            }
+
+            await W2HDialog.success(data.message || 'Renovasi berhasil ditandai selesai.');
+            window.location.reload();
+        } catch (error) {
+            doneButton.classList.remove('is-loading');
+            doneButton.disabled = false;
+            await W2HDialog.error('Terjadi kesalahan server.');
+        }
     });
 })();
 
 // ── Renovasi documentation (frontend only) ───
 (function () {
-    var uploadSection  = document.querySelector('[data-proyek-id]');
+    var uploadSection = document.querySelector('[data-proyek-id]');
     if (!uploadSection) return; // Bukan halaman renovasi (atau proyek_id tidak ada)
- 
-    var proyekId       = uploadSection.getAttribute('data-proyek-id');
+
+    var proyekId = uploadSection.getAttribute('data-proyek-id');
     if (!proyekId) return;
- 
-    var input          = document.getElementById('renovation-doc-input');
-    var dropzone       = document.getElementById('renovation-dropzone');
-    var previewGrid    = document.getElementById('renovation-preview-grid');
-    var dropzoneError  = document.getElementById('renovation-dropzone-error');
- 
+
+    var input = document.getElementById('renovation-doc-input');
+    var dropzone = document.getElementById('renovation-dropzone');
+    var previewGrid = document.getElementById('renovation-preview-grid');
+    var dropzoneError = document.getElementById('renovation-dropzone-error');
+
     if (!input || !dropzone || !previewGrid) return;
- 
-    var MAX_FILE_SIZE  = 5 * 1024 * 1024; // 5MB — sama dengan bangun
-    var UPLOAD_URL     = '/mandor/proyek/' + proyekId + '/dokumentasi'; // route yang sama!
- 
+
+    var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB — sama dengan bangun
+    var UPLOAD_URL = '/mandor/proyek/' + proyekId + '/dokumentasi'; // route yang sama!
+
     var clearError = function () {
         if (dropzoneError) {
             dropzoneError.textContent = '';
             dropzone.classList.remove('is-error');
         }
     };
- 
+
     var setError = function (msg) {
         if (dropzoneError) {
             dropzoneError.textContent = msg;
             dropzone.classList.add('is-error');
         }
     };
- 
+
     var appendPhotoCard = function (fotoUrl, tanggal) {
         var card = document.createElement('div');
         card.className = 'mandor-doc-photo-card';
         card.innerHTML =
             '<img src="' + fotoUrl + '" alt="Dokumentasi renovasi" class="mandor-doc-photo" loading="lazy">' +
             '<div class="mandor-doc-overlay"><span class="mandor-doc-caption">' + tanggal + '</span></div>';
- 
+
         // Sisipkan setelah foto existing (sebelum foto lain yang baru diupload)
         if (previewGrid.firstChild) {
             previewGrid.insertBefore(card, previewGrid.firstChild);
@@ -65,7 +80,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
             previewGrid.appendChild(card);
         }
     };
- 
+
     var appendLoadingCard = function () {
         var card = document.createElement('div');
         card.className = 'mandor-doc-photo-card mandor-doc-loading';
@@ -73,24 +88,24 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
         previewGrid.insertBefore(card, previewGrid.firstChild);
         return card;
     };
- 
+
     var uploadFile = function (file) {
         clearError();
- 
+
         if (!file.type.startsWith('image/')) {
             setError('File harus berupa gambar.');
             return;
         }
- 
+
         if (file.size > MAX_FILE_SIZE) {
             setError('Ukuran foto ' + file.name + ' melebihi 5MB.');
             return;
         }
- 
+
         var loadingCard = appendLoadingCard();
         var formData = new FormData();
         formData.append('foto', file);
- 
+
         fetch(UPLOAD_URL, {
             method: 'POST',
             headers: {
@@ -99,40 +114,40 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
             },
             body: formData,
         })
-        .then(function (res) {
-            return res.json().then(function (data) {
-                return { ok: res.ok, data: data };
+            .then(function (res) {
+                return res.json().then(function (data) {
+                    return { ok: res.ok, data: data };
+                });
+            })
+            .then(function (result) {
+                loadingCard.remove();
+                if (!result.ok) {
+                    setError(result.data.message || 'Gagal upload foto.');
+                    return;
+                }
+                // uploadDokumentasi di controller return { foto_url, tanggal }
+                appendPhotoCard(result.data.foto_url, result.data.tanggal);
+            })
+            .catch(function () {
+                loadingCard.remove();
+                setError('Koneksi gagal. Coba lagi.');
             });
-        })
-        .then(function (result) {
-            loadingCard.remove();
-            if (!result.ok) {
-                setError(result.data.message || 'Gagal upload foto.');
-                return;
-            }
-            // uploadDokumentasi di controller return { foto_url, tanggal }
-            appendPhotoCard(result.data.foto_url, result.data.tanggal);
-        })
-        .catch(function () {
-            loadingCard.remove();
-            setError('Koneksi gagal. Coba lagi.');
-        });
     };
- 
+
     var handleFiles = function (fileList) {
         Array.from(fileList || []).forEach(uploadFile);
     };
- 
+
     input.addEventListener('change', function () {
         handleFiles(this.files);
         this.value = '';
     });
- 
+
     dropzone.addEventListener('click', function () { input.click(); });
     dropzone.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); }
     });
- 
+
     ['dragenter', 'dragover'].forEach(function (ev) {
         dropzone.addEventListener(ev, function (e) {
             e.preventDefault();
@@ -140,7 +155,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribut
             dropzone.classList.add('is-dragover');
         });
     });
- 
+
     ['dragleave', 'drop'].forEach(function (ev) {
         dropzone.addEventListener(ev, function (e) {
             e.preventDefault();

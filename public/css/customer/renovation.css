@@ -80,8 +80,7 @@ body {
 }
 
 .rv-main {
-    padding-top: 8rem;
-    padding-bottom: 6rem;
+    padding: 8rem;
     position: relative;
     z-index: 1;
 }
@@ -792,6 +791,9 @@ body {
     border: 0;
     cursor: pointer;
     font-family: 'Inter', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .rv-action-btn {
@@ -822,27 +824,66 @@ body {
     background: linear-gradient(135deg, var(--primary), var(--primary-container));
 }
 
-.rv-action-btn-outline {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    padding: 0.55rem 1rem;
-    background: transparent;
-    border: 1px solid rgba(0, 71, 150, 0.3);
-    color: var(--primary);
-    font-size: 1rem;
+.rv-action-btn__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    display: inline-block;
+    vertical-align: middle;
+    visibility: hidden;
+    opacity: 0;
+    margin-left: 0.5rem;
+    animation: rv-action-spin 0.8s linear infinite;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
 }
 
-.rv-action-btn-outline:hover {
-    background: rgba(0, 91, 190, 0.08);
+.rv-done-btn .rv-action-btn__spinner {
+    border: 2px solid rgba(4, 94, 150, 0.2);
+    border-top-color: var(--primary);
 }
 
-.rv-action-btn-primary:hover {
-    filter: brightness(1.1);
+.rv-action-btn.is-loading .rv-action-btn__spinner,
+.rv-done-btn.is-loading .rv-action-btn__spinner {
+    visibility: visible;
+    opacity: 1;
 }
 
-.rv-action-btn-primary:active {
-    transform: scale(0.95);
+.rv-action-btn.is-loading .rv-action-btn__text,
+.rv-done-btn.is-loading .rv-action-btn__text {
+    opacity: 0.95;
+}
+
+.rv-action-btn__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    display: none;
+    animation: rv-action-spin 0.8s linear infinite;
+}
+
+.rv-done-btn .rv-action-btn__spinner {
+    border: 2px solid rgba(4, 94, 150, 0.2);
+    border-top-color: var(--primary);
+}
+
+.rv-action-btn.is-loading .rv-action-btn__spinner,
+.rv-done-btn.is-loading .rv-action-btn__spinner {
+    display: inline-block;
+}
+
+.rv-action-btn.is-loading .rv-action-btn__text,
+.rv-done-btn.is-loading .rv-action-btn__text {
+    opacity: 0.95;
+}
+
+@keyframes rv-action-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .rv-actions-spacer {

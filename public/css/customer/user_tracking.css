@@ -626,7 +626,7 @@ body {
 
 /* ===== Customer Tracking Semantic Styles ===== */
 .tracking-page {
-    max-width: 1536px;
+    max-width: 90vw;
     margin: 0 auto;
     padding: 7rem 0rem 2rem 0rem;
 }

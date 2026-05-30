@@ -326,17 +326,23 @@
                                                 Penawaran berlaku sampai {{ $request['offer_expires_at'] }}
                                             </p>
                                         @endif
-                                        <div class="rv-actions rv-state-panel {{ $isReviewedState ? '' : 'rv-hidden' }}"
+                                        <div class="rv-actions rv-state-panel {{     $isReviewedState ? '' : 'rv-hidden' }}"
                                             data-state-panel="reviewed">
                                             <div
                                                 style="display:flex;gap:0.5rem;align-items:center;justify-content:flex-start">
-                                                <button type="button" class="rv-action-btn rv-action-btn-primary"
+                                                <button type="button"
+                                                    class="rv-action-btn rv-action-btn-primary js-accept-offer-btn"
                                                     data-transition-state="on-progress"
                                                     data-service-action="{{ !empty($request['is_service_actionable']) ? '1' : '0' }}"
-                                                    {{ !empty($request['is_service_actionable']) ? '' : 'disabled' }}>Terima
-                                                    Tawaran</button>
-                                                <button type="button" class="rv-done-btn js-reject-offer-btn">Tolak
-                                                    Penawaran & Batalkan Renovasi</button>
+                                                    {{ !empty($request['is_service_actionable']) ? '' : 'disabled' }}>
+                                                    <span class="rv-action-btn__text">Terima Tawaran</span>
+                                                    <span class="rv-action-btn__spinner" aria-hidden="true"></span>
+                                                </button>
+                                                <button type="button" class="rv-done-btn js-reject-offer-btn">
+                                                    <span class="rv-action-btn__text">Tolak Penawaran & Batalkan
+                                                        Renovasi</span>
+                                                    <span class="rv-action-btn__spinner" aria-hidden="true"></span>
+                                                </button>
                                             </div>
                                         </div>
 

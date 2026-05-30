@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const cancelBtn     = document.getElementById('cancelBtn');
-    const dpBtn         = document.getElementById('dpBtn');
-    const progressBtn   = document.getElementById('progressBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const dpBtn = document.getElementById('dpBtn');
+    const progressBtn = document.getElementById('progressBtn');
     const periodePayBtn = document.getElementById('periodePayBtn');
 
     // ─── Helper: inisiasi pembayaran ke backend ───────────────────
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dpBtn) {
         dpBtn.addEventListener('click', async () => {
             const pembayaranId = dpBtn.dataset.pembayaranId;
-            const nominal      = parseInt(dpBtn.dataset.nominal) || 0;
+            const nominal = parseInt(dpBtn.dataset.nominal) || 0;
 
             const formatted = new Intl.NumberFormat('id-ID', {
                 style: 'currency', currency: 'IDR', minimumFractionDigits: 0,
@@ -145,12 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (progressBtn) {
         progressBtn.addEventListener('click', async () => {
             const isMandorAssigned = progressBtn.getAttribute('data-mandor') === 'true';
-            const proyekId         = progressBtn.getAttribute('data-proyek-id');
+            const proyekId = progressBtn.getAttribute('data-proyek-id');
 
             if (isMandorAssigned) {
                 window.location.href = `/proyek/${proyekId}/tracking`;
             } else {
-                await W2HDialog.alert('Mandor belum diassign. Mohon tunggu sebentar!');
+                await W2HDialog.alert('Mandor belum diassign. Mohon tunggu 1x24jam untuk sistem kami menugaskan mandor ke proyek Anda. Terima kasih atas kesabarannya!');
             }
         });
     }
@@ -159,8 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (periodePayBtn) {
         periodePayBtn.addEventListener('click', async () => {
             const pembayaranId = periodePayBtn.dataset.pembayaranId;
-            const nominal      = parseInt(periodePayBtn.dataset.nominal) || 0;
-            const periode      = periodePayBtn.dataset.periode;
+            const nominal = parseInt(periodePayBtn.dataset.nominal) || 0;
+            const periode = periodePayBtn.dataset.periode;
 
             if (!pembayaranId) return;
 

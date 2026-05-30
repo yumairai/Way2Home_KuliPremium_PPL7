@@ -66,7 +66,7 @@
                             <div class="mandor-entry-project">
                                 <p class="mandor-entry-project-label">Status Proyek</p>
                                 <p class="mandor-entry-project-name">
-                                    @if($isBusy && $mandor->proyekAktif)
+                                    @if ($isBusy && $mandor->proyekAktif)
                                         {{ $mandor->proyekAktif->jenis_proyek }}
                                     @elseif($isBusy && $mandor->renovasiAktif)
                                         Renovasi Aktif
@@ -135,7 +135,10 @@
             </div>
             <div class="modal-footer">
                 <div class="modal-footer-buttons">
-                    <button class="modal-btn modal-btn-submit">Assign Mandor</button>
+                    <button class="modal-btn modal-btn-submit" type="button">
+                        <span class="modal-btn-submit__text">Assign Mandor</span>
+                        <span class="modal-btn-submit__spinner" aria-hidden="true"></span>
+                    </button>
                 </div>
             </div>
         </div>
