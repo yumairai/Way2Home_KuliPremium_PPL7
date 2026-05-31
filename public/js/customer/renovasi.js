@@ -1,4 +1,56 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const isTester = window.W2H_IS_TESTER === true;
+
+    if (isTester) {
+        const supabaseBase = 'https://ovyjfudrdwrlyioygotq.supabase.co/storage/v1/object/public/';
+        const dummyUrl = supabaseBase + 'public-assets/testing/renovasi/foto_renovasi.jpg';
+
+        function injectDummyFoto(preview) {
+            const isEmpty = preview.querySelector('.rv-damage-photo-empty');
+            if (!isEmpty) return; // sudah ada foto, skip
+
+            isEmpty.remove();
+
+            const wrap = document.createElement('div');
+            wrap.className = 'rv-damage-photo-thumb-wrap';
+
+            const img = document.createElement('img');
+            img.src = dummyUrl;
+            img.alt = 'Foto tester';
+            img.className = 'rv-damage-photo-thumb';
+
+            wrap.appendChild(img);
+            preview.appendChild(wrap);
+
+            const card = preview.closest('.rv-request-card');
+            if (card) {
+                const btn = card.querySelector('.js-open-request-detail');
+                if (btn) {
+                    btn.setAttribute('data-request-photos', JSON.stringify([dummyUrl]));
+                }
+            }
+        }
+
+        // Fix semua card saat load
+        document.querySelectorAll('.rv-damage-photo-thumb').forEach(img => {
+            const src = img.getAttribute('src') || '';
+            if (src && !src.startsWith('http')) {
+                img.src = supabaseBase + src;
+            }
+        });
+
+        document.querySelectorAll('.js-open-request-detail').forEach(btn => {
+            const raw = btn.getAttribute('data-request-photos');
+            try {
+                const photos = JSON.parse(raw || '[]');
+                const fixed = photos.map(p => p.startsWith('http') ? p : supabaseBase + p);
+                btn.setAttribute('data-request-photos', JSON.stringify(fixed));
+            } catch (e) {}
+        });
+
+        document.querySelectorAll('.rv-damage-photo-preview').forEach(injectDummyFoto);
+    }
+
     var csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
     var csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
     var stateConfig = {
@@ -480,7 +532,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (detailModal) {
         document.addEventListener('click', function (event) {
-            // allow clicking thumbnail wrap or thumbnail image to open the same detail modal
             var thumbWrap = event.target.closest('.rv-damage-photo-thumb-wrap') || event.target.closest('.rv-damage-photo-thumb');
             if (thumbWrap) {
                 var requestCard = thumbWrap.closest('.rv-request-card');

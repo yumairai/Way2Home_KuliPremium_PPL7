@@ -14,7 +14,10 @@ class MandorSeeder extends Seeder
      */
     public function run(): void
     {
-        $mandorUsers = User::where('role', 'mandor')->get();
+        // Hanya ambil mandor reguler (bukan akun tester) agar index cocok dengan array $data
+        $mandorUsers = User::where('role', 'mandor')
+                           ->where('is_tester', false)
+                           ->get();
 
         $data = [
             [
@@ -38,7 +41,7 @@ class MandorSeeder extends Seeder
             Mandor::create([
                 'user_id'          => $user->id,
                 'sertifikasi'      => $data[$index]['sertifikasi'],
-                'path_foto_profil' => 'profil/mandor/foto_profil_mandor.png',
+                'path_foto_profil' => 'https://ovyjfudrdwrlyioygotq.supabase.co/storage/v1/object/public/public-assets/testing/avatars/foto_profil_mandor.png',
                 'area_kerja'       => $data[$index]['area_kerja'],
                 'path_foto_ktp'    => null,
                 'lama_pengalaman'  => $data[$index]['lama_pengalaman'],

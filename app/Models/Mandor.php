@@ -17,6 +17,7 @@ class Mandor extends Model
         'lama_pengalaman',
         'status',
         'rating',
+        'is_ghost',
     ];
 
     public function user()

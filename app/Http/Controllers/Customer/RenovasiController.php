@@ -113,13 +113,14 @@ class RenovasiController extends Controller
             $request->merge([
                 'budget_estimasi' => $normalizedBudget,
             ]);
+            $isTester = Auth::user()?->is_tester;
 
             $validated = $request->validate([
                 'budget_estimasi' => 'required|integer|min:100000',
                 'deskripsi_renovasi' => 'required|string|min:20',
                 'alamat' => 'required|string|min:10',
-                'foto_detail' => 'nullable|array|max:6',
-                'foto_detail.*' => 'image|mimes:jpg,jpeg,png|max:2048',
+                'foto_detail' => $isTester ? 'nullable' : 'required|array|min:1',
+                'foto_detail.*' => $isTester ? 'nullable' : 'image|max:2048',
             ], [
                 'foto_detail.array' => 'Foto kerusakan harus dikirim sebagai daftar file gambar.',
                 'foto_detail.max' => 'Maksimal 6 gambar kerusakan.',
@@ -183,24 +184,41 @@ class RenovasiController extends Controller
             ], 422);
         }
 
-        DB::transaction(function () use ($requestRenovasi, $offer) {
+        $isTester = Auth::user()?->is_tester;
+
+        DB::transaction(function () use ($requestRenovasi, $offer, $isTester) {
             PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
                 ->where('id', '!=', $offer->id)
                 ->where('status_penawaran', 'pending')
                 ->update(['status_penawaran' => 'ditolak']);
 
             $offer->update(['status_penawaran' => 'diterima']);
-            $requestRenovasi->update(['status_request' => 'disetujui']);
+
+            if ($isTester) {
+                $requestRenovasi->update(['status_request' => 'selesai']);
+            } else {
+                $requestRenovasi->update(['status_request' => 'disetujui']);
+            }
 
             // Log aktivitas tawaran diterima
             MandorActivityHistory::logOfferAccepted($offer->mandor, $offer);
+            
             NegosiasiRenovasi::create([
                 'request_renovasi_id' => $requestRenovasi->id,
                 'penawaran_renovasi_id' => $offer->id,
                 'pengirim' => 'customer',
                 'tipe' => 'setuju',
-                'pesan' => 'Anda menyetujui penawaran renovasi ini. Mandor akan segera menghubungi Anda untuk koordinasi.',
+                'pesan' => $isTester
+                    ? 'Anda menyetujui penawaran renovasi ini. Status renovasi langsung selesai (Tester).'
+                    : 'Anda menyetujui penawaran renovasi ini. Mandor akan segera menghubungi Anda untuk koordinasi.',
             ]);
+
+            // Jika listener (HandleTesterWorkflow) sudah membuat proyek renovasi,
+            // kita tidak perlu membuat proyek duplikat di sini.
+            $sudahAda = DetailProyekRenovasi::where('request_renovasi_id', $requestRenovasi->id)->exists();
+            if ($sudahAda) {
+                return;
+            }
 
             $offer->mandor?->update(['status' => 'nonaktif']);
 
@@ -210,7 +228,7 @@ class RenovasiController extends Controller
                 'jenis_proyek' => 'Renovasi',
                 'alamat_proyek' => $requestRenovasi->alamat,
                 'tanggal_mulai' => now()->toDateString(),
-                'status_proyek' => 'In Progress',
+                'status_proyek' => $isTester ? 'Selesai' : 'In Progress',
                 'jumlah_cicilan' => 0,
             ]);
 

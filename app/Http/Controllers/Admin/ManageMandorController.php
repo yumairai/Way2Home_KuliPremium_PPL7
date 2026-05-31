@@ -17,6 +17,7 @@ class ManageMandorController extends Controller
         // Load mandor beserta user dan proyek aktifnya
         $mandors = Mandor::with(['user', 'proyekAktif', 'renovasiAktif'])
             ->where('status', '!=', 'suspend')
+            ->where('is_ghost', false)
             ->get();
 
         // Proyek yang belum ada mandornya

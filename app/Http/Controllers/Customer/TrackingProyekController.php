@@ -24,6 +24,8 @@ class TrackingProyekController extends Controller
             'progress',
             'detailBangun.desainRumah',
             'mandor.user',
+            'pembayaranProyek',
+            'customer.user',
         ])
             ->where('customer_id', $customer->id)
             ->where('id', $id)
@@ -36,52 +38,152 @@ class TrackingProyekController extends Controller
         $totalTask      = $proyek->tasks->count();
         $selesaiTask    = $proyek->tasks->where('is_selesai', true)->count();
         $daftarMilestone = ['Fondasi', 'Struktur', 'Atap', 'MEP', 'Finishing'];
-        $milestoneSelesai = '-';
-        foreach (array_reverse($daftarMilestone) as $nama) {
-            $tasks = $proyek->tasks->where('milestone', $nama);
-            if ($tasks->count() > 0 && $tasks->where('is_selesai', true)->count() === $tasks->count()) {
-                $milestoneSelesai = $nama;
-                break;
-            }
-        }
-        $milestoneAktif      = 'Semua Selesai';
-        $milestoneBerikutnya = '-';
-        foreach ($daftarMilestone as $i => $nama) {
-            $tasks   = $proyek->tasks->where('milestone', $nama);
-            $total   = $tasks->count();
-            $selesai = $tasks->where('is_selesai', true)->count();
 
-            if ($total > 0 && $selesai < $total) {
-                $milestoneAktif = $nama;
-                // Cari milestone berikutnya yang punya task
-                foreach (array_slice($daftarMilestone, $i + 1) as $next) {
-                    if ($proyek->tasks->where('milestone', $next)->count() > 0) {
+        // ── Tester: gunakan progress_proyek, bukan tasks ──────────────────
+        $isTesterProyek = $proyek->customer?->user?->is_tester;
+
+        if ($isTesterProyek && $proyek->progress) {
+            $syaratPembayaran = [
+                'Fondasi'   => 0,
+                'Struktur'  => 0,
+                'Atap'      => 1,
+                'MEP'       => 2,
+                'Finishing' => 3,
+            ];
+            $bobotMilestone = [
+                'Fondasi'   => 15,
+                'Struktur'  => 35,
+                'Atap'      => 15,
+                'MEP'       => 15,
+                'Finishing' => 20,
+            ];
+
+            // Cari periode tertinggi yang sudah berhasil dibayar
+            $maxPeriodeBayar = $proyek->pembayaranProyek
+                ->where('status_pembayaran', 'berhasil')
+                ->max('periode') ?? -1;
+
+            $persentase = 0;
+            $statusMilestone = [];
+            $milestoneAktif = 'Semua Selesai';
+            $milestoneSelesai = '-';
+            $milestoneBerikutnya = '-';
+
+            foreach ($daftarMilestone as $nama) {
+                $syarat = $syaratPembayaran[$nama];
+                if ($maxPeriodeBayar >= $syarat) {
+                    $statusMilestone[$nama] = 'completed';
+                    $persentase += $bobotMilestone[$nama];
+                    $milestoneSelesai = $nama;
+                } else {
+                    $statusMilestone[$nama] = 'pending';
+                }
+            }
+
+            // Cari milestone aktif (pending pertama setelah completed)
+            $foundAktif = false;
+            foreach ($daftarMilestone as $i => $nama) {
+                if ($statusMilestone[$nama] === 'pending' && !$foundAktif) {
+                    $statusMilestone[$nama] = 'in-progress';
+                    $milestoneAktif = $nama;
+                    $foundAktif = true;
+                    // Cari berikutnya
+                    foreach (array_slice($daftarMilestone, $i + 1) as $next) {
                         $milestoneBerikutnya = $next;
                         break;
                     }
+                    break;
+                }
+            }
+
+            if (!$foundAktif) {
+                $milestoneAktif = 'Semua Selesai';
+            }
+
+            $persentase = round($persentase);
+
+            $milestones = collect($daftarMilestone)->map(fn($nama) => [
+                'nama'   => $nama,
+                'status' => $statusMilestone[$nama],
+            ]);
+
+        } else {
+            // ── Non-tester: logika existing dari tasks ────────────────────
+            $milestoneSelesai = '-';
+            foreach (array_reverse($daftarMilestone) as $nama) {
+                $tasks = $proyek->tasks->where('milestone', $nama);
+                if ($tasks->count() > 0 && $tasks->where('is_selesai', true)->count() === $tasks->count()) {
+                    $milestoneSelesai = $nama;
+                    break;
+                }
+            }
+            $milestoneAktif      = 'Semua Selesai';
+            $milestoneBerikutnya = '-';
+            foreach ($daftarMilestone as $i => $nama) {
+                $tasks   = $proyek->tasks->where('milestone', $nama);
+                $total   = $tasks->count();
+                $selesai = $tasks->where('is_selesai', true)->count();
+
+                if ($total > 0 && $selesai < $total) {
+                    $milestoneAktif = $nama;
+                    foreach (array_slice($daftarMilestone, $i + 1) as $next) {
+                        if ($proyek->tasks->where('milestone', $next)->count() > 0) {
+                            $milestoneBerikutnya = $next;
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            $bobotMilestone = [
+                'Fondasi'   => 15,
+                'Struktur'  => 35,
+                'Atap'      => 15,
+                'MEP'       => 15,
+                'Finishing' => 20,
+            ];
+
+            $persentase = 0;
+            foreach ($bobotMilestone as $milestone => $bobot) {
+                $tasks        = $proyek->tasks->where('milestone', $milestone);
+                $total        = $tasks->count();
+                $selesai      = $tasks->where('is_selesai', true)->count();
+                if ($total > 0) {
+                    $persentase += ($selesai / $total) * $bobot;
+                }
+            }
+            $persentase = round($persentase);
+
+            $statusMilestone = [];
+            foreach ($daftarMilestone as $nama) {
+                $tasks   = $proyek->tasks->where('milestone', $nama);
+                $total   = $tasks->count();
+                $selesai = $tasks->where('is_selesai', true)->count();
+
+                $statusMilestone[$nama] = match (true) {
+                    $total === 0        => 'pending',
+                    $selesai === $total => 'completed',
+                    $selesai > 0        => 'in-progress',
+                    default             => 'pending',
+                };
+            }
+            $forceNext = true;
+            foreach ($daftarMilestone as $nama) {
+                if ($statusMilestone[$nama] === 'completed') {
+                    continue;
+                }
+                if ($statusMilestone[$nama] === 'pending' && $forceNext) {
+                    $statusMilestone[$nama] = 'in-progress';
                 }
                 break;
             }
-        }
 
-        $bobotMilestone = [
-            'Fondasi'   => 15,
-            'Struktur'  => 35,
-            'Atap'      => 15,
-            'MEP'       => 15,
-            'Finishing' => 20,
-        ];
-
-        $persentase = 0;
-        foreach ($bobotMilestone as $milestone => $bobot) {
-            $tasks        = $proyek->tasks->where('milestone', $milestone);
-            $total        = $tasks->count();
-            $selesai      = $tasks->where('is_selesai', true)->count();
-            if ($total > 0) {
-                $persentase += ($selesai / $total) * $bobot;
-            }
+            $milestones = collect($daftarMilestone)->map(fn($nama) => [
+                'nama'   => $nama,
+                'status' => $statusMilestone[$nama],
+            ]);
         }
-        $persentase = round($persentase);
 
         $estimasiSelesai = null;
         if ($proyek->tanggal_mulai && $proyek->detailBangun?->desainRumah?->estimasi_durasi) {
@@ -91,21 +193,14 @@ class TrackingProyekController extends Controller
         }
 
         $normalizePhoneNumber = function (?string $phoneNumber): ?string {
-            if (!$phoneNumber) {
-                return null;
-            }
-
+            if (!$phoneNumber) return null;
             $digits = preg_replace('/\D+/', '', $phoneNumber);
-            if (!$digits) {
-                return null;
-            }
-
+            if (!$digits) return null;
             if (str_starts_with($digits, '0')) {
                 $digits = '62' . substr($digits, 1);
             } elseif (!str_starts_with($digits, '62')) {
                 $digits = '62' . ltrim($digits, '0');
             }
-
             return $digits;
         };
 
@@ -116,51 +211,21 @@ class TrackingProyekController extends Controller
                 ->whereIn('activity_type', ['assigned_project', 'completed_project'])
                 ->latest()
                 ->first();
-
             if ($mandorHistory) {
                 $mandorForContact = Mandor::with('user')->find($mandorHistory->mandor_id);
             }
         }
 
-        $mandorContactName = $mandorForContact?->user?->name ?? 'Belum Ditentukan';
+        $mandorContactName   = $mandorForContact?->user?->name ?? 'Belum Ditentukan';
         $mandorContactNumber = $mandorForContact?->user?->phone_number;
-        $mandorContactWaUrl = ($normalizedMandorNumber = $normalizePhoneNumber($mandorContactNumber))
+        $mandorContactWaUrl  = ($normalizedMandorNumber = $normalizePhoneNumber($mandorContactNumber))
             ? "https://wa.me/{$normalizedMandorNumber}"
             : null;
         $mandorContactAvatar = $mandorForContact?->user?->avatar;
 
-        $adminMainContactName = 'Admin Utama';
+        $adminMainContactName   = 'Admin Utama';
         $adminMainContactNumber = '081384310179';
-        $adminMainContactWaUrl = 'https://wa.me/6281384310179';
-
-        $statusMilestone = [];
-        foreach ($daftarMilestone as $nama) {
-            $tasks   = $proyek->tasks->where('milestone', $nama);
-            $total   = $tasks->count();
-            $selesai = $tasks->where('is_selesai', true)->count();
-
-            $statusMilestone[$nama] = match (true) {
-                $total === 0        => 'pending',
-                $selesai === $total => 'completed',
-                $selesai > 0        => 'in-progress',
-                default             => 'pending',
-            };
-        }
-        $forceNext = true;
-        foreach ($daftarMilestone as $nama) {
-            if ($statusMilestone[$nama] === 'completed') {
-                continue;
-            }
-            if ($statusMilestone[$nama] === 'pending' && $forceNext) {
-                $statusMilestone[$nama] = 'in-progress';
-            }
-            break;
-        }
-
-        $milestones = collect($daftarMilestone)->map(fn($nama) => [
-            'nama'   => $nama,
-            'status' => $statusMilestone[$nama],
-        ]);
+        $adminMainContactWaUrl  = 'https://wa.me/6281384310179';
 
         return view('customer-layouts.customer_tracking', compact(
             'proyek',

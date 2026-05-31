@@ -4,6 +4,19 @@
 @endpush
 @section('content')
     @php
+        // Base URL Supabase public storage
+        $supabaseBase = config('services.supabase.url', 'https://ovyjfudrdwrlyioygotq.supabase.co')
+                      . '/storage/v1/object/public/';
+        $isTester = auth()->user()?->is_tester;
+        // Path aset dummy yang di-hardcode sama di BypassTesterRequest
+        $dummyDocs = [
+            'sertifikat_tanah' => $supabaseBase . 'public-assets/testing/dokumen/sertifikat_tanah.jpg',
+            'ktp'              => $supabaseBase . 'public-assets/testing/dokumen/ktp.jpg',
+            'imb'              => $supabaseBase . 'public-assets/testing/dokumen/imb.jpg',
+            'surat_kuasa'      => $supabaseBase . 'public-assets/testing/dokumen/surat_kuasa.jpg',
+        ];
+    @endphp
+    @php
         $imagePath = !empty($desain->path_gambar_desain)
             ? (preg_match('/^https?:\\/\\//', $desain->path_gambar_desain)
                 ? $desain->path_gambar_desain
@@ -133,65 +146,75 @@
             @if(isset($old_proyek_id) && $old_proyek_id)
                 <input type="hidden" id="old_proyek_id" name="old_proyek_id" value="{{ $old_proyek_id }}">
             @endif
-            <!-- dokumen kebutuhan pembangunan rumah -->
+        {{-- ── Banner Tester Mode ── --}}
+        @if($isTester)
+            <div style="background:#d1fae5;border:1.5px solid #059669;border-radius:10px;padding:12px 18px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+                <span class="material-symbols-outlined" style="color:#059669;font-size:22px;">science</span>
+                <div>
+                    <strong style="color:#065f46;">Mode Tester Aktif</strong>
+                    <p style="margin:2px 0 0;font-size:0.85rem;color:#065f46;">Dokumen sudah diisi otomatis dari aset uji coba. Setelah mengisi alamat, silakan langsung klik <b>Ajukan Pembangunan</b>.</p>
+                </div>
+            </div>
+        @endif
+        <!-- dokumen kebutuhan pembangunan rumah -->
             <div class="form-group" id="sectionDokumen">
                 <label class="form-label">Dokumen Pendukung (1 file Max 2MB)</label>
                 <div class="upload-grid">
                     <!-- dokumen sertif tanah -->
-                    <label class="upload-item" for="sertifikat_tanah" id="drop-zone-sertifikat">
+                    <label class="upload-item {{ $isTester ? 'is-valid' : '' }}" for="sertifikat_tanah" id="drop-zone-sertifikat">
                         <input type="file" id="sertifikat_tanah" name="sertifikat_tanah" accept=".jpg,.jpeg,.png,.pdf"
                             class="file-input-hidden">
 
                         <!-- Preview -->
-                        <div class="preview-container" style="display: none;">
-                            <img src="" class="img-preview"
+                        <div class="preview-container" style="display: {{ $isTester ? 'block' : 'none' }};">
+                            <img src="{{ $isTester ? $dummyDocs['sertifikat_tanah'] : '' }}" class="img-preview"
                                 style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
                         </div>
 
                         <p class="upload-title">Sertifikat Tanah (SHM/HGB)</p>
-                        <p class="upload-subtitle">Pilih file atau drag & drop</p>
+                        <p class="upload-subtitle" style="{{ $isTester ? 'color:#059669;' : '' }}">{{ $isTester ? 'Aset tester digunakan' : 'Pilih file atau drag & drop' }}</p>
                         <p class="field-error" aria-live="polite"></p>
                     </label>
 
                     <!-- dokumen ktp -->
-                    <label class="upload-item" for="ktp_pemilik" id="drop-zone-ktp">
+                    <label class="upload-item {{ $isTester ? 'is-valid' : '' }}" for="ktp_pemilik" id="drop-zone-ktp">
                         <input type="file" id="ktp_pemilik" name="ktp_pemilik" accept=".jpg,.jpeg,.png,.pdf"
                             class="file-input-hidden">
                         <!-- Preview -->
-                        <div class="preview-container" style="display: none;">
-                            <img src="" class="img-preview"
+                        <div class="preview-container" style="display: {{ $isTester ? 'block' : 'none' }};">
+                            <img src="{{ $isTester ? $dummyDocs['ktp'] : '' }}" class="img-preview"
                                 style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
                         </div>
                         <p class="upload-title">KTP Pemilik</p>
-                        <p class="upload-subtitle" id="label-ktp">Pilih file atau drag &amp; drop</p>
+                        <p class="upload-subtitle" id="label-ktp" style="{{ $isTester ? 'color:#059669;' : '' }}">{{ $isTester ? '✅ Aset tester digunakan' : 'Pilih file atau drag &amp; drop' }}</p>
                         <p class="field-error" aria-live="polite"></p>
                     </label>
 
                     <!-- dokumen imb/pbg -->
-                    <label class="upload-item" for="imb_pbg" id="drop-zone-imb-pbg">
+                    <label class="upload-item {{ $isTester ? 'is-valid' : '' }}" for="imb_pbg" id="drop-zone-imb-pbg">
                         <input type="file" id="imb_pbg" name="imb_pbg" accept=".jpg,.jpeg,.png,.pdf"
                             class="file-input-hidden">
                         <!-- Preview -->
-                        <div class="preview-container" style="display: none;">
-                            <img src="" class="img-preview"
+                        <div class="preview-container" style="display: {{ $isTester ? 'block' : 'none' }};">
+                            <img src="{{ $isTester ? $dummyDocs['imb'] : '' }}" class="img-preview"
                                 style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
                         </div>
                         <p class="upload-title">IMB/PBG</p>
-                        <p class="upload-subtitle">Pilih file atau drag &amp; drop</p>
+                        <p class="upload-subtitle" style="{{ $isTester ? 'color:#059669;' : '' }}">{{ $isTester ? '✅ Aset tester digunakan' : 'Pilih file atau drag &amp; drop' }}</p>
                         <p class="field-error" aria-live="polite"></p>
                     </label>
 
                     <!-- dokumen surat kuasa -->
-                    <label class="upload-item" for="surat_kuasa" id="drop-zone-surat-kuasa">
+                    <label class="upload-item {{ $isTester ? 'is-valid' : '' }}" for="surat_kuasa" id="drop-zone-surat-kuasa">
                         <input type="file" id="surat_kuasa" name="surat_kuasa" accept=".jpg,.jpeg,.png,.pdf"
                             class="file-input-hidden">
                         <!-- Preview -->
-                        <div class="preview-container" style="display: none;">
-                            <img src="" class="img-preview"
+                        <div class="preview-container" style="display: {{ $isTester ? 'block' : 'none' }};">
+                            <img src="{{ $isTester ? $dummyDocs['surat_kuasa'] : '' }}" class="img-preview"
                                 style="max-width: 100px; border-radius: 5px; margin-bottom: 10px;">
                         </div>
                         <p class="upload-title">Surat Kuasa (Jika Ada)</p>
-                        <p class="upload-subtitle">Pilih file atau drag &amp; drop</p>
+                        <p class="upload-subtitle" style="{{ $isTester ? 'color:#059669;' : '' }}">{{ $isTester ? '✅ Aset tester digunakan' : 'Pilih file atau drag &amp; drop' }}</p>
                         <p class="field-error" aria-live="polite"></p>
                     </label>
                 </div>
@@ -217,6 +240,14 @@
         </form>
     </div>
 @endsection
+
+@push('head')
+    <meta name="is-tester" content="{{ $isTester ? '1' : '0' }}">
+@endpush
+
 @push('scripts')
+    <script>
+        window.W2H_IS_TESTER = {{ $isTester ? 'true' : 'false' }};
+    </script>
     <script src="{{ asset('js/customer/form_pembangunan_script.js') }}"></script>
 @endpush

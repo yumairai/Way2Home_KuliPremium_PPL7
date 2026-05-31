@@ -57,6 +57,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    async function handleBayarResponse(data, { onSettled }) {
+        // Tester bypass: tidak ada snap_token, langsung sukses
+        if (data.status === 'success') {
+            W2HDialog.success('Pembayaran berhasil diproses.');
+            setTimeout(() => window.location.reload(), 1500);
+            return;
+        }
+
+        if (data.snap_token) {
+            openSnap(data.snap_token, { onSettled, onClose: onSettled });
+            return;
+        }
+
+        // Fallback: response tidak dikenali
+        W2HDialog.error(data.message || 'Gagal mendapatkan token pembayaran.');
+        onSettled?.();
+    }
+
     // ─── Batalkan Proyek ─────────────────────────────────────────
     if (cancelBtn) {
         cancelBtn.addEventListener('click', async () => {
@@ -128,18 +146,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const data = await initiateBayar(pembayaranId);
-                if (data.snap_token) {
-                    openSnap(data.snap_token, { onSettled: resetBtn, onClose: resetBtn });
-                } else {
-                    W2HDialog.error(data.message || 'Gagal mendapatkan token pembayaran.');
-                    resetBtn();
-                }
+                await handleBayarResponse(data, { onSettled: resetBtn }); // ← ganti ini
             } catch {
                 W2HDialog.error('Terjadi kesalahan koneksi.');
                 resetBtn();
             }
         });
     }
+
 
     // ─── Pantau Progress ─────────────────────────────────────────
     if (progressBtn) {
@@ -184,12 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const data = await initiateBayar(pembayaranId);
-                if (data.snap_token) {
-                    openSnap(data.snap_token, { onSettled: resetBtn, onClose: resetBtn });
-                } else {
-                    W2HDialog.error(data.message || 'Gagal mendapatkan token pembayaran.');
-                    resetBtn();
-                }
+                await handleBayarResponse(data, { onSettled: resetBtn }); // ← ganti ini
             } catch {
                 W2HDialog.error('Terjadi kesalahan koneksi.');
                 resetBtn();

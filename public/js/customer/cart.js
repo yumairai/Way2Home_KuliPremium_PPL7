@@ -160,6 +160,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
+                        if (!data.token) {
+                            W2HDialog.success('Pembayaran berhasil diproses.');
+                            setTimeout(() => window.location.href = '/order', 1500);
+                            return;
+                        }
                         window.snap.pay(data.token, {
                             onSuccess: function (result) {
                                 const savePrimary = document.getElementById('save_primary').checked;

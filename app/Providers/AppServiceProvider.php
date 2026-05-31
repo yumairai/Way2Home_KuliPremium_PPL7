@@ -5,8 +5,11 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Pagination\Paginator;
 use Carbon\Carbon;
+
+use App\Listeners\HandleTesterWorkflow;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::subscribe(HandleTesterWorkflow::class);
         View::composer('*', function ($view) {
             $view->with('user', Auth::user());
         });

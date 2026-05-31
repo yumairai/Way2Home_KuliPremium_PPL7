@@ -19,7 +19,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone_number',
         'address',
         'avatar',
-        'is_first_login'
+        'is_tester',
+        'is_first_login',
     ];
 
     protected $hidden = [
@@ -31,8 +32,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-            'is_first_login' => 'boolean',
+            'password'          => 'hashed',
+            'is_tester'         => 'boolean',
+            'is_first_login'    => 'boolean',
         ];
     }
 

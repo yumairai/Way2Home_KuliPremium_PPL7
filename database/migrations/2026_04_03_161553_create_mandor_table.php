@@ -22,6 +22,7 @@ return new class extends Migration
             $table->integer('lama_pengalaman');
             $table->enum('status', ['aktif', 'nonaktif', 'suspend'])->default('aktif');
             $table->float('rating')->default(0);
+            $table->boolean('is_ghost')->default(false);
             $table->timestamps();
         });
     }

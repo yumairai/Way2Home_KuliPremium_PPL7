@@ -12,6 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\BypassTesterRequest::class, // ← pindah ke sini
+        ]);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'customer' => \App\Http\Middleware\IsCustomer::class,

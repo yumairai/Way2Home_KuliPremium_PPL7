@@ -14,7 +14,10 @@ class ProyekSeeder extends Seeder
      */
     public function run(): void
     {
-        $customerIds = Customer::pluck('id')->toArray();
+        // Hanya ambil customer reguler (bukan akun tester) agar proyek demo terbuat dengan benar
+        $customerIds = Customer::whereHas('user', fn ($q) => $q->where('is_tester', false))
+                               ->pluck('id')
+                               ->toArray();
 
         $proyekData = [
             [

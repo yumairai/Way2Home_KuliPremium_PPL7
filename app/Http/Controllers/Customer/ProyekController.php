@@ -77,14 +77,16 @@ class ProyekController extends Controller
     public function store(Request $request, \App\Services\SupabaseStorageService $storageService)
     {
         // 1. Validasi input
+        $isTester = Auth::user()?->is_tester;
+
         $request->validate([
             'package'          => 'required|in:paket-komplit,material-only',
             'alamat_proyek'    => 'required_if:package,paket-komplit|nullable|string',
             'desain_id'        => 'required|exists:desain_rumah,id',
-            'sertifikat_tanah' => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
-            'ktp_pemilik'      => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
-            'imb_pbg'          => 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
-            'surat_kuasa'      => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'sertifikat_tanah' => $isTester ? 'nullable|string' : 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
+            'ktp_pemilik'      => $isTester ? 'nullable|string' : 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
+            'imb_pbg'          => $isTester ? 'nullable|string' : 'required_if:package,paket-komplit|file|mimes:pdf,jpg,png|max:2048',
+            'surat_kuasa'      => $isTester ? 'nullable|string' : 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ], [
             'sertifikat_tanah.uploaded' => 'File Sertifikat Tanah terlalu besar. Maksimal 2 MB per file.',
             'ktp_pemilik.uploaded' => 'File KTP Pemilik terlalu besar. Maksimal 2 MB per file.',
@@ -108,21 +110,14 @@ class ProyekController extends Controller
 
         foreach ($dokumenList as $inputName => $label) {
             if ($request->hasFile($inputName)) {
+                // Upload normal — file beneran dari user
                 try {
                     $path = $storageService->uploadPrivate(
                         $request->file($inputName),
                         Auth::id(),
                         'proyek/dokumen'
                     );
-                    // 🔥 DEBUG PENTING
-                    if (!$path) {
-                        throw new \Exception("Upload gagal: path kosong");
-                    }
-
-                    Log::info('UPLOAD SUCCESS', [
-                        'label' => $label,
-                        'path' => $path,
-                    ]);
+                    if (!$path) throw new \Exception("Upload gagal: path kosong");
                     $uploadedFiles[] = ['path' => $path, 'label' => $label];
                 } catch (\Exception $e) {
                     foreach ($uploadedFiles as $uploaded) {
@@ -133,6 +128,12 @@ class ProyekController extends Controller
                         'message' => 'Gagal upload dokumen "' . $label . '": ' . $e->getMessage()
                     ], 500);
                 }
+            } elseif ($isTester && $request->filled($inputName)) {
+                // Tester: pakai dummy URL yang diinject middleware, skip upload
+                $uploadedFiles[] = [
+                    'path'  => $request->input($inputName),
+                    'label' => $label,
+                ];
             }
         }
 
@@ -176,6 +177,21 @@ class ProyekController extends Controller
             ], 200);
         }
 
+        if ($isTester && empty($uploadedFiles)) {
+            $dummyDocs = [
+                'sertifikat_tanah' => ['path' => $request->input('sertifikat_tanah'), 'label' => 'Sertifikat Tanah'],
+                'ktp_pemilik'      => ['path' => $request->input('ktp_pemilik'),      'label' => 'KTP Pemilik'],
+                'imb_pbg'          => ['path' => $request->input('imb_pbg'),          'label' => 'IMB/PBG'],
+                'surat_kuasa'      => ['path' => $request->input('surat_kuasa'),      'label' => 'Surat Kuasa'],
+            ];
+
+            foreach ($dummyDocs as $doc) {
+                if (!empty($doc['path'])) {
+                    $uploadedFiles[] = $doc;
+                }
+            }
+        }
+
         DB::beginTransaction();
 
         try {
@@ -183,7 +199,7 @@ class ProyekController extends Controller
                 'customer_id'   => $customer->id,
                 'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => $request->alamat_proyek,
-                'status_proyek' => 'Menunggu Verifikasi',
+                'status_proyek' => $isTester ? 'Pembayaran DP' : 'Menunggu Verifikasi',
                 'tanggal_mulai' => now(),
             ]);
 
@@ -197,7 +213,7 @@ class ProyekController extends Controller
                     'detail_bangun_id'  => $detail->id,
                     'jenis_dokumen'     => $uploaded['label'],
                     'file_path'         => $uploaded['path'],
-                    'status_verifikasi' => 'pending',
+                    'status_verifikasi' => $isTester ? 'disetujui' : 'pending',
                 ]);
             }
 
@@ -221,8 +237,10 @@ class ProyekController extends Controller
         } catch (\Throwable $e) {
             DB::rollback();
 
-            foreach ($uploadedFiles as $uploaded) {
-                $storageService->deletePrivate($uploaded['path']);
+            if (!$isTester) {
+                foreach ($uploadedFiles as $uploaded) {
+                    $storageService->deletePrivate($uploaded['path']);
+                }
             }
 
             return response()->json([

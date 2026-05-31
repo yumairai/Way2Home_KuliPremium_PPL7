@@ -76,7 +76,7 @@
                         <span class="material-symbols-outlined rf-upload-note-icon" data-icon="info">info</span>
                         <p class="rf-upload-note-text">Minimal 1 gambar dan maksimal 6 gambar</p>
                     </div>
-                    <p class="field-error" id="foto-error" aria-live="polite"></p>
+                <p class="field-error" id="foto-error" aria-live="polite"></p>
                 </div>
                 <!-- Submit Button -->
                 <div class="rf-submit-wrap">
@@ -91,5 +91,8 @@
     </main>
 @endsection
 @push('scripts')
+    <script>
+        window.W2H_IS_TESTER = {{ auth()->user()?->is_tester ? 'true' : 'false' }};
+    </script>
     <script src="{{ asset('js/customer/renovation_form.js') }}"></script>
 @endpush

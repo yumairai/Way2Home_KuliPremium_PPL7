@@ -435,5 +435,8 @@
     </div>
 @endsection
 @push('scripts')
+    <script>
+        window.W2H_IS_TESTER = {{ auth()->user()?->is_tester ? 'true' : 'false' }};
+    </script>
     <script src="{{ asset('js/customer/renovasi.js') }}"></script>
 @endpush

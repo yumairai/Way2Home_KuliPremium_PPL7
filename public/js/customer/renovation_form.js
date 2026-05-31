@@ -1,8 +1,9 @@
-
 (function () {
+    const isTester = window.W2H_IS_TESTER === true;
+
     const MAX_FILES = 6;
     const MIN_FILES = 1;
-    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    const MAX_SIZE = 2 * 1024 * 1024;
 
     const uploadBox = document.querySelector('.rf-upload-box');
     const input = document.getElementById('foto_detail_input');
@@ -22,17 +23,14 @@
     function formatBudget(value) {
         const digits = getBudgetDigits(value);
         if (!digits) return '';
-
         return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
     function syncBudgetInput() {
         if (!budgetInput) return;
-
         budgetInput.value = formatBudget(budgetInput.value);
     }
 
-    // If preview placeholders were removed from markup, create dynamic slots
     if (previewItems.length === 0) {
         for (let i = 0; i < MAX_FILES; i++) {
             const item = document.createElement('div');
@@ -62,22 +60,33 @@
         previewItems = Array.from(previewGrid.querySelectorAll('.rf-preview-item'));
     }
 
-    // hide native input visually (CSS also ensures this)
     input.classList.add('rf-file-input-hidden');
 
     if (budgetInput) {
         syncBudgetInput();
-
-        budgetInput.addEventListener('input', () => {
-            syncBudgetInput();
-        });
-
-        budgetInput.addEventListener('blur', () => {
-            syncBudgetInput();
-        });
+        budgetInput.addEventListener('input', () => syncBudgetInput());
+        budgetInput.addEventListener('blur', () => syncBudgetInput());
     }
 
     let files = [];
+
+    // ── Tester dummy setup ────────────────────────────────────────────
+    let dummyItem = null;
+    if (isTester) {
+        const dummyUrl = 'https://ovyjfudrdwrlyioygotq.supabase.co/storage/v1/object/public/public-assets/testing/renovasi/foto_renovasi.jpg';
+
+        dummyItem = document.createElement('div');
+        dummyItem.className = 'rf-preview-item';
+        dummyItem.id = 'tester-dummy-preview';
+
+        const dummyImg = document.createElement('img');
+        dummyImg.className = 'rf-preview-image';
+        dummyImg.src = dummyUrl;
+        dummyImg.alt = 'Foto tester';
+
+        dummyItem.appendChild(dummyImg);
+        // Tidak ada tombol hapus — sengaja
+    }
 
     function setError(msg) {
         if (fotoError) fotoError.textContent = msg || '';
@@ -103,7 +112,6 @@
                 btn.style.display = '';
                 btn.dataset.index = idx;
             } else {
-                // show dummy if provided in markup, otherwise hide the slot
                 const original = img.dataset.placeholder;
                 if (original) {
                     img.src = original;
@@ -114,9 +122,20 @@
                 btn.style.display = 'none';
             }
         });
+
+        // Tester: dummy muncul kalau tidak ada file, hilang kalau ada file
+        if (isTester && dummyItem) {
+            if (files.length > 0) {
+                dummyItem.style.display = 'none';
+            } else {
+                dummyItem.style.display = '';
+                if (!previewGrid.contains(dummyItem)) {
+                    previewGrid.prepend(dummyItem);
+                }
+            }
+        }
     }
 
-    // Initialize placeholder backups
     previewItems.forEach(item => {
         const img = item.querySelector('.rf-preview-image');
         if (img && !img.dataset.placeholder) img.dataset.placeholder = img.src || '';
@@ -138,18 +157,17 @@
         renderPreviews();
     }
 
-    // Click upload box opens file dialog
     uploadBox.addEventListener('click', (e) => {
         if (e.target.classList.contains('rf-preview-remove-btn')) return;
+        // Jangan buka file dialog kalau klik dummy
+        if (isTester && dummyItem && dummyItem.contains(e.target)) return;
         input.click();
     });
 
-    // Input change
     input.addEventListener('change', (e) => {
         addFiles(e.target.files);
     });
 
-    // Drag & drop
     ['dragenter', 'dragover'].forEach(ev => {
         uploadBox.addEventListener(ev, (e) => {
             e.preventDefault();
@@ -157,6 +175,7 @@
             uploadBox.classList.add('is-dragging');
         });
     });
+
     ['dragleave', 'drop'].forEach(ev => {
         uploadBox.addEventListener(ev, (e) => {
             e.preventDefault();
@@ -172,22 +191,27 @@
         }
     });
 
-    // Remove handlers
     previewGrid.addEventListener('click', (e) => {
         const btn = e.target.closest('.rf-preview-remove-btn');
         if (!btn) return;
         const idx = Number(btn.dataset.index);
         if (Number.isFinite(idx) && idx >= 0 && idx < files.length) {
             files.splice(idx, 1);
-            // revoke object URLs
             renderPreviews();
             syncNativeInput();
         }
     });
 
-    // On form submit, validate min files
     if (form) {
         form.addEventListener('submit', (e) => {
+            if (isTester) {
+                if (submitBtn) {
+                    submitBtn.classList.add('is-loading');
+                    submitBtn.disabled = true;
+                }
+                return true;
+            }
+
             if (files.length < MIN_FILES) {
                 e.preventDefault();
                 setError('Mohon unggah minimal 1 gambar kerusakan.');
@@ -199,11 +223,9 @@
                 submitBtn.classList.add('is-loading');
                 submitBtn.disabled = true;
             }
-            // allow submit
             return true;
         });
     }
 
-    // initial render
     renderPreviews();
 })();

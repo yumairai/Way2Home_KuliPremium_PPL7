@@ -4,10 +4,11 @@
  */
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024;
+const isTester = window.W2H_IS_TESTER === true;
 const documentFields = [
-    { id: 'sertifikat_tanah', label: 'Sertifikat Tanah', required: true },
-    { id: 'ktp_pemilik', label: 'KTP Pemilik', required: true },
-    { id: 'imb_pbg', label: 'IMB/PBG', required: true },
+    { id: 'sertifikat_tanah', label: 'Sertifikat Tanah', required: !isTester },
+    { id: 'ktp_pemilik', label: 'KTP Pemilik', required: !isTester },
+    { id: 'imb_pbg', label: 'IMB/PBG', required: !isTester },
     { id: 'surat_kuasa', label: 'Surat Kuasa', required: false },
 ];
 
@@ -124,6 +125,10 @@ function syncDocumentField(input, { required, label }, showMissingError, renderP
     const isRequired = required && isPackageKomplit;
 
     if (!selectedFile) {
+        if (!isTester) {
+            clearDocumentSubtitle(context);
+            setDocumentState(input, { isValid: false });
+        }
         resetDocumentPreview(context);
         clearDocumentSubtitle(context);
         setDocumentState(input, { isValid: false, isDragging: false });
@@ -194,6 +199,8 @@ function hasAnyUserInput() {
     }
 
     const addressFilled = Boolean(alamatInput && alamatInput.value.trim());
+    if (isTester) return addressFilled;
+
     const documentFilled = documentFields.some(field => {
         const input = document.getElementById(field.id);
         return Boolean(input && input.files && input.files.length > 0);
