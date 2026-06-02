@@ -41,12 +41,21 @@
                 @forelse($mandors as $mandor)
                     @php
                         $isBusy = $mandor->status === 'nonaktif';
+                        $defaultAvatar = asset('images/aset/avatar.jpg');
+                        $avatarPath = trim((string) $mandor->path_foto_profil);
+                        $avatarSrc = $defaultAvatar;
+
+                        if ($avatarPath !== '') {
+                            $avatarSrc = \Illuminate\Support\Str::startsWith($avatarPath, ['http://', 'https://'])
+                                ? $avatarPath
+                                : asset('storage/' . ltrim($avatarPath, '/'));
+                        }
                     @endphp
                     <div class="mandor-entry {{ $isBusy ? 'busy' : '' }}" data-name="{{ strtolower($mandor->user->name) }}">
                         <div class="mandor-entry-info">
                             <div class="mandor-entry-avatar-container">
-                                <img class="mandor-entry-avatar"
-                                    src="{{ $mandor->path_foto_profil ? asset('storage/' . $mandor->path_foto_profil) : asset('images/default-avatar.png') }}"
+                                <img class="mandor-entry-avatar" src="{{ $avatarSrc }}"
+                                    onerror="this.onerror=null;this.src='{{ $defaultAvatar }}';"
                                     alt="{{ $mandor->user->name }}" />
                                 <span class="mandor-entry-status-dot"></span>
                             </div>
