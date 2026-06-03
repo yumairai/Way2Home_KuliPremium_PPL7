@@ -1,0 +1,235 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+}
+
+/* CONTAINER */
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+/* LEFT (65%) */
+.left {
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+    width: 65%;
+    background: linear-gradient(135deg, var(--primary), var(--primary-container));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.left-background {
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+.left-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.left-content {
+    position: relative;
+    z-index: 1;
+}
+
+/* RIGHT (35%) */
+.right {
+    width: 35%;
+    background-color: #2B3361;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+}
+
+/* FORM BOX */
+.form-box {
+    width: 400px;
+    padding: 25px 40px;
+    background: rgb(235, 250, 255);
+    border-radius: 5px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(160, 160, 160, 0.9);
+}
+
+.form-box h2 {
+    margin-bottom: 2px;
+    color: #2B3361;
+}
+
+.form-box p {
+    margin-bottom: 20px;
+    color: #647ca9;
+}
+
+/* INPUT */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+    /* Beri ruang agar teks tidak tertutup ikon */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #2B3361;
+    font-size: 14px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #045ec2;
+}
+
+/* OPTIONS */
+.options {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.options a {
+    text-decoration: none;
+    color: #045ec2;
+}
+
+.options label {
+    color: #2B3361;
+}
+
+/* BUTTON */
+.btn-login {
+    width: 100%;
+    padding: 12px;
+    background-color: #2B3361;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-login:hover {
+    background-color: #21274b;
+}
+
+.btn-login:disabled {
+    cursor: wait;
+    opacity: 0.85;
+}
+
+.btn-login__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    display: none;
+    animation: login-spin 0.8s linear infinite;
+}
+
+.btn-login.is-loading .btn-login__spinner {
+    display: inline-block;
+}
+
+.btn-login.is-loading .btn-login__text {
+    opacity: 0.95;
+}
+
+@keyframes login-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* REGISTER */
+.register {
+    margin-top: 15px;
+    font-size: 14px;
+}
+
+.register a {
+    color: #045ec2;
+    text-decoration: none;
+}
+
+/* RIGHT SIDE CONTENT */
+.branding h1 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.branding p {
+    font-size: 16px;
+    color: #fcd47c;
+}
+
+.branding img {
+    width: 120px;
+    filter: brightness(0) invert(1);
+}
+
+.error-text {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.success-text {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    margin-bottom: 15px;
+    text-align: center;
+    border: 1px solid #c3e6cb;
+}

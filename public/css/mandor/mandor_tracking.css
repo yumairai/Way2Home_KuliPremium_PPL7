@@ -1,0 +1,1320 @@
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.mandor-page {
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--on-background);
+    font-family: 'Inter', sans-serif;
+}
+
+.mandor-shell {
+    width: 100%;
+    max-width: 1536px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.mandor-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(251, 248, 255, 0.8);
+    box-shadow: 0 24px 48px rgba(14, 23, 68, 0.06);
+}
+
+.mandor-topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    gap: 1rem;
+}
+
+.mandor-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.mandor-brand {
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.mandor-toplinks {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.mandor-toplink {
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: color 0.2s ease;
+}
+
+.mandor-toplink:hover {
+    color: var(--primary-container);
+}
+
+.mandor-toplink-active {
+    color: var(--primary-container);
+    border-bottom: 2px solid var(--primary-container);
+    padding-bottom: 0.25rem;
+}
+
+.mandor-account-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.mandor-user-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-right: 1rem;
+    border-right: 1px solid rgba(194, 198, 213, 0.3);
+}
+
+.mandor-user-text {
+    display: none;
+    text-align: right;
+}
+
+.mandor-user-name {
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 700;
+}
+
+.mandor-user-role {
+    color: var(--on-surface-variant);
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.mandor-user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.mandor-logout-btn {
+    border: 0;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.mandor-logout-btn:hover {
+    color: var(--error);
+}
+
+.mandor-main {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+}
+
+.mandor-main>section,
+.mandor-main>header,
+.mandor-main>div {
+    margin-bottom: 3rem;
+}
+
+.mandor-project-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: end;
+}
+
+.mandor-project-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.mandor-icon-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.mandor-project-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+.mandor-project-title {
+    margin-bottom: 1.5rem;
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(2.25rem, 6vw, 3.75rem);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.mandor-project-phase {
+    color: var(--primary-container);
+}
+
+.mandor-request-btn {
+    margin-top: .75rem;
+    width: 12rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: var(--on-surface);
+    color: var(--on-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    padding: .5rem .1rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    border-radius: 9999px;
+}
+
+.mandor-request-btn:hover {
+    opacity: 0.9;
+}
+
+.mandor-project-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.mandor-project-meta-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface-container);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    color: var(--on-surface-variant);
+    font-weight: 500;
+}
+
+.mandor-project-meta-pill.hightlight {
+    background: var(--primary-container);
+    color: var(--on-primary);
+}
+
+.mandor-project-meta-pill.hightlight span {
+    color: white;
+}
+
+.mandor-icon-primary {
+    color: var(--primary);
+}
+
+.mandor-project-dates {
+    background: var(--surface-container-low);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mandor-date-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mandor-date-row-divider {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(194, 198, 213, 0.2);
+}
+
+.mandor-date-label {
+    color: var(--on-surface-variant);
+    font-weight: 500;
+}
+
+.mandor-date-value {
+    color: var(--on-surface);
+    font-weight: 700;
+}
+
+.mandor-main-grid {
+    align-items: start;
+}
+
+.mandor-progress-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.mandor-progress-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-container-lowest);
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 24px 48px rgba(14, 23, 68, 0.06);
+}
+
+.mandor-progress-bg-shape {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 8rem;
+    height: 8rem;
+    border-bottom-left-radius: 9999px;
+    background: rgba(4, 94, 194, 0.05);
+}
+
+.mandor-progress-head {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.mandor-progress-kicker {
+    color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.mandor-progress-title {
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 800;
+}
+
+.mandor-progress-number {
+    color: var(--primary-container);
+    font-family: 'Manrope', sans-serif;
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: 900;
+}
+
+.mandor-progress-track {
+    width: 100%;
+    height: 1rem;
+    border-radius: 9999px;
+    margin-bottom: 2rem;
+    background: var(--surface-container);
+    overflow: hidden;
+}
+
+.mandor-progress-fill {
+    width: 50%;
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(to right, var(--primary), var(--primary-container));
+}
+
+.mandor-current-milestone {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    border-radius: 1rem;
+    background: var(--surface-container-low);
+    padding: 1.25rem;
+}
+
+.mandor-current-milestone-icon-wrap {
+    border-radius: 0.75rem;
+    background: rgba(101, 66, 0, 0.1);
+    padding: 0.75rem;
+}
+
+.mandor-icon-tertiary {
+    color: var(--tertiary);
+}
+
+.mandor-current-milestone-label {
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.mandor-current-milestone-title {
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+}
+
+.mandor-task-block {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mandor-task-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+}
+
+.mandor-icon-primary-container {
+    color: var(--primary-container);
+}
+
+.mandor-task-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.mandor-task-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 1rem;
+    background: var(--surface-container-lowest);
+    padding: 1.5rem;
+    transition: background-color 0.2s ease;
+}
+
+.mandor-task-item:hover {
+    background: var(--surface-container);
+}
+
+.mandor-task-item-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.mandor-task-item-text {
+    color: var(--on-surface);
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+}
+
+.mandor-complete-btn {
+    border: 0;
+    border-radius: 9999px;
+    background: var(--primary-container);
+    color: var(--on-primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.mandor-complete-btn:hover {
+    opacity: 0.9;
+}
+
+.mandor-complete-btn:active {
+    transform: scale(0.95);
+}
+
+.mandor-task-item.completed {
+    opacity: 0.5;
+}
+
+.mandor-task-item.completed .mandor-task-item-text {
+    text-decoration: line-through;
+    color: var(--on-surface-variant);
+}
+
+.mandor-task-done-label {
+    color: var(--primary);
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.5rem 1.5rem;
+}
+
+.mandor-complete-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.mandor-show-more-btn {
+    width: 100%;
+    border: 2px dashed rgba(194, 198, 213, 0.4);
+    border-radius: 1rem;
+    padding: 1rem;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.mandor-show-more-btn:hover {
+    background: var(--surface-container);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.mandor-activity-card {
+    height: auto;
+}
+
+.mandor-activity-list {
+    flex-grow: 0;
+    min-height: 0;
+}
+
+.mandor-activity-empty {
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+    font-style: italic;
+}
+
+.mandor-activity-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1.5rem;
+    background: var(--surface-container);
+    padding: 2rem;
+}
+
+.mandor-activity-heading {
+    margin-bottom: 1.5rem;
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+}
+
+.mandor-activity-list {
+    flex-grow: 1;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.mandor-activity-item {
+    display: flex;
+    gap: 1rem;
+}
+
+.mandor-activity-bar {
+    width: 0.25rem;
+    border-radius: 9999px;
+    background: var(--outline-variant);
+}
+
+.mandor-activity-bar-active {
+    background: var(--primary);
+}
+
+.mandor-activity-title {
+    color: var(--on-surface);
+    font-weight: 700;
+}
+
+.mandor-activity-desc {
+    color: var(--on-surface-variant);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 500;
+}
+
+.mandor-new-activity {
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(194, 198, 213, 0.3);
+    display: grid;
+    gap: 1rem;
+}
+
+.mandor-new-activity-title {
+    color: var(--on-surface);
+    font-weight: 700;
+}
+
+.mandor-new-activity-fields {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.mandor-input,
+.mandor-textarea {
+    width: 100%;
+    border: 0;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: var(--surface-container-lowest);
+    color: var(--on-surface);
+    font: inherit;
+}
+
+.mandor-textarea {
+    resize: none;
+}
+
+.mandor-input::placeholder,
+.mandor-textarea::placeholder {
+    color: rgba(66, 71, 83, 0.5);
+}
+
+.mandor-input:focus,
+.mandor-textarea:focus {
+    outline: 2px solid rgba(0, 71, 150, 0.2);
+}
+
+.mandor-add-activity-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 9999px;
+    padding: 1rem;
+    background: linear-gradient(to right, var(--primary), var(--primary-container));
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.mandor-add-activity-btn:hover {
+    opacity: 0.9;
+}
+
+.mandor-add-activity-btn:active {
+    transform: scale(0.98);
+}
+
+.mandor-docs-section {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.mandor-docs-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.mandor-docs-title {
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+    font-weight: 800;
+}
+
+.mandor-upload-btn {
+    border: 0;
+    border-radius: 9999px;
+    padding: 0.75rem 2rem;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: 700;
+    box-shadow: 0 10px 15px -3px rgba(0, 71, 150, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.mandor-upload-btn:hover {
+    opacity: 0.9;
+}
+
+.mandor-docs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.mandor-upload-placeholder,
+.mandor-doc-photo-card {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 1.5rem;
+    overflow: hidden;
+}
+
+.mandor-upload-placeholder {
+    border: 4px dashed rgba(194, 198, 213, 0.4);
+    background: var(--surface-container-low);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.mandor-upload-placeholder:hover {
+    background: var(--surface-container);
+    border-color: rgba(0, 71, 150, 0.4);
+}
+
+.mandor-upload-icon {
+    color: var(--outline);
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+}
+
+.mandor-upload-text {
+    color: var(--on-surface-variant);
+    font-weight: 700;
+}
+
+.mandor-upload-hint {
+    color: var(--outline);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.mandor-doc-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.mandor-doc-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-end;
+    padding: 1rem;
+    opacity: 0;
+    background: rgba(0, 0, 0, 0.4);
+    transition: opacity 0.2s ease;
+}
+
+.mandor-doc-caption {
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.mandor-doc-photo-card:hover .mandor-doc-photo {
+    transform: scale(1.1);
+}
+
+.mandor-doc-photo-card:hover .mandor-doc-overlay {
+    opacity: 1;
+}
+
+.mandor-reno-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+.mandor-reno-card {
+    border-radius: 2rem;
+    padding: 2rem;
+}
+
+.mandor-reno-card-main,
+.mandor-reno-card-gallery {
+    background: var(--surface-container-low);
+    border: 1px solid rgba(194, 198, 213, 0.2);
+}
+
+.mandor-reno-card-main {
+    box-shadow: 0 8px 20px rgba(14, 23, 68, 0.06);
+}
+
+.mandor-reno-card-side {
+    background: var(--primary);
+    color: var(--on-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 24px 40px rgba(0, 71, 150, 0.18);
+}
+
+.mandor-reno-card-analysis {
+    background: var(--surface-container);
+}
+
+.mandor-reno-card-upload {
+    background: var(--surface-container-low);
+    border: 1px solid rgba(194, 198, 213, 0.2);
+}
+
+.mandor-reno-head,
+.mandor-reno-head-row {
+    display: flex;
+    align-items: center;
+}
+
+.mandor-reno-head {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.mandor-reno-head-lg {
+    margin-bottom: 2rem;
+}
+
+.mandor-reno-head-row {
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.mandor-reno-icon-wrap {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mandor-reno-icon-wrap-primary {
+    color: var(--primary);
+    background: rgba(0, 71, 150, 0.1);
+}
+
+.mandor-reno-icon-wrap-secondary {
+    color: var(--secondary);
+    background: rgba(82, 94, 125, 0.12);
+}
+
+.mandor-reno-icon-wrap-tertiary {
+    color: var(--tertiary);
+    background: rgba(101, 66, 0, 0.1);
+}
+
+.mandor-reno-icon-wrap-light {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.mandor-reno-title {
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.mandor-reno-title-on-primary {
+    color: var(--on-primary);
+}
+
+.mandor-reno-subtitle {
+    color: var(--on-surface-variant);
+    font-weight: 500;
+}
+
+.mandor-reno-body {
+    background: var(--surface-container-lowest);
+    border-radius: 1rem;
+    border: 1px solid rgba(194, 198, 213, 0.28);
+    padding: 2rem;
+}
+
+.mandor-reno-description {
+    color: var(--on-surface-variant);
+    font-size: 1.125rem;
+    line-height: 1.7;
+}
+
+.mandor-reno-total {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mandor-reno-total-label {
+    margin: 0 0 0.25rem;
+    color: rgba(255, 255, 255, 0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.mandor-reno-total-value {
+    margin: 0;
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(2rem, 3.4vw, 2.25rem);
+    line-height: 1.1;
+    font-weight: 900;
+}
+
+.mandor-reno-gallery-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.mandor-reno-photo-card {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 14px 28px rgba(14, 23, 68, 0.14);
+    cursor: pointer;
+}
+
+.mandor-reno-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.mandor-reno-photo-overlay {
+    position: absolute;
+    inset: 0;
+    padding: 1rem;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0));
+    transition: opacity 0.2s ease;
+}
+
+.mandor-reno-photo-caption {
+    margin: 0;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.mandor-reno-photo-card:hover .mandor-reno-photo {
+    transform: scale(1.1);
+}
+
+.mandor-reno-photo-card:hover .mandor-reno-photo-overlay {
+    opacity: 1;
+}
+
+.mandor-reno-analysis-wrap {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.mandor-reno-upload-btn {
+    border: 0;
+    border-radius: 9999px;
+    padding: 0.65rem 1.35rem;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.mandor-reno-upload-btn:hover {
+    opacity: 0.9;
+}
+
+.mandor-reno-file-input {
+    display: none;
+}
+
+.mandor-reno-dropzone {
+    border: 2px dashed rgba(0, 71, 150, 0.35);
+    border-radius: 1rem;
+    background: var(--surface-container-lowest);
+    min-height: 170px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.mandor-reno-dropzone:hover,
+.mandor-reno-dropzone.is-dragover {
+    border-color: var(--primary);
+    background: var(--surface-container);
+    transform: translateY(-1px);
+}
+
+.mandor-reno-dropzone.is-error {
+    border-color: #dc2626;
+    background: #fef2f2;
+}
+
+.mandor-reno-dropzone.is-error .mandor-reno-dropzone-icon,
+.mandor-reno-dropzone.is-error .mandor-reno-dropzone-title,
+.mandor-reno-dropzone.is-error .mandor-reno-dropzone-hint {
+    color: #dc2626;
+}
+
+.mandor-reno-dropzone:focus-visible {
+    outline: 2px solid rgba(0, 71, 150, 0.22);
+    outline-offset: 3px;
+}
+
+.mandor-reno-dropzone-icon {
+    font-size: 2.25rem;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.mandor-reno-dropzone-title {
+    margin: 0;
+    color: var(--on-surface);
+    font-weight: 700;
+}
+
+.mandor-reno-dropzone-hint {
+    margin: 0.35rem 0 0;
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.mandor-reno-dropzone-error {
+    min-height: 1.25rem;
+    margin: 0.5rem 0 0;
+    color: #dc2626;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.mandor-reno-preview-grid {
+    margin-top: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.mandor-reno-preview-card {
+    position: relative;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    background: #e7edf8;
+    border: 1px solid rgba(194, 198, 213, 0.35);
+}
+
+.mandor-reno-preview-remove {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.45rem;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 0;
+    border-radius: 9999px;
+    background: rgba(15, 23, 42, 0.72);
+    color: #fff;
+    font-size: 0;
+    cursor: pointer;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.mandor-reno-preview-remove::before {
+    content: 'close';
+    font-family: 'Material Symbols Outlined';
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.mandor-reno-preview-remove:hover {
+    background: rgba(220, 38, 38, 0.9);
+}
+
+.mandor-reno-preview-remove:active {
+    transform: scale(0.95);
+}
+
+.mandor-reno-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mandor-reno-preview-name {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.72rem;
+    color: #fff;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.1));
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mandor-reno-textarea {
+    width: 100%;
+    min-height: 200px;
+    border: 0;
+    border-radius: 1rem;
+    background: var(--surface-container-lowest);
+    box-shadow: inset 0 0 0 1px rgba(194, 198, 213, 0.35);
+    padding: 1.5rem;
+    color: var(--on-surface-variant);
+    font-size: 1.125rem;
+    line-height: 1.7;
+    font-family: inherit;
+    resize: none;
+}
+
+.mandor-reno-textarea:focus {
+    outline: 0;
+    box-shadow: inset 0 0 0 2px rgba(0, 71, 150, 0.2);
+}
+
+.mandor-reno-footer-action {
+    margin-top: 3rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.mandor-reno-btn-wrap {
+    display: flex;
+    gap: 1rem;
+}
+
+.mandor-reno-action-btn {
+    border: 0;
+    border-radius: 9999px;
+    padding: 1rem 3rem;
+    background: linear-gradient(to right, var(--primary), var(--primary-container));
+    color: #fff;
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.125rem;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 18px 32px rgba(0, 71, 150, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mandor-reno-action-btn.is-loading {
+    cursor: wait;
+    opacity: 0.92;
+}
+
+.mandor-reno-action-btn__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    display: none;
+    animation: mandor-reno-spin 0.8s linear infinite;
+}
+
+.mandor-reno-action-btn.is-loading .mandor-reno-action-btn__spinner {
+    display: inline-block;
+}
+
+.mandor-reno-action-btn.is-loading .mandor-reno-action-btn__text {
+    opacity: 0.95;
+}
+
+@keyframes mandor-reno-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.mandor-reno-action-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 36px rgba(0, 71, 150, 0.34);
+}
+
+.mandor-reno-action-btn:active {
+    transform: scale(0.96);
+}
+
+.mandor-footer {
+    border-top: 1px solid #f4f2ff;
+    background: #fbf8ff;
+}
+
+.mandor-footer-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+.mandor-footer-brand-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.mandor-footer-brand {
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+}
+
+.mandor-footer-copy {
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.mandor-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+}
+
+.mandor-footer-link {
+    color: var(--on-surface-variant);
+    font-size: 0.875rem;
+    text-decoration: none;
+    text-underline-offset: 4px;
+    transition: color 0.2s ease;
+}
+
+.mandor-footer-link:hover {
+    color: var(--primary-container);
+    text-decoration: underline;
+}
+
+@media (min-width: 640px) {
+    .mandor-user-text {
+        display: block;
+    }
+}
+
+@media (min-width: 768px) {
+    .mandor-footer-inner {
+        flex-direction: row;
+    }
+
+    .mandor-reno-gallery-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mandor-docs-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mandor-upload-placeholder,
+    .mandor-doc-photo-card {
+        aspect-ratio: 1 / 1;
+    }
+}
+
+@media (min-width: 1024px) {
+    .mandor-project-head {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .mandor-reno-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .mandor-reno-card-main {
+        grid-column: span 12;
+    }
+
+    .mandor-reno-card-side {
+        grid-column: span 4;
+    }
+
+    .mandor-reno-card-gallery,
+    .mandor-reno-card-analysis,
+    .mandor-reno-card-upload {
+        grid-column: span 12;
+    }
+
+    .mandor-reno-gallery-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .mandor-project-main {
+        grid-column: span 8;
+    }
+
+    .mandor-project-dates {
+        grid-column: span 4;
+    }
+
+    .mandor-main-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .mandor-progress-column {
+        grid-column: span 2;
+    }
+
+    .mandor-activity-column {
+        grid-column: span 1;
+    }
+
+    .mandor-docs-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .mandor-reno-preview-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}

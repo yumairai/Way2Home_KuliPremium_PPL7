@@ -1,0 +1,395 @@
+:root {
+    --error: #ba1a1a;
+    --surface-container-lowest: #ffffff;
+    --primary: #004796;
+    --primary-container: #045ec2;
+    --tertiary: #654200;
+    --on-surface: #0e1744;
+    --on-surface-variant: #424753;
+    --on-background: #0e1744;
+    --on-primary: #ffffff;
+    --background: #fbf8ff;
+    --surface-container: #ececff;
+    --surface-container-low: #f4f2ff;
+    --outline-variant: #c2c6d5;
+    --outline: #727784;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p {
+    margin: 0;
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.mandor-page {
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--on-background);
+    font-family: 'Inter', sans-serif;
+}
+
+.mandor-shell {
+    width: 100%;
+    max-width: 1536px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.mandor-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(12px);
+    background: rgba(251, 248, 255, 0.8);
+    box-shadow: 0 24px 48px rgba(14, 23, 68, 0.06);
+}
+
+.mandor-topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    gap: 1rem;
+}
+
+.mandor-brand-row {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.mandor-brand {
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.mandor-toplinks {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.mandor-toplink {
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    transition: color 0.2s ease;
+}
+
+.mandor-toplink:hover {
+    color: var(--primary-container);
+}
+
+.mandor-toplink.active {
+    color: var(--primary-container);
+    border-bottom: 2px solid var(--primary-container);
+    padding-bottom: 0.25rem;
+}
+
+.mandor-account-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.mandor-user-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-right: 1rem;
+    border-right: 1px solid rgba(194, 198, 213, 0.3);
+}
+
+.mandor-user-text {
+    display: none;
+    text-align: right;
+}
+
+.mandor-user-name {
+    color: var(--on-surface);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 700;
+}
+
+.mandor-user-role {
+    color: var(--on-surface-variant);
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.mandor-user-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    object-fit: cover;
+}
+
+.mandor-logout-btn {
+    border: 0;
+    background: transparent;
+    color: var(--on-surface-variant);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.mandor-logout-btn:hover {
+    color: var(--error);
+}
+
+.mandor-main {
+    min-height: 100vh;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+}
+
+.mandor-main>section,
+.mandor-main>header,
+.mandor-main>div {
+    margin-bottom: 3rem;
+}
+
+.mandor-project-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: end;
+}
+
+.mandor-project-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.mandor-icon-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.mandor-project-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+.mandor-project-title {
+    margin-bottom: 1.5rem;
+    color: var(--on-surface);
+    font-family: 'Manrope', sans-serif;
+    font-size: clamp(2.25rem, 6vw, 3.75rem);
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+}
+
+.mandor-project-phase {
+    color: var(--primary-container);
+}
+
+.mandor-project-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.mandor-project-meta-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface-container);
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    color: var(--on-surface-variant);
+    font-weight: 500;
+}
+
+.mandor-icon-primary {
+    color: var(--primary);
+}
+
+.mandor-project-dates {
+    background: var(--surface-container-low);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mandor-date-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mandor-date-row-divider {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(194, 198, 213, 0.2);
+}
+
+.mandor-date-label {
+    color: var(--on-surface-variant);
+    font-weight: 500;
+}
+
+.mandor-date-value {
+    color: var(--on-surface);
+    font-weight: 700;
+}
+
+.mandor-main-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+}
+
+@media (min-width: 640px) {
+    .mandor-user-text {
+        display: block;
+    }
+}
+
+@media (min-width: 1024px) {
+    .mandor-project-main {
+        grid-column: span 8;
+    }
+
+    .mandor-main-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+footer {
+    width: 100%;
+    padding: 3rem 0;
+    border-top: 1px solid var(--slate-200);
+    background-color: var(--slate-50);
+}
+
+.footer-container {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+@media (min-width: 768px) {
+    .footer-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .footer-brand {
+        align-items: flex-start;
+        text-align: left;
+    }
+}
+
+.footer-brand-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.footer-brand-info img {
+    width: 40px;
+}
+
+.footer-brand-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--blue-900);
+}
+
+.footer-brand-text {
+    color: var(--slate-500);
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.footer-links a {
+    color: var(--slate-500);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: var(--orange-600);
+}
+
+.footer-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.footer-icon-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: var(--surface-container-highest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.footer-icon-btn:hover {
+    background-color: var(--surface-container-low);
+    color: white;
+}
+
+.footer-icon-btn img {
+    width: 20px;
+}

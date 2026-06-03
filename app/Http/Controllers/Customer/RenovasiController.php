@@ -1,0 +1,357 @@
+<?php
+
+namespace App\Http\Controllers\Customer;
+
+use App\Http\Controllers\Controller;
+use App\Models\DetailProyekRenovasi;
+use App\Models\NegosiasiRenovasi;
+use App\Models\PenawaranRenovasi;
+use App\Models\Proyek;
+use App\Models\RequestRenovasi;
+use App\Models\MandorActivityHistory;
+use App\Services\RenovasiService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Services\SupabaseStorageService;
+use Illuminate\Validation\ValidationException;
+
+class RenovasiController extends Controller
+{
+    public function __construct(
+        private readonly RenovasiService $renovasiService,
+        private readonly SupabaseStorageService $supabase
+    ) {}
+
+    public function index()
+    {
+        $this->renovasiService->expirePendingOffers();
+
+        $customer = Auth::user()?->customer;
+        abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
+
+        $requestRenovasiList = RequestRenovasi::with([
+            'penawaran' => fn($query) => $query->latest(),
+            'penawaran.mandor.user',
+            'penawaran.materialRenovasi.material',
+            'penawaran.negosiasi' => fn($query) => $query->orderBy('created_at'),
+        ])
+            ->where('customer_id', $customer->id)
+            ->latest()
+            ->get();
+
+        $requests = $requestRenovasiList->map(function (RequestRenovasi $requestRenovasi) {
+            $latestOffer = $requestRenovasi->penawaran->first();
+
+            $status = $this->resolveFrontendStatus($requestRenovasi, $latestOffer);
+            $materials = $latestOffer?->materialRenovasi?->map(function ($item) {
+                return [
+                    'nama_material' => $item->material?->nama_material ?? '-',
+                    'harga' => (int) ($item->material?->harga ?? 0),
+                    'satuan' => $item->satuan ?: ($item->material?->satuan ?? '-'),
+                    'jumlah' => (int) $item->jumlah,
+                    'deskripsi' => $item->material?->deskripsi ?? '-',
+                ];
+            })->values()->toArray() ?? [];
+
+            return [
+                'id' => sprintf('REV-%03d', $requestRenovasi->id),
+                'db_id' => $requestRenovasi->id,
+                'status' => $status,
+                'location' => $requestRenovasi->alamat,
+                'budget_user' => $this->renovasiService->formatRupiah((int) $requestRenovasi->budget_estimasi),
+                'damage_description' => $requestRenovasi->deskripsi_renovasi,
+                'damage_photos' => $requestRenovasi->getFotoDetailUrls(),
+                'feedback' => $latestOffer?->analisis_dari_mandor
+                    ?? 'Pengajuan Anda sedang dalam antrean review mandor.',
+                'budget_needed' => $latestOffer
+                    ? $this->renovasiService->formatRupiah((int) $latestOffer->estimasi_biaya)
+                    : '-',
+                'mandor_contact' => $latestOffer?->mandor?->user?->phone_number,
+                'mandor_name' => $latestOffer?->mandor?->user?->name,
+                'materials' => $materials,
+                'negotiation_messages' => $latestOffer?->negosiasi?->map(function ($message) {
+                    return [
+                        'pengirim' => $message->pengirim,
+                        'tipe' => $message->tipe,
+                        'pesan' => $message->pesan,
+                        'nominal_tawaran' => $message->nominal_tawaran
+                            ? $this->renovasiService->formatRupiah((int) $message->nominal_tawaran)
+                            : null,
+                        'waktu' => optional($message->created_at)->format('d M Y H:i'),
+                    ];
+                })->values()->toArray() ?? [],
+                'offer_expires_at' => $latestOffer ? optional($this->renovasiService->offerExpiresAt($latestOffer))->format('d M Y H:i') : null,
+                'is_offer_expired' => $latestOffer ? $this->renovasiService->isOfferExpired($latestOffer) : false,
+                'is_service_actionable' => $latestOffer
+                    && $latestOffer->status_penawaran === 'pending'
+                    && !$this->renovasiService->isOfferExpired($latestOffer),
+            ];
+        })->values();
+
+        return view('customer-layouts.renovation', [
+            'requests' => $requests,
+            'isHaveRequest' => $requests->isNotEmpty(),
+        ]);
+    }
+
+    public function create()
+    {
+        $customer = Auth::user()?->customer;
+        abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
+
+        return view('customer-layouts.renovation_form');
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            $customer = Auth::user()?->customer;
+            abort_if(!$customer, 403, 'Akun customer tidak ditemukan.');
+
+            $normalizedBudget = preg_replace('/\D+/', '', (string) $request->input('budget_estimasi'));
+            $request->merge([
+                'budget_estimasi' => $normalizedBudget,
+            ]);
+            $isTester = Auth::user()?->is_tester;
+
+            $validated = $request->validate([
+                'budget_estimasi' => 'required|integer|min:100000',
+                'deskripsi_renovasi' => 'required|string|min:20',
+                'alamat' => 'required|string|min:10',
+                'foto_detail' => $isTester ? 'nullable' : 'required|array|min:1',
+                'foto_detail.*' => $isTester ? 'nullable' : 'image|max:2048',
+            ], [
+                'foto_detail.array' => 'Foto kerusakan harus dikirim sebagai daftar file gambar.',
+                'foto_detail.max' => 'Maksimal 6 gambar kerusakan.',
+                'foto_detail.*.image' => 'Foto kerusakan harus berupa gambar yang valid.',
+                'foto_detail.*.mimes' => 'Foto kerusakan harus berupa gambar JPG, JPEG, atau PNG.',
+                'foto_detail.*.max' => 'Ukuran foto kerusakan terlalu besar. Maksimal 2 MB per file.',
+            ]);
+
+            $photoPaths = [];
+            if ($request->hasFile('foto_detail')) {
+                foreach ((array) $request->file('foto_detail') as $photoFile) {
+                    if ($photoFile && $photoFile->isValid()) {
+                        $photoPaths[] = $this->supabase->uploadPrivate(
+                            $photoFile,
+                            $customer->user_id,
+                            'renovasi-request'
+                        );
+                    }
+                }
+            }
+
+            RequestRenovasi::create([
+                'customer_id' => $customer->id,
+                'deskripsi_renovasi' => $validated['deskripsi_renovasi'],
+                'budget_estimasi' => $validated['budget_estimasi'],
+                'alamat' => $validated['alamat'],
+                'path_foto_detail' => $photoPaths ? json_encode($photoPaths) : null,
+                'tanggal_request' => now()->toDateString(),
+                'status_request' => 'pending',
+            ]);
+
+            return redirect()
+                ->route('customer.renovation')
+                ->with('success', 'Request renovasi berhasil dikirim.');
+        } catch (ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal mengirim request renovasi: ' . $e->getMessage());
+        }
+    }
+
+    public function acceptOffer(RequestRenovasi $requestRenovasi)
+    {
+        $this->renovasiService->expirePendingOffers();
+
+        $customer = Auth::user()?->customer;
+        abort_if(!$customer || $customer->id !== $requestRenovasi->customer_id, 403);
+
+        $offer = PenawaranRenovasi::with('mandor')
+            ->where('request_renovasi_id', $requestRenovasi->id)
+            ->where('status_penawaran', 'pending')
+            ->orderByDesc('id')
+            ->first();
+
+        if (!$offer || $this->renovasiService->isOfferExpired($offer)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Penawaran sudah tidak tersedia.',
+            ], 422);
+        }
+
+        $isTester = Auth::user()?->is_tester;
+
+        DB::transaction(function () use ($requestRenovasi, $offer, $isTester) {
+            PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
+                ->where('id', '!=', $offer->id)
+                ->where('status_penawaran', 'pending')
+                ->update(['status_penawaran' => 'ditolak']);
+
+            $offer->update(['status_penawaran' => 'diterima']);
+
+            if ($isTester) {
+                $requestRenovasi->update(['status_request' => 'selesai']);
+            } else {
+                $requestRenovasi->update(['status_request' => 'disetujui']);
+            }
+
+            // Log aktivitas tawaran diterima
+            MandorActivityHistory::logOfferAccepted($offer->mandor, $offer);
+            
+            NegosiasiRenovasi::create([
+                'request_renovasi_id' => $requestRenovasi->id,
+                'penawaran_renovasi_id' => $offer->id,
+                'pengirim' => 'customer',
+                'tipe' => 'setuju',
+                'pesan' => $isTester
+                    ? 'Anda menyetujui penawaran renovasi ini. Status renovasi langsung selesai (Tester).'
+                    : 'Anda menyetujui penawaran renovasi ini. Mandor akan segera menghubungi Anda untuk koordinasi.',
+            ]);
+
+            // Jika listener (HandleTesterWorkflow) sudah membuat proyek renovasi,
+            // kita tidak perlu membuat proyek duplikat di sini.
+            $sudahAda = DetailProyekRenovasi::where('request_renovasi_id', $requestRenovasi->id)->exists();
+            if ($sudahAda) {
+                return;
+            }
+
+            $offer->mandor?->update(['status' => 'nonaktif']);
+
+            $proyek = Proyek::create([
+                'customer_id' => $requestRenovasi->customer_id,
+                'mandor_id' => $offer->mandor_id,
+                'jenis_proyek' => 'Renovasi',
+                'alamat_proyek' => $requestRenovasi->alamat,
+                'tanggal_mulai' => now()->toDateString(),
+                'status_proyek' => $isTester ? 'Selesai' : 'In Progress',
+                'jumlah_cicilan' => 0,
+            ]);
+
+            DetailProyekRenovasi::create([
+                'proyek_id' => $proyek->id,
+                'request_renovasi_id' => $requestRenovasi->id,
+                'penawaran_renovasi_id' => $offer->id,
+            ]);
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Jasa renovasi berhasil diambil.',
+        ]);
+    }
+
+    public function negotiate(Request $request, RequestRenovasi $requestRenovasi)
+    {
+        $customer = Auth::user()?->customer;
+        abort_if(!$customer || $customer->id !== $requestRenovasi->customer_id, 403);
+
+        $validated = $request->validate([
+            'pesan' => 'required|string|min:5',
+            'nominal_tawaran' => 'nullable|integer|min:100000',
+        ]);
+
+        $offer = PenawaranRenovasi::where('request_renovasi_id', $requestRenovasi->id)
+            ->where('status_penawaran', 'pending')
+            ->latest()
+            ->first();
+
+        if (!$offer || $this->renovasiService->isOfferExpired($offer)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Penawaran tidak bisa dinegosiasikan.',
+            ], 422);
+        }
+
+        NegosiasiRenovasi::create([
+            'request_renovasi_id' => $requestRenovasi->id,
+            'penawaran_renovasi_id' => $offer->id,
+            'pengirim' => 'customer',
+            'tipe' => 'negosiasi',
+            'pesan' => $validated['pesan'],
+            'nominal_tawaran' => $validated['nominal_tawaran'] ?? null,
+        ]);
+
+        // Log aktivitas negosiasi diterima untuk mandor
+        MandorActivityHistory::logNegotiationReceived($offer->mandor, $requestRenovasi, NegosiasiRenovasi::latest()->first());
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Negosiasi berhasil dikirim ke mandor.',
+        ]);
+    }
+
+    public function rejectOffer(Request $request, RequestRenovasi $requestRenovasi)
+    {
+        $customer = Auth::user()?->customer;
+        abort_if(!$customer || $customer->id !== $requestRenovasi->customer_id, 403);
+
+        $validated = $request->validate([
+            'pesan' => 'nullable|string|max:1000',
+        ]);
+
+        $offer = PenawaranRenovasi::with('mandor')
+            ->where('request_renovasi_id', $requestRenovasi->id)
+            ->where('status_penawaran', 'pending')
+            ->latest()
+            ->first();
+
+        if (!$offer) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tidak ada penawaran aktif untuk ditolak.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($offer, $requestRenovasi, $validated) {
+            $offer->update(['status_penawaran' => 'ditolak']);
+            $requestRenovasi->update(['status_request' => 'ditolak']);
+            NegosiasiRenovasi::create([
+                'request_renovasi_id' => $requestRenovasi->id,
+                'penawaran_renovasi_id' => $offer->id,
+                'pengirim' => 'customer',
+                'tipe' => 'tolak',
+                'pesan' => $validated['pesan'] ?? 'Customer menolak penawaran saat ini.',
+            ]);
+
+            if ($offer->mandor) {
+                // Set mandor status to aktif karena penawaran ditolak
+                $offer->mandor->update(['status' => 'aktif']);
+            }
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Penawaran berhasil ditolak.',
+        ]);
+    }
+
+    private function resolveFrontendStatus(RequestRenovasi $request, ?PenawaranRenovasi $offer): string
+    {
+        if ($request->status_request === 'selesai') {
+            return 'completed';
+        }
+
+        if ($request->status_request === 'ditolak') {
+            return 'cancelled';
+        }
+
+        if (!$offer) {
+            return 'waiting';
+        }
+
+        if ($offer->status_penawaran === 'diterima') {
+            return 'on-progress';
+        }
+
+        if ($offer->status_penawaran === 'pending' && !$this->renovasiService->isOfferExpired($offer)) {
+            return 'reviewed';
+        }
+
+        return 'waiting';
+    }
+}

@@ -1,0 +1,191 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    color-scheme: light;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+    background:
+        radial-gradient(circle at top, rgba(4, 94, 194, 0.12), transparent 38%),
+        linear-gradient(180deg, #edf4fb 0%, #f8fbff 100%);
+    color: #10213b;
+}
+
+.verify-notice-page {
+    position: relative;
+    min-height: 100vh;
+    isolation: isolate;
+}
+
+.dashboard-backdrop {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.dashboard-dim {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(180deg, rgba(16, 33, 59, 0.22), rgba(16, 33, 59, 0.34)),
+        radial-gradient(circle at 20% 20%, rgba(4, 94, 194, 0.16), transparent 32%);
+    backdrop-filter: blur(4px) saturate(0.9);
+}
+
+.dashboard-page {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    padding: 4rem 2rem 3rem;
+    max-width: 88rem;
+    margin: 0 auto;
+    transform: scale(0.94);
+    transform-origin: center center;
+    opacity: 0.92;
+    filter: saturate(0.9) blur(0.2px);
+}
+
+.dashboard-page .hero-section,
+.dashboard-page .features-section {
+    pointer-events: none;
+}
+
+.dashboard-page .hero-content,
+.dashboard-page .hero-visual,
+.dashboard-page .feature-card {
+    box-shadow: 0 24px 55px rgba(16, 33, 59, 0.12);
+}
+
+.card-shell {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: grid;
+    place-items: center;
+    padding: 2rem 1rem;
+    background: rgba(16, 33, 59, 0.24);
+    backdrop-filter: blur(12px);
+    overflow: auto;
+}
+
+.card {
+    width: min(100%, 32rem);
+    padding: 2rem;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 30px 70px rgba(16, 33, 59, 0.28);
+    text-align: center;
+    animation: popupIn 0.28s ease-out;
+}
+
+.card h2 {
+    margin: 0 0 0.85rem;
+    font-size: 1.8rem;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #10213b;
+}
+
+.card p {
+    margin: 0;
+    color: #51627d;
+    font-size: 1rem;
+    line-height: 1.75;
+}
+
+.card p+p {
+    margin-top: 1rem;
+}
+
+.email {
+    display: inline-block;
+    margin-top: 0.35rem;
+    font-weight: 700;
+    color: #10213b;
+    word-break: break-word;
+}
+
+.button {
+    margin-top: 1.5rem;
+}
+
+.button button {
+    width: 100%;
+    padding: 0.95rem 1.25rem;
+    border: none;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #004796 0%, #045ec2 100%);
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.98rem;
+    font-weight: 700;
+    box-shadow: 0 16px 30px rgba(4, 94, 194, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.button button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 34px rgba(4, 94, 194, 0.34);
+    filter: brightness(1.02);
+}
+
+.button button:active {
+    transform: translateY(0);
+}
+
+.helper-text {
+    margin-top: 1rem !important;
+    font-size: 0.84rem !important;
+    color: #6b7d96 !important;
+}
+
+@keyframes popupIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 900px) {
+    body {
+        overflow: auto;
+    }
+
+    .dashboard-page {
+        padding: 2rem 1rem;
+        transform: scale(0.98);
+    }
+
+    .card-shell {
+        padding: 1rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+        border-radius: 22px;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-page {
+        transform: none;
+        opacity: 0.85;
+    }
+
+    .card {
+        width: min(100%, 100%);
+    }
+}
