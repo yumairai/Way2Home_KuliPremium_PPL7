@@ -479,8 +479,13 @@ main {
     color: var(--outline);
 }
 
+.filter-action-group {
+    display: flex;
+    gap: 0.75rem;
+}
+
 .reset-filter-btn {
-    width: 100%;
+    flex: 1;
     padding: 1rem;
     background-color: var(--surface-container-highest);
     color: var(--primary);
@@ -492,6 +497,22 @@ main {
 .reset-filter-btn:hover {
     background-color: var(--primary);
     color: white;
+}
+
+.clear-filter-btn {
+    flex: 1;
+    padding: 1rem;
+    background-color: transparent;
+    color: var(--primary);
+    font-weight: 700;
+    border-radius: 9999px;
+    border: 1px solid rgba(0, 71, 150, 0.18);
+    transition: all 0.3s ease;
+}
+
+.clear-filter-btn:hover {
+    background-color: rgba(0, 71, 150, 0.08);
+    border-color: var(--primary);
 }
 
 /* ===== Product Section ===== */

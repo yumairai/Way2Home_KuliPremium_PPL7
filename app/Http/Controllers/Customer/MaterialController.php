@@ -20,7 +20,7 @@ class MaterialController extends Controller
     // API: Memberikan data JSON
     public function getMaterials(Request $request)
     {
-        $materials = $this->buildQuery($request)->paginate(self::PER_PAGE);
+        $materials = $this->buildQuery($request)->paginate(self::PER_PAGE)->appends($request->query());
         return response()->json($materials);
     }
 
@@ -35,7 +35,7 @@ class MaterialController extends Controller
         }
 
         // Filter by harga max
-        if ($request->has('harga_max') && $request->harga_max > 0) {
+        if ($request->has('harga_max')) {
             $query->where('harga', '<=', $request->harga_max);
         }
 
@@ -48,9 +48,14 @@ class MaterialController extends Controller
             }
         }
 
-        // Search by nama
+        // Search by nama, kategori, or deskripsi (partial match)
         if ($request->has('search') && $request->search) {
-            $query->where('nama_material', 'like', '%' . $request->search . '%');
+            $term = mb_strtolower(trim($request->search));
+            $query->where(function ($q) use ($term) {
+                $q->whereRaw('LOWER(nama_material) LIKE ?', ['%' . $term . '%'])
+                    ->orWhereRaw('LOWER(kategori) LIKE ?', ['%' . $term . '%'])
+                    ->orWhereRaw('LOWER(deskripsi) LIKE ?', ['%' . $term . '%']);
+            });
         }
 
         // Sort

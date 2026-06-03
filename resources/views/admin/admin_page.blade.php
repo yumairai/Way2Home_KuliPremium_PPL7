@@ -16,6 +16,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('css/ui/dialog.css') }}">
     @stack('styles')
 </head>
 
@@ -85,7 +86,7 @@
             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                 @csrf
             </form>
-            <button class="logout-button" type="button" onclick="document.getElementById('logout-form').submit()">
+            <button class="logout-button" type="button" onclick="window.W2HLogout.submit('logout-form')">
                 <span>Keluar</span>
                 <span class="material-symbols-outlined">logout</span>
             </button>
@@ -102,6 +103,10 @@
             @yield('content')
         </section>
     </main>
+    @include('partials.w2h-dialog')
+    @include('partials.w2h-flash')
+    <script src="{{ asset('js/ui/dialog.js') }}"></script>
+    <script src="{{ asset('js/logout.js') }}"></script>
     @stack('scripts')
 </body>
 

@@ -9,6 +9,11 @@ const AuthApp = {
         document.querySelectorAll('.error-text').forEach(el => el.innerText = '');
     },
 
+    clearForm: () => {
+        const form = document.getElementById('registerForm');
+        if (form) form.reset();
+    },
+
     getCsrfToken: () => document.querySelector('meta[name="csrf-token"]').content,
 
     // --- ACTIONS ---
@@ -56,17 +61,35 @@ const AuthApp = {
 
             const data = await response.json();
 
-            if (response.ok) {
-                // Karena di Controller kita buat otomatis login, langsung redirect
+            // 🔥 pakai status, bukan response.ok doang
+            if (response.status >= 200 && response.status < 300) {
+                AuthApp.clearForm();
                 window.location.href = data.redirect;
-            } else if (response.status === 422) {
+                return;
+            }
+
+            if (response.status === 422) {
                 for (const key in data.errors) {
                     AuthApp.showError(key, data.errors[key][0]);
                 }
-            } else {
-                alert('Registrasi Gagal');
+                return;
             }
+
+            // fallback
+            if (window.W2HDialog && typeof window.W2HDialog.error === 'function') {
+                await window.W2HDialog.error(data.message || 'Registrasi gagal.');
+                return;
+            }
+
+            alert(data.message || 'Registrasi Gagal');
+
         } catch (error) {
+            console.error(error);
+            if (window.W2HDialog && typeof window.W2HDialog.error === 'function') {
+                await window.W2HDialog.error('Kesalahan koneksi server.');
+                return;
+            }
+
             alert('Kesalahan koneksi server.');
         }
     },
@@ -75,6 +98,7 @@ const AuthApp = {
         const response = await fetch('/logout', {
             method: 'POST',
             headers: {
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }
         });

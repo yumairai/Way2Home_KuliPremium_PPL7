@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Customer;
-use App\Models\Admin;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -39,14 +38,21 @@ class AuthController extends Controller
             'phone_number' => $request->phone_number,
         ]);
 
-        Customer::create(['user_id' => $user->id]);
+        // relasi customer
+        Customer::create([
+            'user_id' => $user->id
+        ]);
 
+        // login otomatis
         Auth::login($user);
         $request->session()->regenerate();
 
+        // 🔥 kirim email verifikasi
+        $user->sendEmailVerificationNotification();
+
         return response()->json([
-            'message'  => 'Register Berhasil',
-            'redirect' => route('customer-layouts.dashboard')
+            'message'  => 'Register berhasil, cek email untuk verifikasi.',
+            'redirect' => route('verification.notice') // ⬅️ BUKAN dashboard lagi
         ], 201);
     }
 
@@ -57,52 +63,78 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
-            $user = Auth::user();
-
-            // Logika Pengalihan Berdasarkan Role
-            if ($user->role === 'admin') {
-                return response()->json([
-                    'message'  => 'Login Admin Berhasil',
-                    'redirect' => route('admin.dashboard')
-                ], 200);
-            }
-
-            // Default ke Dashboard Customer
+        if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             return response()->json([
-                'message'  => 'Login Berhasil',
-                'redirect' => route('customer-layouts.dashboard') // Ke Dashboard Customer
+                'message' => 'Email atau Password Salah'
+            ], 401);
+        }
+
+        $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        // 🔥 CEK VERIFIKASI EMAIL - Hanya untuk customer
+        if ($user->role === 'customer' && !$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message'  => 'Email belum diverifikasi',
+                'redirect' => route('verification.notice')
             ], 200);
         }
 
-        return response()->json(['message' => 'Email atau Password Salah'], 401);
+        // 🔥 Admin dan mandor langsung login tanpa perlu verifikasi email
+        $dashboardRoute = $this->dashboardRouteForRole($user?->role);
+        $dashboardUrl   = route($dashboardRoute);
+
+        if ($user->role === 'admin') {
+            return response()->json([
+                'message'  => 'Login Admin Berhasil',
+                'redirect' => $dashboardUrl
+            ], 200);
+        }
+
+        if ($user->role === 'mandor') {
+            return response()->json([
+                'message'  => 'Login Mandor Berhasil',
+                'redirect' => $dashboardUrl
+            ], 200);
+        }
+
+        return response()->json([
+            'message'  => 'Login Berhasil',
+            'redirect' => $dashboardUrl
+        ], 200);
     }
 
     public function logout(Request $request)
     {
-        $role = Auth::user()->role;
-
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        if ($role === 'admin') {
-            return redirect('/')->with('message', 'Anda telah logout');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Anda telah logout',
+                'redirect' => route('home'),
+            ]);
         }
 
-        return redirect('/')->with('message', 'Anda telah logout');
+        return redirect()->route('home')->with('message', 'Anda telah logout');
     }
 
     public function index()
     {
         if (Auth::check()) {
-            if (Auth::user()->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            }
-            return redirect()->route('customer-layouts.dashboard');
+            return redirect()->route($this->dashboardRouteForRole(Auth::user()->role));
         }
         return view('customer-layouts.dashboard');
+    }
+
+    private function dashboardRouteForRole(?string $role): string
+    {
+        return match ($role) {
+            'admin' => 'admin.dashboard',
+            'mandor' => 'mandor.dashboard',
+            default => 'customer-layouts.dashboard',
+        };
     }
 }

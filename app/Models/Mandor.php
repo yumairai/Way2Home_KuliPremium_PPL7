@@ -17,6 +17,7 @@ class Mandor extends Model
         'lama_pengalaman',
         'status',
         'rating',
+        'is_ghost',
     ];
 
     public function user()
@@ -28,7 +29,21 @@ class Mandor extends Model
     public function proyekAktif()
     {
         return $this->hasOne(Proyek::class, 'mandor_id')
-                    ->where('status_proyek', 'Pengalokasian Mandor');
-        // Ganti status sesuai flow kamu saat mandor sudah diassign
+                    ->whereNotIn('status_proyek', ['Selesai', 'Dibatalkan']);
+    }
+
+    // Cek apakah mandor sedang mengerjakan renovasi aktif
+    public function renovasiAktif()
+    {
+        return $this->hasOne(PenawaranRenovasi::class, 'mandor_id')
+                    ->where('status_penawaran', 'diterima')
+                    ->whereHas('requestRenovasi', function ($query) {
+                        $query->where('status_request', '!=', 'selesai');
+                    });
+    }
+
+    public function penawaranRenovasi()
+    {
+        return $this->hasMany(PenawaranRenovasi::class, 'mandor_id');
     }
 }

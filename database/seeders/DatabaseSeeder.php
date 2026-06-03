@@ -14,12 +14,15 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
+            TesterSeeder::class,         // ← Akun E2E testing (is_tester = true)
             MaterialSeeder::class,
-            DesainRumahSeeder::class, 
+            DesainRumahSeeder::class,
             MandorSeeder::class,
             ProyekSeeder::class,
             DetailProyekBangunSeeder::class,
             DokumenProyekSeeder::class,
+            ProyekMilestoneSeeder::class,
+            PembayaranProyekSeeder::class,
         ]);
     }
 }

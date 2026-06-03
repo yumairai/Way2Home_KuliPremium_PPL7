@@ -113,9 +113,10 @@ html {
     gap: 2rem;
     background-color: var(--slate-50);
     border-right: none;
-    position: fixed;
-    left: 0;
+    position: sticky;
     top: 5rem;
+    align-self: flex-start;
+    overflow-y: auto;
     z-index: 40;
 }
 
@@ -183,18 +184,12 @@ html {
     background-color: #f5eff7;
 }
 
-@media (min-width: 1024px) {
-    .main-content {
-        margin-left: 16rem;
-    }
-}
-
 .content-wrapper {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 2.5rem;
-    padding-left: 3rem;
+    padding-left: 1rem;
 }
 
 /* ============================================
@@ -600,6 +595,90 @@ html {
 
 .btn-progress-action:hover {
     background-color: #dfeeff;
+}
+
+.btn-docs-action {
+    background-color: var(--primary);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-docs-action:hover {
+    background-color: #003d7a;
+}
+
+.sidebar-menu-empty {
+    padding: 1rem 1rem;
+    border-radius: 1rem;
+    background-color: var(--surface-container-low);
+    color: var(--text-slate-400);
+    font-size: 1rem;
+    font-weight: 550;
+    text-align: left;
+}
+
+.project-empty-state {
+    min-height: 420px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    padding: 2.5rem;
+    border-radius: 2rem;
+    background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+    border: 1px solid var(--slate-100);
+    box-shadow: 0 12px 30px rgba(0, 71, 150, 0.08);
+    text-align: center;
+}
+
+.project-empty-icon {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 71, 150, 0.08);
+    color: var(--primary);
+}
+
+.project-empty-icon .material-symbols-outlined {
+    font-size: 2.2rem;
+}
+
+.project-empty-state h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem;
+    line-height: 1.25;
+    color: var(--on-surface);
+    max-width: 28rem;
+}
+
+.project-empty-state p {
+    max-width: 34rem;
+    color: var(--on-surface-variant);
+    line-height: 1.7;
+}
+
+.project-empty-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.95rem 1.4rem;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    color: #fff;
+    font-weight: 800;
+    text-decoration: none;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.project-empty-button:hover {
+    background-color: #003d7a;
+    transform: translateY(-1px);
 }
 
 .btn-payments-action:not(:disabled):hover {

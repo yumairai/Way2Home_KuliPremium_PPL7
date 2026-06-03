@@ -52,12 +52,32 @@ return [
             'key' => env('AWS_ACCESS_KEY_ID'),
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION'),
-            'bucket' => env('AWS_BUCKET'),
+            'bucket' => env('AWS_BUCKET', 'Materials'),
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
+        ],
+
+        'public_assets' => [
+        'driver'                  => 's3',
+        'key'                     => env('AWS_ACCESS_KEY_ID'),
+        'secret'                  => env('AWS_SECRET_ACCESS_KEY'),
+        'region'                  => env('AWS_DEFAULT_REGION'),
+        'bucket'                  => 'public-assets',
+        'endpoint'                => env('AWS_ENDPOINT'),
+        'use_path_style_endpoint' => true,
+        ],
+
+        'user_private' => [
+            'driver'                  => 's3',
+            'key'                     => env('AWS_ACCESS_KEY_ID'),
+            'secret'                  => env('AWS_SECRET_ACCESS_KEY'),
+            'region'                  => env('AWS_DEFAULT_REGION'),
+            'bucket'                  => 'user-private',
+            'endpoint'                => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => true,
         ],
 
     ],

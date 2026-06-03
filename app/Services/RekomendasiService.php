@@ -32,7 +32,7 @@ class RekomendasiService
     private const STATS = [
         'luas_tanah'   => ['min' => 30,          'max' => 350],
         'jumlah_kamar' => ['min' => 1,            'max' => 10],
-        'harga'        => ['min' => 100_000_000,  'max' => 2_000_000_000],
+        'harga'        => ['min' => 22_500,       'max' => 15_718_461_000],
     ];
 
     // ─────────────────────────────────────────
@@ -188,7 +188,7 @@ class RekomendasiService
         if ($harga >= 1_000_000_000) {
             return 'Rp ' . number_format($harga / 1_000_000_000, 1, ',', '.') . ' M';
         }
-        return 'Rp ' . number_format($harga / 1_000_000, 0, ',', '.') . ' Jt';
+        return 'Rp ' . number_format($harga / 1_000_000, 0, ',', '.') . ' jt';
     }
 
     /**

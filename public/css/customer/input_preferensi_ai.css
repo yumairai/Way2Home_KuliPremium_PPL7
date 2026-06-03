@@ -24,20 +24,20 @@
  }
 
  .bg-ellipse {
-     position: absolute;
+     position: fixed;
      inset: 0;
+     width: 100vw;
+     height: 100vh;
      z-index: -2;
-     overflow: hidden;
+     overflow: visible;
      pointer-events: none;
  }
 
  .bg-ellipse::before {
      content: '';
      position: absolute;
-     width: 120vw;
-     height: 120vh;
-     top: -18vh;
-     left: -10vw;
+     inset: -18vh -10vw auto -10vw;
+     height: 130vh;
      background: radial-gradient(circle at 35% 15%, #1f63b8 0%, #004796 45%, #03306a 100%);
      border-radius: 50% 50% 9999px 9999px;
      opacity: 0.9;
@@ -49,17 +49,20 @@
      inset: 0;
      background:
          linear-gradient(180deg, rgba(3, 31, 72, 0.34) 0%, rgba(3, 31, 72, 0.14) 32%, rgba(248, 250, 252, 0) 100%),
-         url('/images/aset/construction2.jpg') center center / cover no-repeat;
+         url('/images/aset/construction2.jpg') center top / cover no-repeat;
      opacity: 0.18;
      mix-blend-mode: screen;
  }
 
  .container {
+     position: relative;
+     z-index: 0;
      display: flex;
      flex-direction: column;
      align-items: center;
-     justify-content: center;
+     justify-content: flex-start;
      min-height: 100vh;
+     padding: 6.5rem 1rem 4rem;
  }
 
  .page-hero {
@@ -69,7 +72,7 @@
      gap: 1rem;
      align-items: stretch;
      margin-bottom: 1.5rem;
-     margin-top: 2rem;
+     margin-top: 0;
  }
 
  .page-hero-copy {
@@ -327,7 +330,7 @@
 
  @media (max-width: 860px) {
      .container {
-         padding: 2rem 1rem;
+         padding: 5.75rem 1rem 3rem;
      }
 
      .page-hero {

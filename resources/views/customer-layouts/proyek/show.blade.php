@@ -1,334 +1,486 @@
 @extends('customer-layouts.proyek_user')
 @section('project_content')
+    @php
+        $hasProject = (bool) $proyek;
+        $statusProyek = $proyek?->status_proyek;
+        $detail = $proyek?->detailBangun;
+        $desain = $detail?->desainRumah;
+        $catatanAdmin = $detail?->catatan_admin;
 
-@php
-$statusProyek = $proyek->status_proyek;
-$detail = $proyek->detailBangun;
-$desain = $detail?->desainRumah;
-$dokumen = $detail?->dokumenProyek ?? collect();
-$catatanAdmin = $detail?->catatan_admin;
+        // Ambil semua pembayaran terurut by periode
+        $semuaPembayaran = $hasProject ? $proyek->pembayaranProyek : collect();
 
-// Cek sudah bayar dari relasi pembayaranDP
-$sudahBayar = $proyek->pembayaranDP !== null;
+        // DP = periode 0
+        $dp = $semuaPembayaran->firstWhere('periode', 0);
+        $sudahBayarDP = $dp?->status_pembayaran === 'berhasil';
 
-$statusDokumen = match($statusProyek) {
-'Menunggu Verifikasi' => 'pending',
-'Revisi Dokumen' => 'revision',
-default => 'approved',
-};
+        // Cicilan = periode 1-3
+        $cicilans = $semuaPembayaran->where('periode', '>', 0)->values();
 
-$isMandor = !in_array($statusProyek, [
-'Menunggu Verifikasi', 'Revisi Dokumen', 'Pembayaran DP', 'Pengalokasian Mandor'
-]);
-$isProyek = $isMandor;
-@endphp
+        // Cicilan aktif pertama yang belum lunas (berurutan)
+        $cicilanAktif = $cicilans->first(
+            fn($c) => in_array($c->status_pembayaran, ['belum_bayar', 'pending', 'gagal', 'jatuh_tempo']),
+        );
 
-<div class="project-main">
-    <section class="project-card">
+        $statusDokumen = $hasProject
+            ? match ($statusProyek) {
+                'Menunggu Verifikasi' => 'pending',
+                'Revisi Dokumen' => 'revision',
+                'Dibatalkan' => 'canceled',
+                default => 'approved',
+            }
+            : 'empty';
 
-        <div class="project-image-container">
-            <img class="project-image"
-                alt="{{ $desain->tipe_rumah ?? $proyek->jenis_proyek }}"
-                src="{{ $desain?->path_gambar_desain ? asset($desain->path_gambar_desain) : asset('images/default-project.jpg') }}" />
-            <div class="project-image-overlay"></div>
+        $isFinished = $hasProject && $statusProyek === 'Selesai';
+        $isMandor =
+            $hasProject &&
+            !in_array($statusProyek, [
+                'Menunggu Verifikasi',
+                'Revisi Dokumen',
+                'Pembayaran DP',
+                'Pengalokasian Mandor',
+                'Dibatalkan',
+            ]);
+        $isProyek = $hasProject && $isMandor;
+        $isCanceled = $hasProject && $statusProyek === 'Dibatalkan';
+    @endphp
 
-            <div class="project-header">
-                <h2>{{ $desain->tipe_rumah ?? $proyek->jenis_proyek }}</h2>
-                <p class="project-location">
-                    <span class="material-symbols-outlined">location_on</span>
-                    {{ $proyek->alamat_proyek }}
-                </p>
-            </div>
+    <div class="project-main">
+        <section class="project-card">
+            @if ($hasProject)
 
-            <div class="project-status {{ $statusDokumen }}">
-                @if ($statusDokumen === 'revision')
-                <span class="status-badge revision">
-                    <span class="material-symbols-outlined" style='font-variation-settings:"FILL" 1'>error</span>
-                    Perlu Revisi
-                </span>
-                @elseif ($statusDokumen === 'pending')
-                <span class="status-badge pending">
-                    <span class="material-symbols-outlined" style='font-variation-settings:"FILL" 1'>error</span>
-                    Menunggu
-                </span>
-                @elseif ($statusDokumen === 'approved')
-                <span class="status-badge verified">
-                    <span class="material-symbols-outlined" style='font-variation-settings:"FILL" 1'>check</span>
-                    Terverifikasi
-                </span>
-                @endif
-            </div>
-        </div>
+                <div class="project-image-container">
+                    <img class="project-image" alt="{{ $desain->tipe_rumah ?? $proyek->jenis_proyek }}"
+                        src="{{ $desain?->path_gambar_desain ? asset($desain->path_gambar_desain) : asset('images/default-project.jpg') }}" />
+                    <div class="project-image-overlay"></div>
 
-        <div class="project-content">
+                    <div class="project-header">
+                        <h2>{{ $desain->tipe_rumah ?? $proyek->jenis_proyek }}</h2>
+                        <p class="project-location">
+                            <span class="material-symbols-outlined">location_on</span>
+                            {{ $proyek->alamat_proyek }}
+                        </p>
+                    </div>
 
-            <div class="info-grid">
-                <div class="info-item">
-                    <p class="info-label">Nama Desain</p>
-                    <p class="info-value">{{ $desain->tipe_rumah ?? '-' }}</p>
+                    <div class="project-status {{ $statusDokumen }}">
+                        @if ($statusDokumen === 'revision')
+                            <span class="status-badge revision">
+                                <span class="material-symbols-outlined"
+                                    style='font-variation-settings:"FILL" 1'>error</span>
+                                Perlu Revisi
+                            </span>
+                        @elseif ($statusDokumen === 'pending')
+                            <span class="status-badge pending">
+                                <span class="material-symbols-outlined"
+                                    style='font-variation-settings:"FILL" 1'>error</span>
+                                Menunggu
+                            </span>
+                        @elseif ($statusDokumen === 'canceled')
+                            <span class="status-badge" style="background-color: #ffebee; color: #c62828;">
+                                <span class="material-symbols-outlined"
+                                    style='font-variation-settings:"FILL" 1'>cancel</span>
+                                Dibatalkan
+                            </span>
+                        @elseif ($statusDokumen === 'approved')
+                            <span class="status-badge verified">
+                                <span class="material-symbols-outlined"
+                                    style='font-variation-settings:"FILL" 1'>check</span>
+                                Terverifikasi
+                            </span>
+                        @endif
+                    </div>
                 </div>
-                <div class="info-item">
-                    <p class="info-label">Budget</p>
-                    <p class="info-value">Rp {{ $desain ? number_format($desain->estimasi_biaya, 0, ',', '.') : '-' }}</p>
-                </div>
-                <div class="info-item">
-                    <p class="info-label">Estimasi Waktu</p>
-                    <p class="info-value">{{ $desain->estimasi_durasi ?? '-' }} Bulan</p>
-                </div>
-            </div>
 
-            @if ($statusDokumen === 'revision')
-            <div class="information-container">
-                <div class="information-icon-box">
-                    <span class="material-symbols-outlined">rate_review</span>
+                <div class="project-content">
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <p class="info-label">Nama Desain</p>
+                            <p class="info-value">{{ $desain->tipe_rumah ?? '-' }}</p>
+                        </div>
+                        <div class="info-item">
+                            <p class="info-label">Budget</p>
+                            <p class="info-value">Rp
+                                {{ $desain ? number_format($desain->estimasi_biaya, 0, ',', '.') : '-' }}
+                            </p>
+                        </div>
+                        <div class="info-item">
+                            <p class="info-label">Estimasi Waktu</p>
+                            <p class="info-value">{{ $desain->estimasi_durasi ?? '-' }} Bulan</p>
+                        </div>
+                    </div>
+
+                    {{-- ── Info Banner ── --}}
+                    @if ($statusDokumen === 'revision')
+                        <div class="information-container">
+                            <div class="information-icon-box">
+                                <span class="material-symbols-outlined">rate_review</span>
+                            </div>
+                            <div class="information-content">
+                                <h3>Dokumen Ditolak</h3>
+                                <p>{{ $catatanAdmin ?? 'Dokumen Anda memerlukan perbaikan. Mohon unggah ulang dokumen yang sesuai.' }}
+                                </p>
+                            </div>
+                            <a href="{{ route('proyek.form_bangun', ['desain_id' => $desain->id, 'alamat' => $proyek->alamat_proyek, 'old_proyek_id' => $proyek->id]) }}" class="btn-upload revision" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                                <span class="material-symbols-outlined">upload_file</span>
+                                Upload Ulang
+                            </a>
+                        </div>
+                    @elseif ($statusDokumen === 'pending')
+                        <div class="information-container pending">
+                            <div class="information-icon-box pending">
+                                <span class="material-symbols-outlined">rate_review</span>
+                            </div>
+                            <div class="information-content pending">
+                                <h3>Dokumen Sedang Direview</h3>
+                                <p>Mohon tunggu 1×24 jam.</p>
+                            </div>
+                        </div>
+                    @elseif ($statusDokumen === 'canceled')
+                        <div class="information-container" style="background-color: #ffebee; border: 1px solid #c62828;">
+                            <div class="information-icon-box" style="background-color: #ffcdd2; color: #c62828;">
+                                <span class="material-symbols-outlined">cancel</span>
+                            </div>
+                            <div class="information-content">
+                                <h3 style="color: #c62828;">Proyek Dibatalkan</h3>
+                                <p>Proyek ini telah dibatalkan dan tidak dapat dilanjutkan.</p>
+                            </div>
+                        </div>
+                    @elseif ($statusDokumen === 'approved' && !$sudahBayarDP)
+                        <div class="information-container verified">
+                            <div class="information-icon-box verified">
+                                <span class="material-symbols-outlined">check</span>
+                            </div>
+                            <div class="information-content verified">
+                                <h3>Dokumen Terverifikasi</h3>
+                                <p>Mohon melakukan pembayaran DP dalam waktu 7×24 jam. Jika tidak, proyek akan otomatis
+                                    dibatalkan.</p>
+                            </div>
+                        </div>
+                    @elseif ($sudahBayarDP && !$isMandor)
+                        <div class="information-container verified">
+                            <div class="information-icon-box verified">
+                                <span class="material-symbols-outlined">check</span>
+                            </div>
+                            <div class="information-content verified">
+                                <h3>Pembayaran DP Berhasil</h3>
+                                <p>Mohon tunggu 1×24 jam untuk pengalokasian mandor proyek Anda.</p>
+                            </div>
+                        </div>
+                    @elseif ($isFinished)
+                        <div class="information-container verified">
+                            <div class="information-icon-box verified">
+                                <span class="material-symbols-outlined"
+                                    style='font-variation-settings:"FILL" 1'>check_circle</span>
+                            </div>
+                            <div class="information-content verified">
+                                <h3>Proyek Selesai</h3>
+                                <p>Seluruh tahapan pengerjaan telah selesai. Silakan lihat dokumentasi rumah untuk melihat
+                                    hasil
+                                    akhir proyek Anda.</p>
+                            </div>
+                        </div>
+                    @elseif ($sudahBayarDP && $isMandor)
+                        <div class="information-container verified">
+                            <div class="information-icon-box verified">
+                                <span class="material-symbols-outlined">check</span>
+                            </div>
+                            <div class="information-content verified">
+                                <h3>Proyek Aktif</h3>
+                                <p>Proyek sedang aktif dan progress dapat dilacak. Terima kasih telah menggunakan layanan
+                                    <strong style="color:#004796">Way2Home</strong>.
+                                </p>
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- ── Action Buttons ── --}}
+                    <div class="button-group">
+                        @if ($isFinished)
+                            <a class="btn-action btn-progress-action btn-docs-action"
+                                href="{{ route('proyek.tracking', $proyek->id) }}">
+                                <span class="material-symbols-outlined">imagesmode</span>
+                                Lihat Dokumentasi Rumah
+                            </a>
+                        @elseif ($isCanceled)
+                            <button class="btn-action btn-cancel" disabled style="opacity: 0.7; cursor: not-allowed;">
+                                <span class="material-symbols-outlined">cancel</span>
+                                Proyek Dibatalkan
+                            </button>
+                        @else
+                            <button class="btn-action btn-cancel" id="cancelBtn"
+                                data-proyek="{{ $isProyek ? 'true' : 'false' }}" data-id="{{ $proyek->id }}"
+                                @if($sudahBayarDP) disabled style="opacity: 0.7; cursor: not-allowed;" title="Proyek tidak dapat dibatalkan setelah DP dibayar" @endif>
+                                <span class="material-symbols-outlined">cancel</span>
+                                Batalkan Proyek
+                            </button>
+
+                            @if (!$sudahBayarDP)
+                                {{-- Tombol Bayar DP --}}
+                                <button class="btn-action btn-payments-action" id="dpBtn"
+                                    data-pembayaran-id="{{ $dp?->id }}" data-nominal="{{ $dp?->jumlah_bayar ?? 0 }}"
+                                    data-label="Down Payment"
+                                    {{ $statusDokumen !== 'approved' || $isCanceled ? 'disabled' : '' }}>
+                                    <span class="material-symbols-outlined">payments</span>
+                                    Bayar DP
+                                </button>
+                            @else
+                                {{-- Tombol Pantau Progress --}}
+                                <button class="btn-action btn-progress-action" id="progressBtn"
+                                    data-mandor="{{ $isMandor ? 'true' : 'false' }}" data-proyek-id="{{ $proyek->id }}">
+                                    <span class="material-symbols-outlined">analytics</span>
+                                    Pantau Progress
+                                </button>
+                            @endif
+                        @endif
+                    </div>
                 </div>
-                <div class="information-content">
-                    <h3>Dokumen Ditolak</h3>
-                    <p>{{ $catatanAdmin ?? 'Dokumen Anda memerlukan perbaikan. Mohon unggah ulang dokumen yang sesuai.' }}</p>
+            @else
+                <div class="project-empty-state">
+                    <div class="project-empty-icon">
+                        <span class="material-symbols-outlined">home_work</span>
+                    </div>
+                    <h2>Anda belum memiliki proyek pembangunan rumah</h2>
+                    <p>Silakan pergi ke halaman rekomendasi rumah dan buat proyek Anda dari sana.</p>
+                    <a href="{{ route('recommendation.input') }}" class="project-empty-button">
+                        <span class="material-symbols-outlined">search</span>
+                        Lihat Rekomendasi Rumah
+                    </a>
                 </div>
-                <button class="btn-upload revision">
-                    <span class="material-symbols-outlined">upload_file</span>
-                    Upload Ulang
+            @endif
+        </section>
+
+        {{-- ── Cicilan Section (hanya tampil jika proyek aktif) ── --}}
+        @if ($hasProject && $isProyek)
+            <div class="cicilan-section">
+                <h3 class="section-title">Periode Cicilan Rumah</h3>
+                <div class="card-grid">
+
+                    @forelse ($cicilans as $cicilan)
+                        @php
+                            $isAktifCard = $cicilanAktif && $cicilanAktif->id === $cicilan->id;
+                            $cardClass = $isAktifCard ? 'active' : $cicilan->cardClass();
+                        @endphp
+                        <div class="card {{ $cardClass }}">
+                            <div class="card-header">
+                                <div>
+                                    <p class="periode-label {{ $isAktifCard ? 'highlight' : '' }}">
+                                        Periode {{ $cicilan->periode }}
+                                    </p>
+                                    <p class="price">Rp {{ number_format($cicilan->jumlah_bayar, 0, ',', '.') }}</p>
+                                </div>
+                                <span class="badge {{ $cicilan->badgeClass() }}">
+                                    {{ $cicilan->badgeLabel() }}
+                                </span>
+                            </div>
+                            <div class="date {{ $isAktifCard ? 'highlight' : '' }}">
+                                <span class="material-symbols-outlined">calendar_today</span>
+                                {{ $cicilan->tanggal_jatuh_tempo?->format('d M Y') ?? '-' }}
+                            </div>
+                        </div>
+                    @empty
+                        <p style="color: var(--text-muted); font-size: 0.9rem;">Cicilan belum tersedia.</p>
+                    @endforelse
+
+                </div>
+
+                <div class="info-box">
+                    <span class="material-symbols-outlined">warning</span>
+                    <p><b>Informasi Penting:</b> Jika cicilan belum dibayar sesuai jadwal, pengerjaan proyek
+                        akan ditunda sementara.</p>
+                </div>
+
+                <button class="btn-primary" id="periodePayBtn" data-pembayaran-id="{{ $cicilanAktif?->id }}"
+                    data-nominal="{{ $cicilanAktif?->jumlah_bayar }}" data-periode="{{ $cicilanAktif?->periode }}"
+                    {{ !$cicilanAktif ? 'disabled' : '' }}>
+                    <span class="material-symbols-outlined">payments</span>
+                    @if (!$cicilanAktif)
+                        Semua Cicilan Sudah Lunas
+                    @elseif ($cicilanAktif->status_pembayaran === 'pending')
+                        Selesaikan Pembayaran Periode {{ $cicilanAktif->periode }}
+                    @else
+                        Bayar Periode {{ $cicilanAktif->periode }}
+                    @endif
                 </button>
             </div>
+        @endif
 
-            @elseif ($statusDokumen === 'pending')
-            <div class="information-container pending">
-                <div class="information-icon-box pending">
-                    <span class="material-symbols-outlined">rate_review</span>
-                </div>
-                <div class="information-content pending">
-                    <h3>Dokumen Sedang Direview</h3>
-                    <p>Mohon tunggu 1×24 jam.</p>
-                </div>
-                <button class="btn-upload" style="display:none">
-                    <span class="material-symbols-outlined">upload_file</span>
-                    Upload Ulang
-                </button>
-            </div>
+    </div>
 
-            @elseif ($statusDokumen === 'approved' && !$sudahBayar)
-            <div class="information-container verified">
-                <div class="information-icon-box verified">
-                    <span class="material-symbols-outlined">check</span>
-                </div>
-                <div class="information-content verified">
-                    <h3>Dokumen Terverifikasi</h3>
-                    <p>Mohon melakukan pembayaran DP dalam waktu 7×24 jam. Jika tidak, proyek akan otomatis dibatalkan.</p>
-                </div>
-                <button class="btn-upload" style="display:none"></button>
-            </div>
-
-            @elseif ($sudahBayar && !$isMandor)
-            <div class="information-container verified">
-                <div class="information-icon-box verified">
-                    <span class="material-symbols-outlined">check</span>
-                </div>
-                <div class="information-content verified">
-                    <h3>Pembayaran Berhasil</h3>
-                    <p>Mohon tunggu 1×24 jam untuk pengalokasian mandor proyek Anda.</p>
-                </div>
-                <button class="btn-upload" style="display:none"></button>
-            </div>
-
-            @elseif ($sudahBayar && $isMandor)
-            <div class="information-container verified">
-                <div class="information-icon-box verified">
-                    <span class="material-symbols-outlined">check</span>
-                </div>
-                <div class="information-content verified">
-                    <h3>Proyek Aktif</h3>
-                    <p>Proyek sedang aktif dan progress dapat dilacak. Terima kasih telah menggunakan layanan
-                        <strong style="color:#004796">Way2Home</strong>.
+    {{-- ── Sidebar ── --}}
+    @if ($hasProject)
+        <div class="project-sidebar">
+            <div class="info-box-gradient">
+                <div class="info-box-content">
+                    <span class="material-symbols-outlined info-box-icon">lock_clock</span>
+                    <h3 class="info-box-title">Proses Pembayaran</h3>
+                    <p class="info-box-text">
+                        Keamanan Anda adalah prioritas kami. Pembayaran Down Payment (DP) hanya dapat
+                        dilakukan setelah seluruh dokumen administrasi Anda dinyatakan <b>Disetujui</b>
+                        oleh tim verifikator kami.
                     </p>
                 </div>
-                <button class="btn-upload" style="display:none"></button>
-            </div>
-            @endif
-
-            <div class="button-group">
-                <button class="btn-action btn-cancel" id="cancelBtn"
-                    data-proyek="{{ $isProyek ? 'true' : 'false' }}">
-                    <span class="material-symbols-outlined">cancel</span>
-                    Batalkan Proyek
-                </button>
-
-                @if (!$sudahBayar)
-                <button class="btn-action btn-payments-action" id="dpBtn"
-                    data-harga="{{ $desain?->estimasi_biaya ?? 0 }}"
-                    data-proyek-id="{{ $proyek->id }}"
-                    {{ $statusDokumen !== 'approved' ? 'disabled' : '' }}>
-                    <span class="material-symbols-outlined">payments</span>
-                    Bayar DP
-                </button>
-                @else
-                <button class="btn-action btn-progress-action" id="progressBtn"
-                    data-mandor="{{ $isMandor ? 'true' : 'false' }}">
-                    <span class="material-symbols-outlined">analytics</span>
-                    Pantau Progress
-                </button>
-                @endif
-            </div>
-
-        </div>
-    </section>
-</div>
-
-<div class="project-sidebar">
-
-    <div class="info-box-gradient">
-        <div class="info-box-content">
-            <span class="material-symbols-outlined info-box-icon">lock_clock</span>
-            <h3 class="info-box-title">Proses Pembayaran</h3>
-            <p class="info-box-text">
-                Keamanan Anda adalah prioritas kami. Pembayaran Down Payment (DP) hanya dapat
-                dilakukan setelah seluruh dokumen administrasi Anda dinyatakan <b>Disetujui</b>
-                oleh tim verifikator kami.
-            </p>
-        </div>
-        <div class="info-box-decoration">
-            <span class="material-symbols-outlined">verified_user</span>
-        </div>
-    </div>
-
-    <section class="milestone-section">
-        <h3 class="milestone-title">Milestone Proyek</h3>
-        <div class="milestone-list">
-
-            {{-- 1. Pengajuan --}}
-            <div class="milestone-item">
-                <div class="milestone-timeline">
-                    <div class="milestone-icon completed">
-                        <span class="material-symbols-outlined" style='font-variation-settings:"FILL" 1'>check</span>
-                    </div>
-                    <div class="milestone-line"></div>
-                </div>
-                <div class="milestone-content">
-                    <p class="milestone-label">Pengajuan</p>
-                    <p class="milestone-date">{{ $proyek->created_at->format('d M Y') }}</p>
+                <div class="info-box-decoration">
+                    <span class="material-symbols-outlined">verified_user</span>
                 </div>
             </div>
 
-            {{-- 2. Verifikasi Dokumen --}}
-            <div class="milestone-item">
-                <div class="milestone-timeline">
-                    @if ($statusDokumen === 'approved')
-                    <div class="milestone-icon completed">
-                        <span class="material-symbols-outlined">check</span>
+            <section class="milestone-section">
+                <h3 class="milestone-title">Milestone Proyek</h3>
+                <div class="milestone-list">
+
+                    {{-- 1. Pengajuan --}}
+                    <div class="milestone-item">
+                        <div class="milestone-timeline">
+                            <div class="milestone-icon completed">
+                                <span class="material-symbols-outlined"
+                                    style='font-variation-settings:"FILL" 1'>check</span>
+                            </div>
+                            <div class="milestone-line"></div>
+                        </div>
+                        <div class="milestone-content">
+                            <p class="milestone-label">Pengajuan</p>
+                            <p class="milestone-date">{{ $proyek->created_at->format('d M Y') }}</p>
+                        </div>
                     </div>
-                    <div class="milestone-line"></div>
-                    @else
-                    <div class="milestone-icon in-progress">
-                        <span class="material-symbols-outlined">history</span>
+
+                    {{-- 2. Verifikasi Dokumen --}}
+                    <div class="milestone-item">
+                        <div class="milestone-timeline">
+                            @if ($statusDokumen === 'approved')
+                                <div class="milestone-icon completed">
+                                    <span class="material-symbols-outlined">check</span>
+                                </div>
+                                <div class="milestone-line"></div>
+                            @else
+                                <div class="milestone-icon in-progress">
+                                    <span class="material-symbols-outlined">history</span>
+                                </div>
+                                <div class="milestone-line inactive"></div>
+                            @endif
+                        </div>
+                        <div class="milestone-content">
+                            <p class="milestone-label">Verifikasi Dokumen</p>
+                            @if ($statusDokumen === 'approved')
+                                <p class="milestone-status pending">Berhasil direview</p>
+                            @elseif ($statusDokumen === 'revision')
+                                <p class="milestone-status revision">Butuh Revisi</p>
+                            @else
+                                <p class="milestone-status pending">Menunggu review</p>
+                            @endif
+                        </div>
                     </div>
-                    <div class="milestone-line inactive"></div>
+
+                    {{-- 3. Pembayaran DP --}}
+                    <div class="milestone-item">
+                        <div class="milestone-timeline">
+                            @if ($sudahBayarDP)
+                                <div class="milestone-icon completed">
+                                    <span class="material-symbols-outlined">check</span>
+                                </div>
+                                <div class="milestone-line"></div>
+                            @elseif ($statusDokumen === 'approved')
+                                <div class="milestone-icon in-progress">
+                                    <span class="material-symbols-outlined">payments</span>
+                                </div>
+                                <div class="milestone-line inactive"></div>
+                            @else
+                                <div class="milestone-icon pending">
+                                    <span class="material-symbols-outlined">payments</span>
+                                </div>
+                                <div class="milestone-line inactive"></div>
+                            @endif
+                        </div>
+                        <div class="milestone-content">
+                            <p class="milestone-label">Pembayaran DP</p>
+                            @if ($sudahBayarDP)
+                                <p class="milestone-date">{{ $dp->tanggal_bayar?->format('d M Y') }}</p>
+                            @elseif ($statusDokumen === 'approved')
+                                <p class="milestone-date">Menunggu Pembayaran</p>
+                            @else
+                                <p class="milestone-date">Menunggu Verifikasi</p>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- 4. Pengalokasian Mandor --}}
+                    <div class="milestone-item">
+                        <div class="milestone-timeline">
+                            @if ($isMandor)
+                                <div class="milestone-icon completed">
+                                    <span class="material-symbols-outlined">check</span>
+                                </div>
+                                <div class="milestone-line"></div>
+                            @elseif ($sudahBayarDP)
+                                <div class="milestone-icon in-progress">
+                                    <span class="material-symbols-outlined">person</span>
+                                </div>
+                                <div class="milestone-line inactive"></div>
+                            @else
+                                <div class="milestone-icon pending">
+                                    <span class="material-symbols-outlined">person</span>
+                                </div>
+                                <div class="milestone-line inactive"></div>
+                            @endif
+                        </div>
+                        <div class="milestone-content">
+                            <p class="milestone-label">Pengalokasian Mandor</p>
+                            <p class="milestone-date">{{ $isMandor ? 'Mandor dialokasikan' : 'Menunggu' }}</p>
+                        </div>
+                    </div>
+
+                    {{-- 5. Proyek Mulai --}}
+                    <div class="milestone-item">
+                        <div class="milestone-timeline">
+                            <div class="milestone-icon {{ $isFinished || $isProyek ? 'completed' : 'pending' }}">
+                                <span class="material-symbols-outlined"
+                                    style='font-variation-settings:"FILL" 1'>{{ $isFinished ? 'check' : 'start' }}</span>
+                            </div>
+                            @if ($isFinished)
+                                <div class="milestone-line"></div>
+                            @endif
+                        </div>
+                        <div class="milestone-content">
+                            <p class="milestone-label">
+                                {{ $isFinished ? 'Proyek Aktif' : ($isProyek ? 'Proyek Aktif' : 'Mulai') }}</p>
+                            <p class="milestone-date">
+                                {{ $isFinished ? 'Pengerjaan selesai' : ($isProyek ? 'Pantau progress proyek Anda' : 'Progress dimulai') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    @if ($isFinished)
+                        {{-- 6. Proyek Selesai --}}
+                        <div class="milestone-item">
+                            <div class="milestone-timeline">
+                                <div class="milestone-icon completed">
+                                    <span class="material-symbols-outlined"
+                                        style='font-variation-settings:"FILL" 1'>check</span>
+                                </div>
+                            </div>
+                            <div class="milestone-content">
+                                <p class="milestone-label">Proyek Selesai</p>
+                                <p class="milestone-date">
+                                    {{ $proyek->updated_at?->format('d M Y') ?? 'Dokumentasi tersedia' }}</p>
+                            </div>
+                        </div>
                     @endif
-                </div>
-                <div class="milestone-content">
-                    <p class="milestone-label">Verifikasi Dokumen</p>
-                    @if ($statusDokumen === 'approved')
-                    <p class="milestone-status pending">Berhasil direview</p>
-                    @elseif ($statusDokumen === 'revision')
-                    <p class="milestone-status revision">Butuh Revisi</p>
-                    @else
-                    <p class="milestone-status pending">Menunggu review</p>
-                    @endif
-                </div>
-            </div>
 
-            {{-- 3. Pembayaran DP --}}
-            <div class="milestone-item">
-                <div class="milestone-timeline">
-                    @if ($sudahBayar)
-                    <div class="milestone-icon completed">
-                        <span class="material-symbols-outlined">check</span>
-                    </div>
-                    <div class="milestone-line"></div>
-                    @elseif ($statusDokumen === 'approved')
-                    <div class="milestone-icon in-progress">
-                        <span class="material-symbols-outlined">payments</span>
-                    </div>
-                    <div class="milestone-line inactive"></div>
-                    @else
-                    <div class="milestone-icon pending">
-                        <span class="material-symbols-outlined">payments</span>
-                    </div>
-                    <div class="milestone-line inactive"></div>
-                    @endif
                 </div>
-                <div class="milestone-content">
-                    <p class="milestone-label">Pembayaran DP</p>
-                    @if ($sudahBayar)
-                    <p class="milestone-date">Pembayaran Berhasil</p>
-                    @elseif ($statusDokumen === 'approved')
-                    <p class="milestone-date">Menunggu Pembayaran</p>
-                    @else
-                    <p class="milestone-date">Menunggu Verifikasi</p>
-                    @endif
-                </div>
-            </div>
+            </section>
 
-            {{-- 4. Pengalokasian Mandor --}}
-            <div class="milestone-item">
-                <div class="milestone-timeline">
-                    @if ($isMandor)
-                    <div class="milestone-icon completed">
-                        <span class="material-symbols-outlined">check</span>
+            <div class="support-card">
+                <div class="support-content">
+                    <div class="support-icon">
+                        <span class="material-symbols-outlined">support_agent</span>
                     </div>
-                    <div class="milestone-line"></div>
-                    @elseif ($sudahBayar)
-                    <div class="milestone-icon in-progress">
-                        <span class="material-symbols-outlined">person</span>
+                    <div class="support-text">
+                        <h4>Butuh Bantuan?</h4>
+                        <p>Hubungi Admin Kami</p>
                     </div>
-                    <div class="milestone-line inactive"></div>
-                    @else
-                    <div class="milestone-icon pending">
-                        <span class="material-symbols-outlined">person</span>
-                    </div>
-                    <div class="milestone-line inactive"></div>
-                    @endif
                 </div>
-                <div class="milestone-content">
-                    <p class="milestone-label">Pengalokasian Mandor</p>
-                    <p class="milestone-date">{{ $isMandor ? 'Mandor dialokasikan' : 'Menunggu' }}</p>
-                </div>
-            </div>
-
-            {{-- 5. Proyek Mulai --}}
-            <div class="milestone-item">
-                <div class="milestone-timeline">
-                    @if ($isProyek)
-                    <div class="milestone-icon completed">
-                        <span class="material-symbols-outlined">start</span>
-                    </div>
-                    @else
-                    <div class="milestone-icon pending">
-                        <span class="material-symbols-outlined">start</span>
-                    </div>
-                    @endif
-                </div>
-                <div class="milestone-content">
-                    <p class="milestone-label">{{ $isProyek ? 'Proyek Dibuat' : 'Mulai' }}</p>
-                    <p class="milestone-date">{{ $isProyek ? 'Pantau progress proyek Anda' : 'Progress dimulai' }}</p>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    <div class="support-card">
-        <div class="support-content">
-            <div class="support-icon">
-                <span class="material-symbols-outlined">support_agent</span>
-            </div>
-            <div class="support-text">
-                <h4>Butuh Bantuan?</h4>
-                <p>Hubungi Admin Kami</p>
+                <span class="material-symbols-outlined support-chevron">chevron_right</span>
             </div>
         </div>
-        <span class="material-symbols-outlined support-chevron">chevron_right</span>
-    </div>
-
-</div>
-
+    @endif
 @endsection

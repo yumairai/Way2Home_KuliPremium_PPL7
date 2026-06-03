@@ -20,20 +20,29 @@
                         <p class="profile-lead">Perbarui informasi personal dan preferensi akun Anda.</p>
                     </header>
 
-                    <form class="profile-form">
+                    <form class="profile-form" method="POST" action="/profile" enctype="multipart/form-data">
+                        @csrf
+
                         <div class="profile-avatar-block">
                             <div class="profile-avatar-wrap">
                                 <div class="profile-avatar-frame">
-                                    <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="User">
+                                    <img alt="avatar" id="avatarPreview"
+                                        src="{{ $user->avatar ?? asset('images/aset/avatar.jpg') }}" />
+
+                                    <input type="file" name="avatar" id="avatarInput"
+                                        accept="image/jpg,image/jpeg,image/png" style="display:none" />
+
+                                    <button class="profile-avatar-edit-btn" type="button"
+                                        onclick="document.getElementById('avatarInput').click()"
+                                        aria-label="Edit foto profil">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </button>
+                                    <div class="profile-avatar-overlay" onclick="document.getElementById('avatarInput').click()">
+                                        <span>Ganti Foto</span>
+                                    </div>
                                 </div>
-                                <button class="profile-avatar-edit-btn" type="button" aria-label="Edit foto profil">
-                                    <span class="material-symbols-outlined">edit</span>
-                                </button>
-                                <div class="profile-avatar-overlay">
-                                    <span>Ganti Foto</span>
-                                </div>
+                                <p class="profile-avatar-hint">jpg/png maks 2mb</p>
                             </div>
-                            <p class="profile-avatar-hint">FORMAT JPG ATAU PNG. MAKS 2MB.</p>
                         </div>
 
                         <div class="profile-fields">
@@ -42,7 +51,7 @@
                                     <span class="material-symbols-outlined profile-label-icon">person</span>
                                     Nama Lengkap
                                 </label>
-                                <input class="profile-input" type="text" value="Robby Azwan" />
+                                <input class="profile-input" type="text" name="name" value="{{ $user->name }}">
                             </div>
 
                             <div class="profile-field-grid">
@@ -51,14 +60,14 @@
                                         <span class="material-symbols-outlined profile-label-icon">phone</span>
                                         Nomor HP
                                     </label>
-                                    <input class="profile-input" type="tel" value="0813-8431-0179" />
+                                    <input class="profile-input" type="tel" name="phone" value="{{ $user->phone_number }}">
                                 </div>
                                 <div class="profile-field">
                                     <label class="profile-label">
                                         <span class="material-symbols-outlined profile-label-icon">mail</span>
                                         Email
                                     </label>
-                                    <input class="profile-input" type="email" value="oby.azwan@gmail.com" />
+                                    <input class="profile-input" type="email" name="email" value="{{ $user->email }}">
                                 </div>
                             </div>
 
@@ -67,12 +76,12 @@
                                     <span class="material-symbols-outlined profile-label-icon">location_on</span>
                                     Alamat
                                 </label>
-                                <textarea class="profile-textarea" placeholder="Masukkan alamat lengkap Anda di Jawa Barat" rows="3"></textarea>
+                                <textarea class="profile-textarea" name="address" rows="3">{{ $user->address }}</textarea>
                             </div>
                         </div>
 
                         <div class="profile-actions">
-                            <button class="profile-submit-btn" type="submit">
+                            <button class="profile-submit-btn" type="submit" id="submitBtn" disabled>
                                 <span>Ubah Profile</span>
                                 <span class="material-symbols-outlined">save</span>
                             </button>
@@ -83,3 +92,42 @@
         </div>
     </main>
 @endsection
+
+@push('scripts')
+<script>
+    document.getElementById('avatarInput').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => document.getElementById('avatarPreview').src = e.target.result;
+        reader.readAsDataURL(file);
+    });
+
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.querySelector('.profile-form');
+
+    const initialValues = {};
+    form.querySelectorAll('input, textarea').forEach(field => {
+        if (field.name) initialValues[field.name] = field.value;
+    });
+
+    function checkChanges() {
+        let hasChange = false;
+
+        form.querySelectorAll('input, textarea').forEach(field => {
+            if (field.type === 'file') {
+                if (field.files.length > 0) hasChange = true;
+            } else if (field.name && initialValues[field.name] !== field.value) {
+                hasChange = true;
+            }
+        });
+
+        submitBtn.disabled = !hasChange;
+    }
+
+    form.querySelectorAll('input, textarea').forEach(field => {
+        field.addEventListener('input', checkChanges);
+        field.addEventListener('change', checkChanges);
+    });
+</script>
+@endpush

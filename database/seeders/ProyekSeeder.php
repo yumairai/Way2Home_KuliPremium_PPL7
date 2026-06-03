@@ -14,57 +14,55 @@ class ProyekSeeder extends Seeder
      */
     public function run(): void
     {
-        $customerIds = Customer::pluck('id')->toArray();
+        // Hanya ambil customer reguler (bukan akun tester) agar proyek demo terbuat dengan benar
+        $customerIds = Customer::whereHas('user', fn ($q) => $q->where('is_tester', false))
+                               ->pluck('id')
+                               ->toArray();
 
         $proyekData = [
             [
                 'customer_id'   => $customerIds[0] ?? 1,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan',
+                'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Jl. Melati No. 12, Bandung',
-                'tanggal_mulai' => null, // Biasanya tanggal fiksasi nunggu mandor
+                'tanggal_mulai' => null,
                 'status_proyek' => 'Pengalokasian Mandor',
-                'jumlah_cicilan' => 4,
             ],
             [
                 'customer_id'   => $customerIds[1] ?? 2,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan',
+                'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Komp. Asri B-9, Jakarta',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Pengalokasian Mandor',
-                'jumlah_cicilan' => 0,
             ],
             [
                 'customer_id'   => $customerIds[2] ?? 3,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan',
+                'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Jl. Raya Utama No. 45, Surabaya',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Pengalokasian Mandor',
-                'jumlah_cicilan' => 12,
             ],
 
             // 1 Proyek: Revisi Dokumen
             [
                 'customer_id'   => $customerIds[0] ?? 1,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan ',
+                'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Jl. Melati No. 12, Bandung',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Revisi Dokumen',
-                'jumlah_cicilan' => 0,
             ],
 
             // 1 Proyek: Menunggu Verifikasi
             [
                 'customer_id'   => $customerIds[1] ?? 2,
                 'mandor_id'     => null,
-                'jenis_proyek'  => 'Pembangunan',
+                'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Komp. Asri B-9, Jakarta',
                 'tanggal_mulai' => null,
                 'status_proyek' => 'Menunggu Verifikasi',
-                'jumlah_cicilan' => 2,
             ],
         ];
 

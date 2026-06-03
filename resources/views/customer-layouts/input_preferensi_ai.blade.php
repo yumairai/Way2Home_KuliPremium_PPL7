@@ -26,7 +26,7 @@
             <div class="row">
                 <div class="input-group">
                     <label>PREFERENSI LOKASI</label>
-                    <select id="lokasi">
+                    <select id="location">
                         <option>Kota Bandung</option>
                         <option>Kabupaten Bandung</option>
                         <option>Kabupaten Bandung Barat</option>
@@ -61,7 +61,7 @@
 
                 <div class="input-group">
                     <label>GAYA ARSITEKTUR</label>
-                    <select id="gaya_arsitektur">
+                    <select id="style">
                         <option>Minimalist</option>
                         <option>Modern</option>
                         <option>Mewah</option>
@@ -74,21 +74,48 @@
                 <div class="input-group">
                     <label>ESTIMASI AREA RUMAH (<span id="areaValue">30</span> m²)</label>
 
-                    <input type="range" id="areaRange" min="30" max="350" value="30">
+                    <input type="range" id="areaRange" min="25" max="350" value="30">
 
                     <div class="range-info">
-                        <span>30 m²</span>
+                        <span>25 m²</span>
                         <span>350 m²</span>
                     </div>
                 </div>
 
                 <div class="input-group">
-                    <label>JUMLAH KAMAR</label>
-                    <input type="number" id="jumlah_kamar" min="1" max="10" placeholder="1 - 10">
+                    <label>JUMLAH KAMAR TIDUR</label>
+                    <input type="number" id="bedrooms" min="1" max="10" placeholder="1 - 10" value="1">
                 </div>
             </div>
 
             <!-- ROW 3 -->
+            <div class="row">
+                <div class="input-group">
+                    <label>JUMLAH KAMAR MANDI</label>
+                    <input type="number" id="bathrooms" min="1" max="5" placeholder="1 - 5" value="1">
+                </div>
+
+                <div class="input-group">
+                    <label>JUMLAH GARASI</label>
+                    <input type="number" id="garage" min="0" max="5" placeholder="0 - 5" value="0">
+                </div>
+            </div>
+
+            <!-- ROW 4 -->
+            <div class="row">
+                <div class="input-group">
+                    <label>KUALITAS DESAIN (1-10)</label>
+                    <input type="number" id="quality" min="1" max="10" placeholder="1 - 10" value="5">
+                </div>
+
+                <div class="input-group">
+                    <label>FLEKSIBILITAS BUDGET</label>
+                    <input type="number" id="flexibility" min="0" max="50" placeholder="0 - 50%" value="10" step="5">
+                    <small>% dari budget</small>
+                </div>
+            </div>
+
+            <!-- ROW 5 -->
             <div class="input-group full">
                 <label>ESTIMASI BUDGET (Rp <span id="budgetValue">100000000</span>)</label>
 
@@ -98,6 +125,12 @@
                     <span>Rp 100 jt</span>
                     <span>Rp 2 M</span>
                 </div>
+            </div>
+
+            <!-- AC REQUIRED -->
+            <div class="input-group full" style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="ac_required" style="width: 20px; height: 20px; cursor: pointer;">
+                <label for="ac_required" style="margin: 0; cursor: pointer;">AC/Pendingin Ruangan Diperlukan</label>
             </div>
 
             <!-- PRIORITAS -->

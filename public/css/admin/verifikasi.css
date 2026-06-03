@@ -510,6 +510,30 @@
     opacity: 0.95;
 }
 
+.modal-btn-submit__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    display: none;
+    animation: verifikasi-spin 0.8s linear infinite;
+}
+
+.modal-btn-submit.is-loading .modal-btn-submit__spinner {
+    display: inline-block;
+}
+
+.modal-btn-submit.is-loading .modal-btn-submit__text {
+    opacity: 0.95;
+}
+
+@keyframes verifikasi-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 
 /* Container Utama Modal Content */
 .modal-content {
@@ -551,6 +575,53 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.doc-bulk-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.doc-bulk-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #0e1744;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.doc-bulk-btn span {
+    font-size: 1.1rem;
+}
+
+.doc-bulk-btn-reject {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.doc-bulk-btn-reject:hover {
+    background: #fee2e2;
+    border-color: #dc2626;
+}
+
+.doc-bulk-btn-approve {
+    border-color: #16a34a;
+    color: #16a34a;
+}
+
+.doc-bulk-btn-approve:hover {
+    background: #ecfdf5;
+    border-color: #16a34a;
 }
 
 /* Item Dokumen */

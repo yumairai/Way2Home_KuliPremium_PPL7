@@ -3,74 +3,6 @@
     <link rel="stylesheet" href="{{ asset('css/mandor/mandor_dashboard.css') }}" />
 @endpush
 @section('content')
-    @php
-        $renovationRequests = [
-            [
-                'id' => 'REV-001',
-                'applicant_name' => 'Bapak Budi',
-                'budget' => 'Rp 10.000.000',
-                'phone' => '0812-3456-7890',
-                'location' => 'Jl. Melati No. 45, Kebayoran Baru, Jakarta Selatan',
-                'description' =>
-                    'Atap bocor di area ruang tamu dan plafon sudah mulai berjamur. Kerusakan terlihat semakin parah saat hujan deras semalam. Kami membutuhkan pengecekan struktur rangka atap dan penggantian genteng serta pengecatan ulang plafon.',
-                'photos' => [
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                ],
-            ],
-            [
-                'id' => 'REV-002',
-                'applicant_name' => 'Ibu Pertiwi',
-                'budget' => 'Rp 12.000.000',
-                'phone' => '0813-8877-2233',
-                'location' => 'Jl. Cendana No. 12, Cimahi Tengah, Jawa Barat',
-                'description' =>
-                    'Dinding kamar retak memanjang dan ada rembesan air dari sisi samping rumah. Mohon dicek struktur dinding, plester ulang, dan pengecatan interior.',
-                'photos' => [
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                ],
-            ],
-            [
-                'id' => 'REV-003',
-                'applicant_name' => 'Bapak Santoso',
-                'budget' => 'Rp 50.000.000',
-                'phone' => '0856-1122-3344',
-                'location' => 'Jl. Kenanga No. 8, Setiabudi, Jakarta Selatan',
-                'description' =>
-                    'Renovasi dapur total untuk perluasan area dan perbaikan saluran air. Butuh pembongkaran kabinet lama, instalasi pipa baru, serta finishing keramik lantai.',
-                'photos' => [
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                    asset('images/aset/user-dummy.jpg'),
-                ],
-            ],
-            [
-                'id' => 'REV-004',
-                'applicant_name' => 'Bapak Fadhli',
-                'budget' => 'Rp 40.000.000',
-                'phone' => '0856-2222-1111',
-                'location' => 'Jl. Jatinangor No. 8, Hegar, Sumedang ',
-                'description' =>
-                    'Renovasi dapur total untuk perluasan area dan perbaikan saluran air. Butuh pembongkaran kabinet lama, instalasi pipa baru, serta finishing keramik lantai.',
-                'photos' => [asset('images/aset/user-dummy.jpg'), asset('images/aset/user-dummy.jpg')],
-            ],
-        ];
-
-        $requestMap = collect($renovationRequests)->mapWithKeys(fn($request) => [$request['id'] => $request]);
-        $activeProjects = '-';
-        $completedProjects = 18; // data jumlah proyek yang sudah diselesaikan oleh suatu id mandor (mandor tertentu) nnti ambil dr db
-        $requestCount = count($renovationRequests);
-    @endphp
-
     <header class="dashboard-header">
         <h1 class="dashboard-title">Ringkasan Operasional</h1>
         <p class="dashboard-lead">
@@ -78,33 +10,60 @@
             tentang status proyek dan permintaan klien untuk memastikan semua berjalan lancar.
         </p>
     </header>
-    <section class="dashboard-stats">
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon dashboard-stat-icon-primary">
-                <span class="material-symbols-outlined">architecture</span>
+    <section class="dashboard-summary-wrapper">
+        <section class="dashboard-stats">
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon dashboard-stat-icon-primary">
+                    <span class="material-symbols-outlined">architecture</span>
+                </div>
+                <div class="dashboard-stat-copy">
+                    <p class="dashboard-stat-label">Project Saat Ini</p>
+                    <p class="dashboard-stat-value">{{ $activeProjectLabel }}</p>
+                </div>
             </div>
-            <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Project Saat Ini</p>
-                <p class="dashboard-stat-value">{{ $activeProjects }}</p>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon dashboard-stat-icon-secondary">
+                    <span class="material-symbols-outlined">task_alt</span>
+                </div>
+                <div class="dashboard-stat-copy">
+                    <p class="dashboard-stat-label">Project Diselesaikan</p>
+                    <p class="dashboard-stat-value">{{ $completedProjects }}</p>
+                </div>
             </div>
-        </div>
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon dashboard-stat-icon-secondary">
-                <span class="material-symbols-outlined">task_alt</span>
+            <div class="dashboard-stat-card">
+                <div class="dashboard-stat-icon dashboard-stat-icon-tertiary">
+                    <span class="material-symbols-outlined">assignment_late</span>
+                </div>
+                <div class="dashboard-stat-copy">
+                    <p class="dashboard-stat-label">Request Renovasi</p>
+                    <p class="dashboard-stat-value">{{ $requestCount }}</p>
+                </div>
             </div>
-            <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Project Diselesaikan</p>
-                <p class="dashboard-stat-value">{{ $completedProjects }}</p>
+        </section>
+        <div class="dashboard-activity-history">
+            <div class="dashboard-activity-header">
+                <h3 class="dashboard-activity-title">History Aktivitas</h3>
             </div>
-        </div>
-        <div class="dashboard-stat-card">
-            <div class="dashboard-stat-icon dashboard-stat-icon-tertiary">
-                <span class="material-symbols-outlined">assignment_late</span>
+            <div class="dashboard-activity-list dashboard-activity-list-collapsed" id="dashboard-activity-list">
+                <div class="dashboard-activity-track">
+                    @forelse($activityHistory as $activity)
+                        <article
+                            class="dashboard-activity-item{{ $loop->index >= 4 ? ' dashboard-activity-item-hidden' : '' }}">
+                            <div class="dashboard-activity-connector"></div>
+                            <div class="dashboard-activity-content">
+                                <p class="dashboard-activity-title">{{ $activity['title'] }}</p>
+                                <span class="dashboard-activity-timestamp">{{ $activity['timestamp'] }}</span>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="dashboard-activity-empty">
+                            <p>Belum ada aktivitas</p>
+                        </div>
+                    @endforelse
+                </div>
             </div>
-            <div class="dashboard-stat-copy">
-                <p class="dashboard-stat-label">Request Renovasi</p>
-                <p class="dashboard-stat-value">{{ $requestCount }}</p>
-            </div>
+            <button class="dashboard-activity-expand-btn" id="dashboard-activity-expand-btn" type="button">Lihat
+                keseluruhan</button>
         </div>
     </section>
     <section class="dashboard-list-section">
@@ -115,11 +74,12 @@
             </div>
         </div>
         <div class="dashboard-request-list">
-            @foreach ($renovationRequests as $request)
+            @forelse ($renovationRequests as $request)
                 <div
                     class="dashboard-request-card {{ $loop->odd ? 'dashboard-request-card-primary' : 'dashboard-request-card-soft' }}">
                     <div class="dashboard-request-image-wrap">
-                        <img src="{{ asset('images/aset/user-dummy.jpg') }}" alt="Foto Pengaju Renovasi">
+                        <img src="{{ $request['photos'][0] ?? asset('images/aset/user-dummy.jpg') }}"
+                            alt="Foto Pengaju Renovasi">
                     </div>
                     <div class="dashboard-request-meta">
                         <div>
@@ -146,7 +106,17 @@
                         </button>
                     </div>
                 </div>
-            @endforeach
+            @empty
+                <div class="dashboard-request-card dashboard-request-card-soft">
+                    <div class="dashboard-request-meta">
+                        <div>
+                            <p class="dashboard-meta-label">Info</p>
+                            <p class="dashboard-meta-value">Belum ada request renovasi yang perlu direview saat ini.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endforelse
         </div>
     </section>
     <div class="dashboard-review-modal" id="dashboard-review-modal" aria-hidden="true" hidden>
@@ -172,6 +142,14 @@
                         </div>
                     </div>
                     <div class="dashboard-review-summary-item">
+                        <span class="dashboard-review-label">Estimasi Budget</span>
+                        <div class="dashboard-review-inline">
+                            <span class="material-symbols-outlined dashboard-review-icon">monetization_on</span>
+                            <span class="dashboard-review-value dashboard-review-value-small"
+                                id="dashboard-review-budget">-</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-review-summary-item">
                         <span class="dashboard-review-label">Lokasi Renovasi</span>
                         <div class="dashboard-review-inline">
                             <span class="material-symbols-outlined dashboard-review-icon">location_on</span>
@@ -189,16 +167,60 @@
                 </div>
 
                 <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Feedback Mandor</span>
+                    <div class="dashboard-review-note dashboard-review-feedback-wrap">
+                        <textarea class="dashboard-review-feedback-readonly" placeholder="Tulis feedback mandor untuk customer..."></textarea>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Riwayat Negosiasi Customer</span>
+                    <div class="dashboard-review-note">
+                        <div id="dashboard-review-negotiation-list"></div>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-block">
+                    <span class="dashboard-review-label">Balas Negosiasi</span>
+                    <div class="dashboard-review-note dashboard-review-negotiation-compose">
+                        <textarea class="dashboard-review-negotiation-message" placeholder="Tulis balasan negosiasi untuk customer..."></textarea>
+                    </div>
+                </div>
+
+                <div class="dashboard-review-block">
                     <span class="dashboard-review-label">Foto Kerusakan (<span
                             id="dashboard-review-photo-count">0</span>)</span>
                     <div class="dashboard-review-gallery" id="dashboard-review-gallery">
                     </div>
                 </div>
+
                 <div class="dashboard-review-block">
-                    <span class="dashboard-review-label">Feedback Mandor</span>
-                    <div class="dashboard-review-note">
-                        <textarea class="dashboard-review-feedback"
-                            placeholder="Tulis feedback dan material yang dibutuhkan secara lengkap untuk renovasi klien..."></textarea>
+                    <span class="dashboard-review-label">Material Renovasi</span>
+                    <div class="dashboard-review-material-wrap">
+                        <div class="dashboard-review-material-panel dashboard-review-material-panel-left">
+                            <label class="dashboard-review-material-search-label"
+                                for="dashboard-review-material-search">Cari
+                                Material</label>
+                            <input class="dashboard-review-material-search" id="dashboard-review-material-search"
+                                type="text" placeholder="Cari nama material..." autocomplete="off" />
+                            <div class="dashboard-review-material-source-list" id="dashboard-review-material-source-list">
+                            </div>
+                        </div>
+                        <div class="dashboard-review-material-panel dashboard-review-material-panel-right">
+                            <p class="dashboard-review-material-selected-title">Material Dipilih</p>
+                            <p class="dashboard-review-material-empty" id="dashboard-review-material-empty">Belum ada
+                                material
+                                ditambah</p>
+                            <div class="dashboard-review-material-selected-list"
+                                id="dashboard-review-material-selected-list">
+                            </div>
+                            <div class="dashboard-review-material-total">
+                                <p class="dashboard-review-material-total-label">Total Harga Material</p>
+                                <p class="dashboard-review-material-total-value" id="dashboard-review-material-total">
+                                    Rp 0
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -207,8 +229,8 @@
                     <div class="dashboard-review-cost-wrap">
                         <label class="dashboard-review-cost-field" for="dashboard-review-cost">
                             <span class="dashboard-review-cost-prefix">Rp</span>
-                            <input class="dashboard-review-cost-input" id="dashboard-review-cost" type="number"
-                                inputmode="numeric" min="0" step="1000" placeholder="Contoh: 12500000" />
+                            <input class="dashboard-review-cost-input" id="dashboard-review-cost" type="text"
+                                inputmode="numeric" autocomplete="off" placeholder="Contoh: 12.500.000" />
                         </label>
                         <p class="dashboard-review-cost-hint">Masukkan total biaya renovasi.</p>
                     </div>
@@ -216,8 +238,14 @@
 
                 <div class="dashboard-review-actions">
                     <button class="dashboard-review-action-btn dashboard-review-action-btn-primary" type="button"
-                        data-tracking-url="{{ route('mandor.tracking') }}" id="dashboard-review-take-btn">
-                        Ambil Renovasi
+                        id="dashboard-review-negotiate-btn">
+                        Kirim Negosiasi
+                    </button>
+                    <button class="dashboard-review-action-btn dashboard-review-action-btn-secondary" type="button"
+                        data-tracking-url="{{ route('mandor.tracking') }}" id="dashboard-review-take-btn" disabled
+                        aria-disabled="true">
+                        <span class="dashboard-review-action-btn__text">Ambil Renovasi</span>
+                        <span class="dashboard-review-action-btn__spinner" aria-hidden="true"></span>
                     </button>
                 </div>
             </div>
@@ -226,8 +254,10 @@
 
     <script>
         window.renovationRequestMap = @json($requestMap);
+        window.renovationMaterialCatalog = @json($materialCatalog);
     </script>
 @endsection
 @push('scripts')
     <script src="{{ asset('js/mandor/review.js') }}"></script>
+    <script src="{{ asset('js/mandor/activity-history.js') }}"></script>
 @endpush

@@ -79,6 +79,25 @@ body {
 }
 
 /* INPUT */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding-right: 40px;
+    /* Beri ruang agar teks tidak tertutup ikon */
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
 .input-group {
     margin-bottom: 15px;
 }
@@ -124,17 +143,50 @@ body {
 .btn-login {
     width: 100%;
     padding: 12px;
-    background-color: #fbab04;
+    background-color: #2B3361;
     border: none;
     border-radius: 10px;
     color: white;
     font-weight: bold;
     cursor: pointer;
     transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 .btn-login:hover {
-    background-color: #e89c00;
+    background-color: #21274b;
+}
+
+.btn-login:disabled {
+    cursor: wait;
+    opacity: 0.85;
+}
+
+.btn-login__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    display: none;
+    animation: login-spin 0.8s linear infinite;
+}
+
+.btn-login.is-loading .btn-login__spinner {
+    display: inline-block;
+}
+
+.btn-login.is-loading .btn-login__text {
+    opacity: 0.95;
+}
+
+@keyframes login-spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* REGISTER */

@@ -10,7 +10,8 @@
             <a href="/">Beranda</a>
             <a href="/recommendation">Desain</a>
             <a href="/material">Material</a>
-            <a href="/renovation">Renovasi</a>
+            <a
+                href="{{ Auth::user()?->role === 'mandor' ? route('mandor.dashboard') : route('customer.renovation') }}">Renovasi</a>
         </div>
         <!-- user bisa klik dropdown -->
         <div class="nav-actions">
@@ -19,7 +20,7 @@
                 <span class="cart-badge" id="navCartBadge" style="display: none;">0</span>
             </div>
             <img alt="User profile avatar" class="profile-avatar" id="profileDropdown"
-                src="{{ asset('images/aset/user-dummy.jpg') }}" />
+                src="{{ Auth::user()?->avatar ?? asset('images/aset/avatar.jpg') }}" />
             <!-- DROPDOWN PROFILE !-->
             <div class="profile-dropdown">
                 <!-- Header dengan Background Foto (Sesuai request sebelumnya) -->
@@ -30,10 +31,10 @@
                     <div class="header-content">
                         <div class="user-info">
                             <div class="user-avatar">
-                                <img alt="avatar" src="{{ asset('images/aset/user-dummy.jpg') }}" />
+                                <img alt="avatar" src="{{ Auth::user()?->avatar ?? asset('images/aset/avatar.jpg') }}" />
                             </div>
                             <div class="user-details">
-                                <h3>Robby Azwan</h3>
+                                <h3>{{ auth()->user()?->name }}</h3>
                                 <p>Customer</p>
                             </div>
                         </div>
@@ -49,7 +50,8 @@
                         <span class="material-symbols-outlined">house</span>
                         <span>Proyek Saya</span>
                     </a>
-                    <a href="{{ route('customer.renovation') }}" class="nav-link">
+                    <a href="{{ Auth::user()?->role === 'mandor' ? route('mandor.dashboard') : route('customer.renovation') }}"
+                        class="nav-link">
                         <span class="material-symbols-outlined">construction</span>
                         <span>Renovasi Saya</span>
                     </a>
@@ -68,7 +70,7 @@
                     </form>
 
                     <button type="button" class="dropdown-logout-btn"
-                        onclick="event.preventDefault(); if(confirm('Yakin ingin keluar?')) { document.getElementById('logout-form').submit(); }">
+                        onclick="window.W2HLogout.submit('logout-form', 'Yakin ingin keluar?')">
                         <span class="material-symbols-outlined">logout</span>
                         Logout
                     </button>
@@ -78,6 +80,7 @@
     </div>
 </nav>
 @push('scripts')
+    <script src="{{ asset('js/logout.js') }}"></script>
     <script src="{{ asset('js/dropdown.js') }}"></script>
     <script>
         // Fungsi global untuk update cart badge

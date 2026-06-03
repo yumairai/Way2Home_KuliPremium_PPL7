@@ -1,22 +1,75 @@
 ﻿// ─── Modal open/close ────────────────────────────────────────────────────────
 
+
+// ─── Bulk Actions: Tolak Semua / Verifikasi Semua ────────────────────────────
+
+function approveAllDocs() {
+    const allItems = document.querySelectorAll('.doc-item');
+
+    allItems.forEach(item => {
+        item.classList.remove('rejected');
+        item.classList.add('verified');
+
+        const statusEl = item.querySelector('.doc-status');
+        statusEl.textContent = 'disetujui';
+        statusEl.className = 'doc-status status-verified';
+
+        item.querySelector('.doc-status-input').value = 'disetujui';
+    });
+
+    checkSubmitEligibility();
+}
+
+function rejectAllDocs() {
+    const allItems = document.querySelectorAll('.doc-item');
+
+    allItems.forEach(item => {
+        item.classList.remove('verified');
+        item.classList.add('rejected');
+
+        const statusEl = item.querySelector('.doc-status');
+        statusEl.textContent = 'Ditolak';
+        statusEl.className = 'doc-status status-rejected';
+
+        item.querySelector('.doc-status-input').value = 'ditolak';
+    });
+
+    checkSubmitEligibility();
+}
 function openDocModal(triggerBtn) {
-    const proyekId   = triggerBtn.dataset.id;
-    const pemohon    = triggerBtn.dataset.name;
-    const documents  = JSON.parse(triggerBtn.dataset.documents); // array dari relasi dokumenProyek
+    const proyekId = triggerBtn.dataset.id;
+    const pemohon = triggerBtn.dataset.name;
+
+    let documents;
+    try {
+        documents = JSON.parse(triggerBtn.dataset.documents);
+    } catch (e) {
+        console.error('Error parsing documents JSON:', e);
+        W2HDialog.error('Gagal memuat data dokumen. Coba refresh halaman.');
+        return;
+    }
+
+    const modal = document.getElementById('doc-modal');
+    const subtitle = document.querySelector('.modal-subtitle');
+    const form = document.getElementById('doc-form');
+
+    if (!modal || !subtitle || !form) {
+        console.error('Modal elements not found');
+        W2HDialog.error('Modal tidak ditemukan. Coba refresh halaman.');
+        return;
+    }
 
     // Isi header modal
-    document.querySelector('.modal-subtitle').textContent =
-        `Pemohon: ${pemohon} | ID: #${proyekId}`;
+    subtitle.textContent = `Pemohon: ${pemohon} | ID: #${proyekId}`;
 
     // Arahkan form ke route update yang benar
-    document.getElementById('doc-form').action = `/admin/verifikasi/${proyekId}`;
+    form.action = `/admin/verifikasi/${proyekId}`;
 
     // Render daftar dokumen secara dinamis dari database
     renderDocList(documents);
 
     // Tampilkan modal
-    document.getElementById('doc-modal').style.display = 'flex';
+    modal.style.display = 'flex';
 
     // Aktifkan dokumen pertama
     const firstItem = document.querySelector('.doc-item');
@@ -59,7 +112,7 @@ function renderDocList(documents) {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'doc-item';
-        btn.dataset.src  = doc.file_url;
+        btn.dataset.src = doc.file_url;
         btn.dataset.docId = doc.id;
 
         // Tandai class awal jika sudah ada status dari DB
@@ -91,16 +144,16 @@ function renderDocList(documents) {
 // ─── Preview file (gambar / PDF) ──────────────────────────────────────────────
 
 function previewFile(fileUrl, fileName, isPdf) {
-    const pdfInfo    = document.getElementById('pdf-info');
+    const pdfInfo = document.getElementById('pdf-info');
     const imgPreview = document.getElementById('image-preview');
 
-    pdfInfo.style.display    = 'none';
+    pdfInfo.style.display = 'none';
     imgPreview.style.display = 'none';
 
     if (isPdf) {
         pdfInfo.style.display = 'flex';
-        document.getElementById('pdf-filename').textContent  = fileName;
-        document.getElementById('pdf-download-btn').href     = fileUrl;
+        document.getElementById('pdf-filename').textContent = fileName;
+        document.getElementById('pdf-download-btn').href = fileUrl;
     } else {
         imgPreview.style.display = 'block';
         imgPreview.src = fileUrl;
@@ -122,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const statusEl = activeItem.querySelector('.doc-status');
         statusEl.textContent = 'disetujui';
-        statusEl.className   = 'doc-status status-verified';
+        statusEl.className = 'doc-status status-verified';
 
         // Update hidden input supaya nilai yang di-submit ke controller ikut berubah
         activeItem.querySelector('.doc-status-input').value = 'disetujui';
@@ -140,22 +193,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const statusEl = activeItem.querySelector('.doc-status');
         statusEl.textContent = 'Ditolak';
-        statusEl.className   = 'doc-status status-rejected';
+        statusEl.className = 'doc-status status-rejected';
 
         activeItem.querySelector('.doc-status-input').value = 'ditolak';
 
         checkSubmitEligibility();
     });
 
-    // Tombol Submit — kirim form ke controller
-    document.querySelector('.modal-btn-submit').addEventListener('click', function () {
-        if (this.disabled) return;
+    // Submit form — tampilkan spinner lalu kirim ke controller
+    document.getElementById('doc-form').addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const submitBtn = document.querySelector('.modal-btn-submit');
+        if (!submitBtn || submitBtn.disabled) return;
 
         const hasRejected = document.querySelectorAll('.doc-item.rejected').length > 0;
-        const alasan      = document.getElementById('alasan_penolakan').value.trim();
+        const alasan = document.getElementById('alasan_penolakan').value.trim();
 
         if (hasRejected && !alasan) {
-            alert('Mohon isi alasan penolakan sebelum submit.');
+            await W2HDialog.alert('Mohon isi alasan penolakan sebelum submit.');
             document.getElementById('alasan_penolakan').focus();
             return;
         }
@@ -165,7 +221,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const statusProyek = hasRejected ? 'Revisi Dokumen' : 'Pembayaran DP';
         document.getElementById('status-proyek-input').value = statusProyek;
 
-        document.getElementById('doc-form').submit();
+        submitBtn.classList.add('is-loading');
+        submitBtn.disabled = true;
+
+        this.submit();
     });
 
     // Re-check saat admin mengetik alasan penolakan
@@ -176,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
 // ─── Cek apakah semua dokumen sudah di-review ────────────────────────────────
 
 function checkSubmitEligibility() {
-    const allItems  = document.querySelectorAll('.doc-item');
+    const allItems = document.querySelectorAll('.doc-item');
     const submitBtn = document.querySelector('.modal-btn-submit');
 
     const allReviewed = [...allItems].every(item =>
@@ -184,8 +243,8 @@ function checkSubmitEligibility() {
     );
 
     const hasRejected = document.querySelectorAll('.doc-item.rejected').length > 0;
-    const alasan      = document.getElementById('alasan_penolakan').value.trim();
-    const alasanOk    = !hasRejected || alasan.length > 0;
+    const alasan = document.getElementById('alasan_penolakan').value.trim();
+    const alasanOk = !hasRejected || alasan.length > 0;
 
     submitBtn.disabled = !(allReviewed && alasanOk);
 }

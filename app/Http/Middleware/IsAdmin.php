@@ -20,7 +20,6 @@ class IsAdmin
             return $next($request);
         }
 
-        // Kalau bukan admin, lempar balik ke dashboard customer atau login
-        return redirect('/dashboard')->with('error', 'Anda tidak punya akses ke halaman admin.');
+        return redirect()->route('home')->with('error', 'Anda tidak punya akses ke halaman admin.');
     }
 }

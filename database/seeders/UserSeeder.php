@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
                 'role'         => 'admin',
                 'phone_number' => '081111111111',
                 'address'      => 'Kantor Pusat Management',
+                'email_verified_at' => now(), // Admin tidak perlu verifikasi email
             ]
         );
 
@@ -35,22 +36,19 @@ class UserSeeder extends Seeder
                 'name'    => 'Budi Customer',
                 'email'   => 'customer@gmail.com',
                 'phone'   => '082222222221',
-                'address' => 'Jl. Perumahan Indah No. 10',
-                'ktp'     => 'ktp_budi.jpg'
+                'address' => 'Jl. Perumahan Indah No. 10'
             ],
             [
                 'name'    => 'Siti Aminah',
                 'email'   => 'siti@gmail.com',
                 'phone'   => '082222222222',
-                'address' => 'Jl. Mawar Melati No. 5',
-                'ktp'     => 'ktp_siti.jpg'
+                'address' => 'Jl. Mawar Melati No. 5'
             ],
             [
                 'name'    => 'Agus Pratama',
                 'email'   => 'agus@gmail.com',
                 'phone'   => '082222222223',
-                'address' => 'Griya Asri Blok C-12',
-                'ktp'     => 'ktp_agus.jpg'
+                'address' => 'Griya Asri Blok C-12'
             ],
         ];
 
@@ -58,11 +56,12 @@ class UserSeeder extends Seeder
             $user = User::updateOrCreate(
                 ['email' => $c['email']],
                 [
-                    'name'         => $c['name'],
-                    'password'     => 'passwordcustomer',
-                    'role'         => 'customer',
-                    'phone_number' => $c['phone'],
-                    'address'      => $c['address'],
+                    'name'              => $c['name'],
+                    'password'          => 'passwordcustomer',
+                    'role'              => 'customer',
+                    'phone_number'      => $c['phone'],
+                    'address'           => $c['address'],
+                    'email_verified_at' => now(), // Customer seed otomatis verified
                 ]
             );
 
@@ -70,7 +69,6 @@ class UserSeeder extends Seeder
                 ['user_id' => $user->id],
                 [
                     'no_hp'              => $c['phone'],
-                    'path_file_foto_ktp' => $c['ktp'],
                 ]
             );
         }
@@ -107,6 +105,7 @@ class UserSeeder extends Seeder
                     'role'         => 'mandor',
                     'phone_number' => $m['phone'],
                     'address'      => $m['address'],
+                    'email_verified_at' => now(), // Mandor tidak perlu verifikasi email
                 ]
             );
         }

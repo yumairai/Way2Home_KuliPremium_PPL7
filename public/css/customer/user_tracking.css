@@ -626,7 +626,7 @@ body {
 
 /* ===== Customer Tracking Semantic Styles ===== */
 .tracking-page {
-    max-width: 1536px;
+    max-width: 90vw;
     margin: 0 auto;
     padding: 7rem 0rem 2rem 0rem;
 }
@@ -865,6 +865,13 @@ body {
     letter-spacing: 0.25em;
 }
 
+.tracking-contact-number {
+    margin: 0.25rem 0 0;
+    color: var(--outline);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
 .tracking-contact-chat {
     margin-left: auto;
     color: var(--outline);
@@ -872,6 +879,10 @@ body {
     border: 0;
     padding: 0;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
 
 .tracking-timeline {

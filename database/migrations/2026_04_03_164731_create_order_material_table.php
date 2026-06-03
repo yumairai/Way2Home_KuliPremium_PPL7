@@ -26,7 +26,7 @@ return new class extends Migration
             $table->bigInteger('biaya_layanan');
             $table->bigInteger('total_harga');
             
-            $table->enum('status_order', ['pending', 'settlement', 'expire', 'cancel', 'deny'])
+            $table->enum('status_order', ['pending','paid','persiapan','dikirim','selesai','expire','cancel','deny'])
                 ->default('pending');
                 
             $table->timestamps();

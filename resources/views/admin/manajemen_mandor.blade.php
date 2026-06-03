@@ -40,13 +40,22 @@
             <div class="mandor-entries">
                 @forelse($mandors as $mandor)
                     @php
-                        $isBusy = $mandor->proyekAktif !== null;
+                        $isBusy = $mandor->status === 'nonaktif';
+                        $defaultAvatar = asset('images/aset/avatar.jpg');
+                        $avatarPath = trim((string) $mandor->path_foto_profil);
+                        $avatarSrc = $defaultAvatar;
+
+                        if ($avatarPath !== '') {
+                            $avatarSrc = \Illuminate\Support\Str::startsWith($avatarPath, ['http://', 'https://'])
+                                ? $avatarPath
+                                : asset('storage/' . ltrim($avatarPath, '/'));
+                        }
                     @endphp
                     <div class="mandor-entry {{ $isBusy ? 'busy' : '' }}" data-name="{{ strtolower($mandor->user->name) }}">
                         <div class="mandor-entry-info">
                             <div class="mandor-entry-avatar-container">
-                                <img class="mandor-entry-avatar"
-                                    src="{{ $mandor->path_foto_profil ? asset('storage/' . $mandor->path_foto_profil) : asset('images/default-avatar.png') }}"
+                                <img class="mandor-entry-avatar" src="{{ $avatarSrc }}"
+                                    onerror="this.onerror=null;this.src='{{ $defaultAvatar }}';"
                                     alt="{{ $mandor->user->name }}" />
                                 <span class="mandor-entry-status-dot"></span>
                             </div>
@@ -64,9 +73,15 @@
 
                         <div class="mandor-entry-actions">
                             <div class="mandor-entry-project">
-                                <p class="mandor-entry-project-label">Proyek Saat Ini</p>
+                                <p class="mandor-entry-project-label">Status Proyek</p>
                                 <p class="mandor-entry-project-name">
-                                    {{ $mandor->proyekAktif ? $mandor->proyekAktif->jenis_proyek : '-' }}
+                                    @if ($isBusy && $mandor->proyekAktif)
+                                        {{ $mandor->proyekAktif->jenis_proyek }}
+                                    @elseif($isBusy && $mandor->renovasiAktif)
+                                        Renovasi Aktif
+                                    @else
+                                        Tidak Ada Proyek
+                                    @endif
                                 </p>
                             </div>
 
@@ -77,7 +92,7 @@
                                 </button>
                             @else
                                 <button class="mandor-assign-btn disabled" disabled>
-                                    Assign Proyek
+                                    Sedang Bertugas
                                 </button>
                             @endif
                         </div>
@@ -129,7 +144,10 @@
             </div>
             <div class="modal-footer">
                 <div class="modal-footer-buttons">
-                    <button class="modal-btn modal-btn-submit">Assign Mandor</button>
+                    <button class="modal-btn modal-btn-submit" type="button">
+                        <span class="modal-btn-submit__text">Assign Mandor</span>
+                        <span class="modal-btn-submit__spinner" aria-hidden="true"></span>
+                    </button>
                 </div>
             </div>
         </div>

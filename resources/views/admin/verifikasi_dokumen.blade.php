@@ -87,7 +87,7 @@
                                                 return [
                                                     'id' => $d->id,
                                                     'nama_dokumen' => $d->jenis_dokumen,
-                                                    'file_url' => asset('storage/' . $d->file_path),
+                                                    'file_url' => $d->signed_url, // ← ubah ini
                                                     'status_verifikasi' => $d->status_verifikasi,
                                                 ];
                                             }),
@@ -144,6 +144,14 @@
                         <p class="doc-label">Dokumen Pengaju:</p>
                         <div class="doc-list">
                         </div>
+                        <div class="doc-bulk-actions">
+                            <button type="button" class="doc-bulk-btn doc-bulk-btn-reject" onclick="rejectAllDocs()">
+                                Tolak Semua
+                            </button>
+                            <button type="button" class="doc-bulk-btn doc-bulk-btn-approve" onclick="approveAllDocs()">
+                                Verifikasi Semua
+                            </button>
+                        </div>
                     </div>
                     <div class="doc-preview-container">
                         <div id="preview-placeholder" class="preview-wrapper">
@@ -179,7 +187,10 @@
                     <button type="button" class="modal-btn modal-btn-approve">Verifikasi</button>
                 </div>
                 <div class="modal-footer-buttons-right">
-                    <button type="submit" class="modal-btn modal-btn-submit" disabled>Submit</button>
+                    <button type="submit" class="modal-btn modal-btn-submit" disabled>
+                        <span class="modal-btn-submit__text">Submit</span>
+                        <span class="modal-btn-submit__spinner" aria-hidden="true"></span>
+                    </button>
                 </div>
             </div>
         </form>

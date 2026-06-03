@@ -165,10 +165,11 @@ body::selection {
 }
 
 .user-avatar img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50px;
-
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    scale: 0.95;
 }
 
 .user-details h3 {
@@ -268,7 +269,7 @@ nav {
 }
 
 nav .nav-container {
-    max-width: 80rem;
+    max-width: 100vw;
     margin: 0 auto;
     padding: 0 2rem;
     display: flex;

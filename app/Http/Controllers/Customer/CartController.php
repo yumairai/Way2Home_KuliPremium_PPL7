@@ -9,11 +9,12 @@ use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
-    // 1. Ambil semua data keranjang user yang sedang login (Read)
+    // 1. Ambil semua data keranjang user yang sedang login (Read) - OPTIMIZED
     public function index()
     {
         $userId = Auth::id();
-        $carts = Cart::with('material')
+        $carts = Cart::select('id', 'user_id', 'material_id', 'jumlah')  // Only needed columns
+            ->with('material:id,nama_material,harga,satuan,kategori,path_foto_material,stok')
             ->where('user_id', $userId)
             ->get();
 
@@ -23,7 +24,7 @@ class CartController extends Controller
         ]);
     }
 
-    // 2. Tambah barang ke keranjang (Create/Update)
+    // 2. Tambah barang ke keranjang (Create/Update) - OPTIMIZED
     public function addToCart(Request $request)
     {
         if (!Auth::check()) {
@@ -31,27 +32,33 @@ class CartController extends Controller
         }
 
         $request->validate([
-            'material_id' => 'required|exists:materials,id',
+            'material_id' => 'required|integer|min:1',  // Fast integer validation
             'jumlah' => 'required|integer|min:1'
         ]);
 
         $userId = Auth::id();
+        $materialId = $request->material_id;
+        $jumlah = $request->jumlah;
 
-        $cart = Cart::where('user_id', $userId)
-            ->where('material_id', $request->material_id)
-            ->first();
-
-        if ($cart) {
-            $cart->update([
-                'jumlah' => $request->jumlah
-            ]);
-        } else {
-            Cart::create([
-                'user_id' => $userId,
-                'material_id' => $request->material_id,
-                'jumlah' => $request->jumlah
-            ]);
+        $material = \App\Models\Material::find($materialId);
+        if (!$material) {
+            return response()->json(['message' => 'Material tidak ditemukan'], 404);
         }
+
+        if ($jumlah > $material->stok) {
+            return response()->json(['message' => 'Maaf, stok tidak cukup. Sisa stok: ' . $material->stok], 400);
+        }
+
+        // Gunakan updateOrCreate untuk 1 query saja (bukan 2-3 query)
+        Cart::updateOrCreate(
+            [
+                'user_id' => $userId,
+                'material_id' => $materialId
+            ],
+            [
+                'jumlah' => $jumlah
+            ]
+        );
 
         return response()->json(['message' => 'Keranjang berhasil diperbarui!']);
     }
@@ -63,10 +70,14 @@ class CartController extends Controller
             'jumlah' => 'required|integer|min:1'
         ]);
 
-        $cart = Cart::where('user_id', Auth::id())->find($id);
+        $cart = Cart::with('material')->where('user_id', Auth::id())->find($id);
 
         if (!$cart) {
             return response()->json(['message' => 'Data tidak ditemukan'], 404);
+        }
+
+        if ($cart->material && $request->jumlah > $cart->material->stok) {
+            return response()->json(['message' => 'Maaf, stok tidak cukup. Sisa stok: ' . $cart->material->stok], 400);
         }
 
         $cart->update(['jumlah' => $request->jumlah]);
@@ -93,5 +104,16 @@ class CartController extends Controller
         if (!$cart) return response()->json(['message' => 'Barang tidak ditemukan'], 404);
         $cart->delete();
         return response()->json(['message' => 'Barang dihapus dari keranjang']);
+    }
+
+    public function cartPage()
+    {
+        $user = Auth::user();
+        $customer = $user->customer; // relasi customer
+
+        return view('customer.cart', [
+            'user' => $user,
+            'customer' => $customer,
+        ]);
     }
 }
