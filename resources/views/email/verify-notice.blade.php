@@ -107,6 +107,16 @@
                     </form>
                 </div>
 
+                <div class="button-logout">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn-logout">
+                            Keluar
+                        </button>
+                    </form>
+                </div>
+
+
                 <p class="helper-text">
                     Jika tidak menerima email, tunggu beberapa detik lalu klik tombol di atas.
                 </p>
@@ -117,6 +127,7 @@
     @include('partials.w2h-dialog')
     @include('partials.w2h-flash')
     <script src="{{ asset('js/ui/dialog.js') }}"></script>
+    <script src="{{ asset('js/ui/dropdown.js') }}"></script>
 
 </body>
 

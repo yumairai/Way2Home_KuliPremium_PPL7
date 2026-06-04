@@ -141,6 +141,34 @@ body {
     transform: translateY(0);
 }
 
+.button-logout {
+    margin-top: 1.5rem;
+}
+
+.button-logout button {
+    width: 100%;
+    padding: 0.95rem 1.25rem;
+    border: none;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #f72222 0%, #ff0000 100%);
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.98rem;
+    font-weight: 700;
+    box-shadow: 0 16px 30px rgba(194, 4, 4, 0.28);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.button-logout button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 20px 34px rgba(194, 4, 4, 0.34);
+    filter: brightness(1.02);
+}
+
+.button-logout button:active {
+    transform: translateY(0);
+}
+
 .helper-text {
     margin-top: 1rem !important;
     font-size: 0.84rem !important;

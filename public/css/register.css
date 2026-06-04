@@ -6,7 +6,8 @@
 }
 
 body {
-    height: 100vh;
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
 /* CONTAINER */
@@ -63,7 +64,7 @@ body {
     width: 400px;
     padding: 25px 40px;
     background: rgb(235, 250, 255);
-    border-radius: 5px;
+    border-radius: 18px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(160, 160, 160, 0.9);
 }
@@ -221,4 +222,93 @@ body {
     font-size: 12px;
     display: block;
     margin-top: 5px;
+}
+
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        min-height: 100vh;
+        height: auto;
+    }
+
+    .left,
+    .right {
+        width: 100%;
+    }
+
+    .left {
+        min-height: auto;
+        padding: 1.5rem;
+    }
+
+    .right {
+        order: -1;
+        padding: 2rem 1.5rem;
+        min-height: 18rem;
+    }
+
+    .branding img {
+        width: 96px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .right {
+        min-height: 14rem;
+        padding: 1.5rem;
+    }
+
+    .branding h1 {
+        font-size: 2rem;
+    }
+
+    .branding p {
+        font-size: 0.95rem;
+    }
+
+    .left {
+        padding: 1rem;
+    }
+
+    .form-box {
+        width: 100%;
+        max-width: 28rem;
+        padding: 1.25rem;
+        border-radius: 1.25rem;
+    }
+
+    .form-box h2 {
+        font-size: 1.5rem;
+    }
+
+    .form-box p {
+        margin-bottom: 1rem;
+    }
+
+    .input-group {
+        margin-bottom: 1rem;
+    }
+
+    .input-group input {
+        padding: 0.85rem 0.9rem;
+    }
+
+    .options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-login {
+        padding: 0.95rem 1rem;
+    }
+
+    .register {
+        margin-top: 1rem;
+    }
+
+    .error-text {
+        font-size: 11px;
+    }
 }
