@@ -80,7 +80,7 @@ body {
 }
 
 .rv-main {
-    padding: 8rem;
+    padding: 6rem 3rem;
     position: relative;
     z-index: 1;
 }
@@ -1175,8 +1175,7 @@ body {
 
 @media (max-width: 767px) {
     .rv-main {
-        padding-top: 6rem;
-        padding-bottom: 4rem;
+        padding: 6rem 2rem;
     }
 
     .rv-request-content {

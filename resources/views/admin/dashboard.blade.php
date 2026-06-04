@@ -60,10 +60,6 @@
             <h3>Daftar Proyek Aktif</h3>
             <p>Monitoring status dan progres pengerjaan dari proyek bangun rumah dan renovasi yang sedang berjalan.</p>
         </div>
-        <div class="project-actions">
-            <button class="btn btn-secondary" type="button" disabled>Filter</button>
-            <button class="btn btn-primary" type="button" disabled>Export Data</button>
-        </div>
     </div>
     <div class="table-wrapper">
         <table class="project-table">
