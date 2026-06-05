@@ -1,10 +1,10 @@
 <nav class="glass-nav">
     <div class="nav-container">
         <!-- Brand -->
-        <div class="brand">
+        <a href="/" class="brand">
             <img src="{{ asset('images/aset/logo-w2h.png') }}" alt="Logo Way2Home">
             <span class="brand-text">Way2Home</span>
-        </div>
+        </a>
         <button class="nav-menu-toggle" type="button" aria-label="Buka navigasi" aria-controls="mobile-nav-drawer"
             aria-expanded="false" data-nav-drawer-toggle>
             <span class="material-symbols-outlined">menu</span>
@@ -97,6 +97,20 @@
     </div>
 
     <div class="nav-drawer-body">
+        <div class="nav-drawer-user-card">
+            <div class="nav-drawer-user-avatar">
+                <img alt="avatar" src="{{ Auth::user()?->avatar ?? asset('images/aset/avatar.jpg') }}" />
+            </div>
+            <div class="nav-drawer-user-meta">
+                <p class="nav-drawer-user-label">Akun Anda</p>
+                <h3 class="nav-drawer-user-name">{{ auth()->user()?->name }}</h3>
+                <p class="nav-drawer-user-role">
+                    <span class="material-symbols-outlined">person</span>
+                    <span>Profil {{ ucfirst(auth()->user()?->role ?? 'user') }}</span>
+                </p>
+            </div>
+        </div>
+
         <p class="nav-drawer-title">Navigasi</p>
         <div class="nav-links">
             <a href="/">Beranda</a>
@@ -104,6 +118,36 @@
             <a href="/material">Material</a>
             <a
                 href="{{ Auth::user()?->role === 'mandor' ? route('mandor.dashboard') : route('customer.renovation') }}">Renovasi</a>
+        </div>
+
+        <div class="nav-drawer-actions nav-drawer-user-actions">
+            <p class="nav-drawer-actions-title">Akun</p>
+            <div class="nav-drawer-user-grid">
+                <a href="/material/cart" class="btn-nav secondary nav-drawer-action-btn nav-drawer-action-secondary">
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                    Keranjang
+                </a>
+                <a href="{{ route('customer.order') }}"
+                    class="btn-nav secondary nav-drawer-action-btn nav-drawer-action-secondary">
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                    Pesanan
+                </a>
+                <a href="{{ route('proyek.index') }}"
+                    class="btn-nav secondary nav-drawer-action-btn nav-drawer-action-secondary">
+                    <span class="material-symbols-outlined">home_work</span>
+                    Proyek
+                </a>
+                <a href="{{ route('customer.profile') }}"
+                    class="btn-nav secondary nav-drawer-action-btn nav-drawer-action-secondary">
+                    <span class="material-symbols-outlined">person_edit</span>
+                    Profil
+                </a>
+            </div>
+            <button type="button" class="btn-nav primary nav-drawer-action-btn nav-drawer-action-primary"
+                onclick="window.W2HLogout.submit('logout-form', 'Yakin ingin keluar?')">
+                <span class="material-symbols-outlined">logout</span>
+                Logout
+            </button>
         </div>
     </div>
 </aside>

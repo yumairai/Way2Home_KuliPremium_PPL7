@@ -22,7 +22,7 @@ body {
     overflow: hidden;
     padding: 2rem;
     width: 65%;
-    background: linear-gradient(135deg, var(--primary), var(--primary-container));
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
     display: flex;
     justify-content: center;
     align-items: center;
@@ -32,7 +32,7 @@ body {
 .left-background {
     position: absolute;
     inset: 0;
-    opacity: 0.1;
+    opacity: 0.18;
     mix-blend-mode: overlay;
     pointer-events: none;
 }
@@ -61,7 +61,7 @@ body {
 
 /* FORM BOX */
 .form-box {
-    width: 400px;
+    width: 55%;
     padding: 25px 40px;
     background: rgb(235, 250, 255);
     border-radius: 18px;
@@ -227,7 +227,7 @@ body {
 @media (max-width: 1024px) {
     .container {
         flex-direction: column;
-        min-height: 100vh;
+        min-height: 100dvh;
         height: auto;
     }
 
@@ -244,7 +244,7 @@ body {
     .right {
         order: -1;
         padding: 2rem 1.5rem;
-        min-height: 18rem;
+        min-height: 16rem;
     }
 
     .branding img {
@@ -254,61 +254,68 @@ body {
 
 @media (max-width: 767.98px) {
     .right {
-        min-height: 14rem;
-        padding: 1.5rem;
+        min-height: 12rem;
+        padding: 1.25rem 1rem;
     }
 
     .branding h1 {
-        font-size: 2rem;
+        font-size: 1.75rem;
     }
 
     .branding p {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
     }
 
     .left {
-        padding: 1rem;
+        padding: 0.85rem;
+        align-items: flex-start;
     }
 
     .form-box {
         width: 100%;
-        max-width: 28rem;
-        padding: 1.25rem;
-        border-radius: 1.25rem;
+        max-width: 100%;
+        padding: 1.15rem;
+        border-radius: 1.15rem;
+        background: rgba(235, 250, 255, 0.96);
+        backdrop-filter: blur(6px);
     }
 
     .form-box h2 {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
     }
 
     .form-box p {
-        margin-bottom: 1rem;
+        margin-bottom: 0.85rem;
+        font-size: 0.95rem;
     }
 
     .input-group {
-        margin-bottom: 1rem;
+        margin-bottom: 0.85rem;
     }
 
     .input-group input {
-        padding: 0.85rem 0.9rem;
+        padding: 0.8rem 0.9rem;
+        font-size: 0.95rem;
     }
 
     .options {
         flex-direction: column;
         align-items: flex-start;
         gap: 0.75rem;
-        margin-bottom: 1rem;
+        margin-bottom: 0.9rem;
     }
 
     .btn-login {
-        padding: 0.95rem 1rem;
+        padding: 0.9rem 1rem;
+        font-size: 0.95rem;
     }
 
     .register {
         margin-top: 1rem;
+        font-size: 0.92rem;
     }
 
     .error-text {
-        font-size: 11px;
+        font-size: 0.85rem;
     }
 }

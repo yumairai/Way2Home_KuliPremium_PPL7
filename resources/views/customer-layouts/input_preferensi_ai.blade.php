@@ -110,7 +110,8 @@
 
                 <div class="input-group">
                     <label>FLEKSIBILITAS BUDGET</label>
-                    <input type="number" id="flexibility" min="0" max="50" placeholder="0 - 50%" value="10" step="5">
+                    <input type="number" id="flexibility" min="0" max="50" placeholder="0 - 50%"
+                        value="10" step="5">
                     <small>% dari budget</small>
                 </div>
             </div>
@@ -125,12 +126,6 @@
                     <span>Rp 100 jt</span>
                     <span>Rp 2 M</span>
                 </div>
-            </div>
-
-            <!-- AC REQUIRED -->
-            <div class="input-group full" style="display: flex; align-items: center; gap: 10px;">
-                <input type="checkbox" id="ac_required" style="width: 20px; height: 20px; cursor: pointer;">
-                <label for="ac_required" style="margin: 0; cursor: pointer;">AC/Pendingin Ruangan Diperlukan</label>
             </div>
 
             <!-- PRIORITAS -->
