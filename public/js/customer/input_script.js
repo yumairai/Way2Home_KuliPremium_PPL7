@@ -117,7 +117,7 @@ submitBtn.addEventListener("click", async (e) => {
         garage: garage,
         quality: quality,
         budget: parseInt(document.getElementById('budgetRange').value),
-        ac_required: document.getElementById('ac_required').checked,
+        //ac_required: document.getElementById('ac_required').checked,
         priority: prioritasEl.dataset.value,
         flexibility: flexibility,
     };

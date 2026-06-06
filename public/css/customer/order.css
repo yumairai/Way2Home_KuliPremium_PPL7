@@ -453,7 +453,7 @@
 
 @media (max-width: 640px) {
     .order-page {
-        padding: 28px 16px 56px;
+        padding: 6rem 2rem;
     }
 
     .order-card-toggle {

@@ -33,7 +33,7 @@ class PreferensiController extends Controller
             'garage'      => 'required|integer|min:0',
             'quality'     => 'required|integer|min:1|max:10',
             'budget'      => 'required|integer|min:100000000|max:2000000000',
-            'ac_required' => 'required|boolean',
+            //'ac_required' => 'required|boolean',
             'priority'    => 'required|in:biaya,estetik,cepat',
             'flexibility' => 'required|numeric|min:0|max:50',
         ]);
@@ -67,7 +67,7 @@ class PreferensiController extends Controller
             'garage'      => (int) $request->garage,
             'quality'     => (int) $request->quality,
             'budget'      => (int) $request->budget,
-            'ac_required' => (bool) $request->ac_required,
+            //'ac_required' => (bool) $request->ac_required,
             'priority'    => $request->priority,
             'flexibility' => (float) $request->flexibility,
         ];
