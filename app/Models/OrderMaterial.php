@@ -33,4 +33,22 @@ class OrderMaterial extends Model
             default      => ucfirst($this->status_order),
         };
     }
+    
+    protected static function booted(): void
+    {
+        static::addGlobalScope('admin_order_isolation', function ($builder) {
+            if (!app()->runningInConsole()) {
+                $user = auth()->user();
+                if ($user && $user->role === 'admin' && $user->is_tester) {
+                    if ($user->email === 'tester.admin01@way2home.test') {
+                        $builder->where('order_id_midtrans', 'like', 'W2H-TESTER-QA1-%');
+                    } elseif ($user->email === 'tester.admin02@way2home.test') {
+                        $builder->where('order_id_midtrans', 'like', 'W2H-TESTER-QA2-%');
+                    } elseif ($user->email === 'tester.admin03@way2home.test') {
+                        $builder->where('order_id_midtrans', 'like', 'W2H-TESTER-QA3-%');
+                    }
+                }
+            }
+        });
+    }
 }

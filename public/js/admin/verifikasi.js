@@ -105,7 +105,7 @@ function renderDocList(documents) {
             'pending': 'status-check',
         }[doc.status_verifikasi] ?? 'status-check';
 
-        const isPdf = doc.file_url.toLowerCase().endsWith('.pdf');
+        const isPdf = doc.file_url ? doc.file_url.toLowerCase().endsWith('.pdf') : false;
 
         // Tambahkan hidden input agar status tiap dokumen ikut ter-submit
         const hiddenInput = `<input type="hidden" name="status_dokumen[${doc.id}]" class="doc-status-input" value="${doc.status_verifikasi}">`;

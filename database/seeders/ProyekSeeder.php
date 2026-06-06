@@ -29,7 +29,7 @@ class ProyekSeeder extends Seeder
                 'status_proyek' => 'Pengalokasian Mandor',
             ],
             [
-                'customer_id'   => $customerIds[1] ?? 2,
+                'customer_id'   => $customerIds[2] ?? 3,
                 'mandor_id'     => null,
                 'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Komp. Asri B-9, Jakarta',
@@ -57,7 +57,7 @@ class ProyekSeeder extends Seeder
 
             // 1 Proyek: Menunggu Verifikasi
             [
-                'customer_id'   => $customerIds[1] ?? 2,
+                'customer_id'   => $customerIds[2] ?? 3,
                 'mandor_id'     => null,
                 'jenis_proyek'  => 'Bangun Rumah',
                 'alamat_proyek' => 'Komp. Asri B-9, Jakarta',

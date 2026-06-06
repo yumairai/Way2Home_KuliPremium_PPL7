@@ -195,7 +195,19 @@ class RenovasiController extends Controller
     {
         $this->renovasiService->expirePendingOffers();
         $mandor = $this->currentMandor();
+        if ($mandor->user->is_tester) {
+            $sedangBangun = \App\Models\Proyek::where('mandor_id', $mandor->id)
+                ->where('jenis_proyek', 'Bangun Rumah')
+                ->where('status_proyek', 'In Progress')
+                ->exists();
 
+            if ($sedangBangun) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Anda sedang mengerjakan proyek bangun dan tidak dapat mengambil renovasi.',
+                ], 422);
+            }
+        }
         $validated = $request->validate([
             'feedback' => 'required|string|min:20',
             'estimasi_biaya' => 'required|integer|min:100000',

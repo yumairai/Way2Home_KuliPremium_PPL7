@@ -6,6 +6,23 @@ use Illuminate\Database\Eloquent\Model;
 
 class Mandor extends Model
 {
+    protected static function booted(): void
+    {
+        static::addGlobalScope('admin_specific_mandor', function ($builder) {
+            if (!app()->runningInConsole()) {
+                $user = auth()->user();
+                if ($user && $user->role === 'admin' && $user->is_tester) {
+                    if ($user->email === 'tester.admin01@way2home.test') {
+                        $builder->where('mandors.user_id', 5);
+                    } elseif ($user->email === 'tester.admin02@way2home.test') {
+                        $builder->where('mandors.user_id', 6);
+                    } elseif ($user->email === 'tester.admin03@way2home.test') {
+                        $builder->where('mandors.user_id', 7);
+                    }
+                }
+            }
+        });
+    }
     protected $table = 'mandors';
 
     protected $fillable = [
