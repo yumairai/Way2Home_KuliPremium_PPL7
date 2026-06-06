@@ -11,6 +11,10 @@
 @endpush
 @section('content')
     <main class="tracking-page">
+        <a class="proyek-back-link" href="/proyek/{{ $proyek->id }}">
+            <span class="material-symbols-outlined">arrow_back</span>
+            <span>Kembali ke Proyek</span>
+        </a>
         @if ($proyek->status_proyek === 'Selesai')
             <div
                 style="background-color: #ecfdf5; color: #065f46; padding: 16px 24px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; border: 1px solid #a7f3d0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">

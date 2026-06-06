@@ -16,7 +16,7 @@ body {
 }
 
 .dashboard-title {
-    margin: 0 0 1rem;
+    margin-top: 2rem;
     color: var(--on-background);
     font-family: 'Manrope', sans-serif;
     font-size: clamp(2.5rem, 5vw, 3.75rem);
