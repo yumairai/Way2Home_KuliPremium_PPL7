@@ -20,8 +20,14 @@ class VerifikasiProyekController extends Controller
                 $paths = $item->detailBangun->dokumenProyek->pluck('file_path')->toArray();
                 if (!empty($paths)) {
                     $signedUrls = $storageService->getAdminSignedUrls($paths);
-                    $item->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
-                        $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                    $item->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls, $storageService) {
+                        if (str_starts_with($dokumen->file_path, 'https://')) {
+                            $dokumen->signed_url = $dokumen->file_path;
+                        } elseif (str_starts_with($dokumen->file_path, 'public-assets/')) {
+                            $dokumen->signed_url = $storageService->getPublicUrl($dokumen->file_path);
+                        } else {
+                            $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                        }
                         return $dokumen;
                     });
                 }
@@ -39,8 +45,14 @@ class VerifikasiProyekController extends Controller
             $paths = $proyek->detailBangun->dokumenProyek->pluck('file_path')->toArray();
             if (!empty($paths)) {
                 $signedUrls = $storageService->getAdminSignedUrls($paths);
-                $proyek->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls) {
-                    $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                $proyek->detailBangun->dokumenProyek->transform(function ($dokumen) use ($signedUrls, $storageService) {
+                    if (str_starts_with($dokumen->file_path, 'https://')) {
+                        $dokumen->signed_url = $dokumen->file_path;
+                    } elseif (str_starts_with($dokumen->file_path, 'public-assets/')) {
+                        $dokumen->signed_url = $storageService->getPublicUrl($dokumen->file_path);
+                    } else {
+                        $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
+                    }
                     return $dokumen;
                 });
             }

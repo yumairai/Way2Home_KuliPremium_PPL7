@@ -83,16 +83,16 @@
                 </div>
 
                 <div class="input-group">
-                    <label>JUMLAH KAMAR TIDUR</label>
-                    <input type="number" id="bedrooms" min="1" max="10" placeholder="1 - 10" value="1">
+                    <label>JUMLAH KAMAR TIDUR (MAX 6)</label>
+                    <input type="number" id="bedrooms" min="1" max="6" placeholder="1 - 6" value="1">
                 </div>
             </div>
 
             <!-- ROW 3 -->
             <div class="row">
                 <div class="input-group">
-                    <label>JUMLAH KAMAR MANDI</label>
-                    <input type="number" id="bathrooms" min="1" max="5" placeholder="1 - 5" value="1">
+                    <label>JUMLAH KAMAR MANDI (MAX 3)</label>
+                    <input type="number" id="bathrooms" min="1" max="3" placeholder="1 - 3" value="1">
                 </div>
 
                 <div class="input-group">
@@ -110,7 +110,8 @@
 
                 <div class="input-group">
                     <label>FLEKSIBILITAS BUDGET</label>
-                    <input type="number" id="flexibility" min="0" max="50" placeholder="0 - 50%" value="10" step="5">
+                    <input type="number" id="flexibility" min="0" max="50" placeholder="0 - 50%"
+                        value="10" step="5">
                     <small>% dari budget</small>
                 </div>
             </div>
@@ -125,12 +126,6 @@
                     <span>Rp 100 jt</span>
                     <span>Rp 2 M</span>
                 </div>
-            </div>
-
-            <!-- AC REQUIRED -->
-            <div class="input-group full" style="display: flex; align-items: center; gap: 10px;">
-                <input type="checkbox" id="ac_required" style="width: 20px; height: 20px; cursor: pointer;">
-                <label for="ac_required" style="margin: 0; cursor: pointer;">AC/Pendingin Ruangan Diperlukan</label>
             </div>
 
             <!-- PRIORITAS -->

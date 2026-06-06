@@ -20,6 +20,45 @@ class Proyek extends Model
         'status_proyek',
     ];
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope('exclude_testers', function ($builder) {
+            if (!app()->runningInConsole()) {
+                $user = auth()->user();
+                if (!$user || !$user->is_tester) {
+                    $builder->where('proyek.customer_id', '!=', 2);
+                }
+            }
+        });
+
+        static::addGlobalScope('admin_project_isolation', function ($builder) {
+            if (!app()->runningInConsole()) {
+                $user = auth()->user();
+                if ($user && $user->role === 'admin' && $user->is_tester) {
+                    if ($user->email === 'tester.admin01@way2home.test') {
+                        $builder->whereIn('proyek.alamat_proyek', [
+                            'Cluster Admin 1 Verifikasi Blok QA-01',
+                            'Cluster Admin 1 Verifikasi Blok QA-07', // tambah
+                            'Kawasan Alokasi Mandor 1 No. QA-02',
+                        ]);
+                    } elseif ($user->email === 'tester.admin02@way2home.test') {
+                        $builder->whereIn('proyek.alamat_proyek', [
+                            'Cluster Admin 2 Verifikasi Blok QA-03',
+                            'Cluster Admin 2 Verifikasi Blok QA-08', // tambah
+                            'Kawasan Alokasi Mandor 2 No. QA-04',
+                        ]);
+                    } elseif ($user->email === 'tester.admin03@way2home.test') {
+                        $builder->whereIn('proyek.alamat_proyek', [
+                            'Cluster Admin 3 Verifikasi Blok QA-05',
+                            'Cluster Admin 3 Verifikasi Blok QA-09', // tambah
+                            'Kawasan Alokasi Mandor 3 No. QA-06',
+                        ]);
+                    }
+                }
+            }
+        });
+    }
+
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');

@@ -21,7 +21,7 @@
 </head>
 
 <body class="admin-page">
-    <aside class="sidebar">
+    <aside class="sidebar" id="admin-sidebar">
         <div class="brand">
             <div class="brand-icon">
                 <img src="{{ asset('images/logo-w2h.png') }}" alt="Way2Home Logo">
@@ -74,6 +74,10 @@
         </div>
     </aside>
     <header class="topbar">
+        <button class="sidebar-toggle" type="button" aria-label="Buka menu admin" aria-controls="admin-sidebar"
+            aria-expanded="false" data-admin-sidebar-toggle>
+            <span class="material-symbols-outlined">menu</span>
+        </button>
         <div class="topbar-actions">
             <button class="icon-button" type="button">
                 <span class="material-symbols-outlined">notifications</span>
@@ -92,6 +96,7 @@
             </button>
         </div>
     </header>
+    <div class="sidebar-backdrop" data-admin-sidebar-backdrop></div>
     <main class="main-content">
         <header class="page-header">
             @yield('header')
@@ -107,6 +112,43 @@
     @include('partials.w2h-flash')
     <script src="{{ asset('js/ui/dialog.js') }}"></script>
     <script src="{{ asset('js/logout.js') }}"></script>
+    <script>
+        (function() {
+            const sidebar = document.querySelector('.sidebar');
+            const toggle = document.querySelector('[data-admin-sidebar-toggle]');
+            const backdrop = document.querySelector('[data-admin-sidebar-backdrop]');
+
+            if (!sidebar || !toggle || !backdrop) {
+                return;
+            }
+
+            const setOpenState = (isOpen) => {
+                sidebar.classList.toggle('is-open', isOpen);
+                backdrop.classList.toggle('is-open', isOpen);
+                document.body.classList.toggle('admin-sidebar-open', isOpen);
+                toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                sidebar.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+            };
+
+            const closeSidebar = () => setOpenState(false);
+
+            toggle.addEventListener('click', () => {
+                setOpenState(!sidebar.classList.contains('is-open'));
+            });
+
+            backdrop.addEventListener('click', closeSidebar);
+
+            sidebar.querySelectorAll('a').forEach((link) => {
+                link.addEventListener('click', closeSidebar);
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeSidebar();
+                }
+            });
+        })();
+    </script>
     @stack('scripts')
 </body>
 

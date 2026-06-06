@@ -440,7 +440,59 @@ class HandleTesterWorkflow
             return;
         }
 
-        // ── Hanya react ke pesan dari customer ───────────────────────────────
+        // ── React ke pesan mandor (penawaran awal ke tester customer) ────────
+        // Ketika mandor kirim penawaran ke tester customer, otomatis buat 'setuju'
+        // dari customer dan langsung accept (tanpa perlu klik manual).
+        if ($negosiasi->pengirim === 'mandor' && in_array($negosiasi->tipe, ['penawaran', 'tanggapan'])) {
+            $negosiasi->loadMissing([
+                'requestRenovasi.customer.user',
+                'penawaranRenovasi',
+            ]);
+
+            $reqRenov = $negosiasi->requestRenovasi;
+            //$mandorOwner = $reqRenov?->customer?->user;
+
+            //if (! $this->isTesterUser($mandorOwner)) {
+            //    return; // Bukan tester customer, skip
+            //}
+
+            $pen = $negosiasi->penawaranRenovasi;
+            if (! $pen) {
+                return;
+            }
+            $mandorUser = $pen->mandor?->user;
+
+            if (! $this->isTesterUser($mandorUser)) {
+                return;
+            }
+
+            Log::info("[Tester] Mandor penawaran → auto-accept untuk RequestRenovasi#{$reqRenov->id}");
+
+            try {
+                // Tambah negosiasi 'setuju' dari customer (tanpa trigger event lagi)
+                NegosiasiRenovasi::withoutEvents(function () use ($reqRenov, $pen) {
+                    NegosiasiRenovasi::create([
+                        'request_renovasi_id'   => $reqRenov->id,
+                        'penawaran_renovasi_id' => $pen->id,
+                        'pengirim'              => 'customer',
+                        'tipe'                  => 'setuju',
+                        'pesan'                 => 'Penawaran disetujui (Tester Auto-Accept).',
+                        'nominal_tawaran'       => null,
+                    ]);
+                });
+
+                // Langsung proses acceptance
+                $this->handleRenovasiAccepted($reqRenov, $pen);
+            } catch (\Throwable $e) {
+                Log::error('[Tester] auto-accept renovasi error: ' . $e->getMessage(), [
+                    'negosiasi_id' => $negosiasi->id,
+                    'trace'        => $e->getTraceAsString(),
+                ]);
+            }
+            return;
+        }
+
+        // ── Hanya react ke pesan dari customer di bawah ini ──────────────────
         if ($negosiasi->pengirim !== 'customer') {
             return;
         }
@@ -513,28 +565,30 @@ class HandleTesterWorkflow
 
         // 2. Bungkus dengan Database Transaction agar data tidak menggantung jika terjadi error
         DB::transaction(function () use ($requestRenovasi, $penawaran) {
-            
-            // Update status penawaran menjadi diterima
+
+            // Tandai penawaran sebagai diterima
             PenawaranRenovasi::withoutEvents(function () use ($penawaran) {
                 $penawaran->status_penawaran = 'diterima';
                 $penawaran->save();
             });
 
-            // Update status request menjadi selesai (karena user tester langsung selesai)
+            // Set status request ke 'disetujui' (BUKAN 'selesai') agar tracking mandor masih bisa tampil.
+            // 'selesai' hanya di-set saat mandor klik "Tandai Selesai" via markDone().
             RequestRenovasi::withoutEvents(function () use ($requestRenovasi) {
-                $requestRenovasi->status_request = 'selesai';
+                $requestRenovasi->status_request = 'disetujui';
                 $requestRenovasi->save();
             });
 
             $customer = $requestRenovasi->customer;
 
-            // Buat data Proyek dengan status LANGSUNG Selesai
+            // Buat proyek Renovasi dengan status 'In Progress' agar mandor bisa tracking
             $proyek = Proyek::create([
                 'customer_id'   => $customer->id,
                 'mandor_id'     => $penawaran->mandor_id,
                 'jenis_proyek'  => 'Renovasi',
                 'alamat_proyek' => $requestRenovasi->alamat ?? 'Alamat tester default',
-                'status_proyek' => 'Selesai', // Sesuai keinginan Anda
+                'status_proyek' => 'In Progress',
+                'tanggal_mulai' => now()->toDateString(),
             ]);
 
             // Hubungkan proyek dengan detail renovasi
@@ -544,8 +598,12 @@ class HandleTesterWorkflow
                 'penawaran_renovasi_id' => $penawaran->id,
             ]);
 
-            // FIX LOG: Sekarang pesan log sudah jujur dan sesuai dengan database
-            Log::info("[Tester] Proyek#{$proyek->id} (Renovasi) berhasil dibuat dan LANGSUNG BERSTATUS SELESAI.");
+            // Set Wahyu mandor sebagai nonaktif (sedang mengerjakan)
+            \Illuminate\Support\Facades\DB::table('mandors')
+                ->where('id', $penawaran->mandor_id)
+                ->update(['status' => 'nonaktif', 'updated_at' => now()]);
+
+            Log::info("[Tester] Proyek#{$proyek->id} (Renovasi) 'In Progress' berhasil dibuat. Request status='disetujui'.");
         });
     }
 

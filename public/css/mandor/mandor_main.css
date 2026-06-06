@@ -37,13 +37,16 @@ p {
     background: var(--background);
     color: var(--on-background);
     font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
 }
 
 .mandor-shell {
     width: 100%;
     max-width: 1536px;
     margin: 0 auto;
-    padding: 0 2rem;
+    margin-bottom: 1rem;
+    height: 4rem;
 }
 
 .mandor-topbar {
@@ -59,15 +62,27 @@ p {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
     gap: 1rem;
+    margin: 0 auto;
 }
 
 .mandor-brand-row {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
+}
+
+.mandor-brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.mandor-brand-logo {
+    width: 2rem;
+    height: 2rem;
+    object-fit: contain;
 }
 
 .mandor-brand {
@@ -78,10 +93,34 @@ p {
     letter-spacing: -0.02em;
 }
 
+.mandor-menu-toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
+    border-radius: 9999px;
+    background: transparent;
+    color: var(--on-surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: none;
+}
+
+.mandor-menu-toggle:hover {
+    background: var(--surface-container-low);
+}
+
+.mandor-menu-toggle .material-symbols-outlined {
+    font-size: 1.5rem;
+}
+
 .mandor-toplinks {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
+    margin-left: 2rem;
 }
 
 .mandor-toplink {
@@ -103,6 +142,102 @@ p {
     padding-bottom: 0.25rem;
 }
 
+.mandor-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 55;
+}
+
+.mandor-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: min(20rem, 86vw);
+    height: 100dvh;
+    background: rgba(251, 248, 255, 0.98);
+    box-shadow: 24px 0 48px rgba(14, 23, 68, 0.16);
+    transform: translateX(-102%);
+    transition: transform 0.28s ease;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.mandor-drawer.is-open {
+    transform: translateX(0);
+}
+
+.mandor-drawer-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mandor-drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(194, 198, 213, 0.5);
+}
+
+.mandor-drawer-close {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: none;
+    border-radius: 9999px;
+    background: var(--surface-container);
+    color: var(--on-surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.mandor-drawer-body {
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+}
+
+.mandor-drawer-title {
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+}
+
+.mandor-toplinks-drawer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+.mandor-toplinks-drawer .mandor-toplink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.9rem 1rem;
+    border-radius: 0.85rem;
+    background: var(--surface-container-low);
+    border: 1px solid rgba(194, 198, 213, 0.4);
+}
+
+.mandor-toplinks-drawer .mandor-toplink.active {
+    border-bottom: none;
+    padding-bottom: 0.9rem;
+    background: rgba(4, 94, 194, 0.08);
+}
+
 .mandor-account-row {
     display: flex;
     align-items: center;
@@ -117,9 +252,23 @@ p {
     border-right: 1px solid rgba(194, 198, 213, 0.3);
 }
 
+.mandor-user-meta-drawer {
+    padding: 0.9rem 1rem;
+    border-right: 0;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, rgba(0, 71, 150, 0.08), rgba(4, 94, 194, 0.04));
+    border: 1px solid rgba(194, 198, 213, 0.4);
+}
+
 .mandor-user-text {
-    display: none;
+    display: flex;
+    flex-direction: column;
     text-align: right;
+}
+
+.mandor-user-text-drawer {
+    display: block;
+    text-align: left;
 }
 
 .mandor-user-name {
@@ -159,8 +308,23 @@ p {
     color: var(--error);
 }
 
+.mandor-logout-drawer {
+    width: 100%;
+    justify-content: center;
+    padding: 0.9rem 1rem;
+    border-radius: 9999px;
+    background: var(--surface-container-low);
+    border: 1px solid rgba(194, 198, 213, 0.5);
+    color: var(--on-surface-variant);
+}
+
+.mandor-logout-drawer:hover {
+    background: rgba(186, 26, 26, 0.08);
+    color: var(--error);
+}
+
 .mandor-main {
-    min-height: 100vh;
+    flex: 1;
     padding-top: 2.5rem;
     padding-bottom: 2.5rem;
 }
@@ -270,8 +434,9 @@ p {
 }
 
 @media (min-width: 640px) {
-    .mandor-user-text {
-        display: block;
+    .mandor-brand-logo {
+        width: 2.15rem;
+        height: 2.15rem;
     }
 }
 
@@ -283,6 +448,49 @@ p {
     .mandor-main-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+
+    .mandor-shell {
+        padding: 0 2rem;
+    }
+}
+
+body.mandor-drawer-open {
+    overflow: hidden;
+}
+
+@media (max-width: 767.98px) {
+    .mandor-shell {
+        padding: 0 1rem;
+    }
+
+    .mandor-brand {
+        font-size: 1.2rem;
+    }
+
+    .mandor-brand-logo {
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+
+    .mandor-menu-toggle {
+        display: inline-flex;
+    }
+
+    .mandor-topbar .mandor-toplinks {
+        display: none;
+    }
+
+    .mandor-topbar .mandor-user-text {
+        display: none;
+    }
+
+    .mandor-topbar .mandor-logout-btn {
+        display: none;
+    }
+
+    .mandor-topbar .mandor-user-avatar {
+        display: none;
+    }
 }
 
 /* ============================================
@@ -291,8 +499,9 @@ p {
 footer {
     width: 100%;
     padding: 3rem 0;
-    border-top: 1px solid var(--slate-200);
-    background-color: var(--slate-50);
+    border-top: 1px solid rgba(194, 198, 213, 0.5);
+    background-color: var(--surface-container);
+    box-shadow: 0 -12px 24px rgba(14, 23, 68, 0.06);
 }
 
 .footer-container {
