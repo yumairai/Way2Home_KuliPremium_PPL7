@@ -59,16 +59,16 @@ submitBtn.addEventListener("click", async (e) => {
 
     // Validasi bedrooms
     const bedrooms = parseInt(document.getElementById('bedrooms').value);
-    if (!bedrooms || bedrooms < 1 || bedrooms > 10) {
-        await W2HDialog.alert("Jumlah kamar tidur harus diisi antara 1 - 10.");
+    if (!bedrooms || bedrooms < 1 || bedrooms > 6) {
+        await W2HDialog.alert("Jumlah kamar tidur harus diisi antara 1 - 6.");
         document.getElementById('bedrooms').focus();
         return;
     }
 
     // Validasi bathrooms
     const bathrooms = parseInt(document.getElementById('bathrooms').value);
-    if (!bathrooms || bathrooms < 1 || bathrooms > 5) {
-        await W2HDialog.alert("Jumlah kamar mandi harus diisi antara 1 - 5.");
+    if (!bathrooms || bathrooms < 1 || bathrooms > 3) {
+        await W2HDialog.alert("Jumlah kamar mandi harus diisi antara 1 - 3.");
         document.getElementById('bathrooms').focus();
         return;
     }
