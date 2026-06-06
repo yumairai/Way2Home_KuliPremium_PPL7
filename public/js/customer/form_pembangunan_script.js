@@ -412,7 +412,7 @@ if (mainSubmitBtn) {
                     setTimeout(() => window.location.href = "/material/cart", 1500);
                 } else {
                     await W2HDialog.success("Berhasil! " + data.message_1);
-                    setTimeout(() => window.location.href = "/proyek", 1500);
+                    setTimeout(() => window.location.href = `/proyek/${data.data.id}`, 1500);
                 }
             } else {
                 // Jika Laravel mengembalikan error (misal file kegedean/validasi gagal)
