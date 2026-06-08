@@ -625,6 +625,32 @@ body {
 }
 
 /* ===== Customer Tracking Semantic Styles ===== */
+.proyek-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    width: fit-content;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.proyek-back-link .material-symbols-outlined {
+    color: var(--primary);
+    transition: transform 0.2s ease;
+}
+
+.proyek-back-link:hover {
+    color: var(--on-surface);
+}
+
+.proyek-back-link:hover .material-symbols-outlined {
+    transform: translateX(-0.25rem);
+}
+
 .tracking-page {
     max-width: 90vw;
     margin: 0 auto;
