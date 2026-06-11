@@ -12,7 +12,31 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
 </head>
+<script>
+    async function checkVerificationStatus() {
+        try {
+            const response = await fetch('{{ route('verification.check') }}', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
 
+            const data = await response.json();
+
+            if (data.verified) {
+                window.location.href = '{{ route('customer-layouts.dashboard') }}';
+            }
+        } catch (error) {
+            console.error('Gagal mengecek status verifikasi:', error);
+        }
+    }
+
+    // cek setiap 5 detik
+    setInterval(checkVerificationStatus, 5000);
+
+    // cek sekali saat halaman selesai dimuat
+    checkVerificationStatus();
+</script>
 <body>
     <div class="verify-notice-page">
         <div class="dashboard-backdrop" aria-hidden="true">
@@ -96,6 +120,9 @@
 
                 <p>
                     Silakan cek inbox atau folder spam, lalu klik link untuk mengaktifkan akun kamu.
+                </p>
+                <p class="helper-text">
+                    Sudah memverifikasi email? Silakan reload halaman ini untuk melanjutkan.
                 </p>
 
                 <div class="button">

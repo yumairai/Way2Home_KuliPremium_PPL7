@@ -16,6 +16,7 @@ use App\Services\RenovasiService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Services\SupabaseStorageService;
 
@@ -103,37 +104,41 @@ class RenovasiController extends Controller
             ->values();
 
         $requestMap = $renovationRequests->keyBy('id');
-        $materialCatalog = Material::query()
-            ->select(['id', 'nama_material', 'kategori', 'harga', 'satuan', 'stok', 'deskripsi', 'path_foto_material'])
-            ->orderBy('nama_material')
-            ->get()
-            ->map(fn(Material $item) => [
-                'id' => (string) $item->id,
-                'nama_material' => $item->nama_material,
-                'kategori' => $item->kategori,
-                'harga' => (int) $item->harga,
-                'satuan' => $item->satuan,
-                'stok' => $item->stok,
-                'deskripsi' => $item->deskripsi,
-                'path_foto_material' => $item->path_foto_material,
-            ])
-            ->values();
+        $materialCatalog = Cache::remember('mandor:material_catalog_full', now()->addMinutes(10), function () {
+            return Material::query()
+                ->select(['id', 'nama_material', 'kategori', 'harga', 'satuan', 'stok', 'deskripsi', 'path_foto_material'])
+                ->orderBy('nama_material')
+                ->get()
+                ->map(fn(Material $item) => [
+                    'id' => (string) $item->id,
+                    'nama_material' => $item->nama_material,
+                    'kategori' => $item->kategori,
+                    'harga' => (int) $item->harga,
+                    'satuan' => $item->satuan,
+                    'stok' => $item->stok,
+                    'deskripsi' => $item->deskripsi,
+                    'path_foto_material' => $item->path_foto_material,
+                ])
+                ->values();
+        });
 
         $activeProjects = '-';
         $completedProjects = 0;
         $requestCount = $renovationRequests->count();
 
         // Ambil history aktivitas mandor
-        $activityHistory = MandorActivityHistory::where('mandor_id', $mandor->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function ($activity) {
-                return [
-                    'title' => $activity->description,
-                    'timestamp' => $activity->created_at->format('d M Y H:i'),
-                ];
-            });
+        $activityHistory = Cache::remember('mandor:activity_history:' . $mandor->id, now()->addMinutes(5), function () use ($mandor) {
+            return MandorActivityHistory::where('mandor_id', $mandor->id)
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($activity) {
+                    return [
+                        'title' => $activity->description,
+                        'timestamp' => $activity->created_at->format('d M Y H:i'),
+                    ];
+                });
+        });
         $mandor = $this->currentMandor();
 
         /**
@@ -255,18 +260,22 @@ class RenovasiController extends Controller
 
             MaterialRenovasi::where('penawaran_renovasi_id', $offer->id)->delete();
 
+            // Batch insert material renovasi untuk efisiensi
+            $materialBatch = [];
             foreach ($validated['materials'] as $materialInput) {
                 $material = Material::find($materialInput['material_id']);
-                if (!$material) {
-                    continue;
-                }
-
-                MaterialRenovasi::create([
+                if (!$material) continue;
+                $materialBatch[] = [
                     'penawaran_renovasi_id' => $offer->id,
-                    'material_id' => $material->id,
-                    'jumlah' => $materialInput['jumlah'],
-                    'satuan' => $material->satuan,
-                ]);
+                    'material_id'           => $material->id,
+                    'jumlah'                => $materialInput['jumlah'],
+                    'satuan'                => $material->satuan,
+                    'created_at'            => now(),
+                    'updated_at'            => now(),
+                ];
+            }
+            if (!empty($materialBatch)) {
+                MaterialRenovasi::insert($materialBatch);
             }
 
             NegosiasiRenovasi::create([
@@ -340,18 +349,22 @@ class RenovasiController extends Controller
 
             MaterialRenovasi::where('penawaran_renovasi_id', $offer->id)->delete();
 
+            // Batch insert material renovasi untuk efisiensi
+            $materialBatch = [];
             foreach ($validated['materials'] as $materialInput) {
                 $material = Material::find($materialInput['material_id']);
-                if (!$material) {
-                    continue;
-                }
-
-                MaterialRenovasi::create([
+                if (!$material) continue;
+                $materialBatch[] = [
                     'penawaran_renovasi_id' => $offer->id,
-                    'material_id' => $material->id,
-                    'jumlah' => $materialInput['jumlah'],
-                    'satuan' => $material->satuan,
-                ]);
+                    'material_id'           => $material->id,
+                    'jumlah'                => $materialInput['jumlah'],
+                    'satuan'                => $material->satuan,
+                    'created_at'            => now(),
+                    'updated_at'            => now(),
+                ];
+            }
+            if (!empty($materialBatch)) {
+                MaterialRenovasi::insert($materialBatch);
             }
 
             NegosiasiRenovasi::create([

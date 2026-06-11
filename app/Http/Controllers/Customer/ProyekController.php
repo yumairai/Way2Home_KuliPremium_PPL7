@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
+
 class ProyekController extends Controller
 {
 
@@ -40,15 +41,15 @@ class ProyekController extends Controller
     public function index()
     {
         $customer = Auth::user()->customer;
-        $proyeks  = Proyek::with([
+        $proyeks = Proyek::with([
             'detailBangun.desainRumah',
-            'detailBangun.dokumenProyek',
-            'pembayaranProyek',
+            // dokumen dan pembayaran tidak selalu diperlukan untuk listing
         ])
             ->where('customer_id', $customer->id)
             ->where('jenis_proyek', 'Bangun Rumah')
-            ->get();
+            ->paginate(10); // pagination for better performance
 
+        // Ambil proyek pertama untuk tampilan utama (jika ada)
         $proyek = $proyeks->first();
 
         return view('customer-layouts.proyek.show', compact('proyek', 'proyeks'));
@@ -58,16 +59,23 @@ class ProyekController extends Controller
     {
         $customer = Auth::user()->customer;
 
-        $proyeks = Proyek::with([
+        // Proyek spesifik
+        $proyek = Proyek::with([
             'detailBangun.desainRumah',
-            'detailBangun.dokumenProyek',
-            'pembayaranProyek',
+            // dokumen dan pembayaran tidak selalu diperlukan untuk tampilan detail
         ])
             ->where('customer_id', $customer->id)
             ->where('jenis_proyek', 'Bangun Rumah')
-            ->get();
+            ->where('id', $id)
+            ->first();
 
-        $proyek = $proyeks->first(fn($p) => $p->id == $id);
+        // Daftar semua proyek (untuk sidebar / navigasi)
+        $proyeks = Proyek::with([
+            'detailBangun.desainRumah',
+        ])
+            ->where('customer_id', $customer->id)
+            ->where('jenis_proyek', 'Bangun Rumah')
+            ->paginate(10);
 
         abort_if(is_null($proyek), 404);
 
@@ -208,19 +216,26 @@ class ProyekController extends Controller
                 'desain_rumah_id' => $request->desain_id,
             ]);
 
+            $batch = [];
             foreach ($uploadedFiles as $uploaded) {
-                DokumenProyek::create([
+                $batch[] = [
                     'detail_bangun_id'  => $detail->id,
                     'jenis_dokumen'     => $uploaded['label'],
                     'file_path'         => $uploaded['path'],
                     'status_verifikasi' => $isTester ? 'disetujui' : 'pending',
-                ]);
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+            if (!empty($batch)) {
+                DokumenProyek::insert($batch);
             }
 
             DB::commit();
 
             $proyek->load('detailBangun.desainRumah');
             $proyek->generateDP();
+        
 
             if ($request->filled('old_proyek_id')) {
                 Proyek::where('id', $request->old_proyek_id)

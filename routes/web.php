@@ -23,6 +23,8 @@ use App\Http\Controllers\Mandor\TrackingProyekController as MandorTrackingProyek
 use App\Http\Controllers\Admin\ManageMaterialController;
 use App\Http\Controllers\Admin\ManageOrderController;
 use App\Http\Controllers\Customer\OrderController;
+use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 
 /*
 |--------------------------------------------------------------------------
@@ -56,17 +58,56 @@ Route::prefix('material')->group(function () {
 
 // 🔔 Halaman notice (setelah register/login tapi belum verif)
 Route::get('/email/verify-notice', function () {
+    // Jika sudah terverifikasi (mis. dari device lain), langsung redirect ke dashboard
+    if (auth()->user()->hasVerifiedEmail()) {
+        return redirect()->route('customer-layouts.dashboard');
+    }
     return view('email.verify-notice');
 })->middleware('auth')->name('verification.notice');
 
+// Endpoint untuk polling status verifikasi dari frontend (JavaScript)
+Route::get('/email/check-verified', function () {
+    // Fresh query ke database untuk memastikan data terbaru
+    $user = \App\Models\User::find(auth()->id());
+    return response()->json([
+        'verified' => $user && $user->hasVerifiedEmail(),
+    ]);
+})->middleware('auth')->name('verification.check');
+
 
 // 🔗 Klik link dari email
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-    $request->fulfill();
+//Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+//    $request->fulfill();
 
     // ✅ setelah verif → ke dashboard customer
-    return redirect()->route('customer-layouts.dashboard');
-})->middleware(['auth', 'signed'])->name('verification.verify');
+//    return redirect()->route('customer-layouts.dashboard');
+//})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
+
+    $user = User::findOrFail($id);
+
+    if (! hash_equals(
+        (string) $hash,
+        sha1($user->getEmailForVerification())
+    )) {
+        abort(403);
+    }
+
+    if (! $user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+        event(new Verified($user));
+    }
+
+    // Kalau sudah login
+    if (auth()->check()) {
+        return redirect()->route('customer-layouts.dashboard');
+    }
+
+    // Kalau belum login
+    return redirect()->route('login')
+        ->with('success', 'Email berhasil diverifikasi. Silakan login.');
+})->middleware('signed')->name('verification.verify');
 
 
 // 🔁 Kirim ulang email verifikasi
