@@ -13,7 +13,48 @@ class VerifikasiProyekController extends Controller
 {
     public function index(\App\Services\SupabaseStorageService $storageService)
     {
-        $proyek = Proyek::with(['customer.user', 'detailBangun.dokumenProyek'])->get();
+        // Calculate stats on all projects
+        $allProyeks = Proyek::with(['detailBangun.dokumenProyek'])->get();
+        
+        $totalPengajuan = $allProyeks->count();
+        $pendingCount = 0;
+        $verifiedCount = 0;
+        $rejectedCount = 0;
+
+        foreach ($allProyeks as $item) {
+            $dokumen = $item->detailBangun->dokumenProyek ?? collect();
+            if ($dokumen->isEmpty()) {
+                $pendingCount++;
+                continue;
+            }
+
+            $isFinal = $dokumen->every(function ($doc) {
+                return in_array($doc->status_verifikasi, ['disetujui', 'ditolak']);
+            });
+
+            if ($isFinal) {
+                $hasRejected = $dokumen->contains('status_verifikasi', 'ditolak');
+                if ($hasRejected) {
+                    $rejectedCount++;
+                } else {
+                    $verifiedCount++;
+                }
+            } else {
+                $pendingCount++;
+            }
+        }
+
+        $stats = [
+            'total'    => $totalPengajuan,
+            'pending'  => $pendingCount,
+            'verified' => $verifiedCount,
+            'rejected' => $rejectedCount,
+        ];
+
+        // Sort with latest() to show newest at the top
+        $proyek = Proyek::with(['customer.user', 'detailBangun.dokumenProyek'])
+            ->latest()
+            ->paginate(6);
 
         foreach ($proyek as $item) {
             if ($item->detailBangun) {
@@ -34,7 +75,7 @@ class VerifikasiProyekController extends Controller
             }
         }
 
-        return view('admin.verifikasi_dokumen', compact('proyek'));
+        return view('admin.verifikasi_dokumen', compact('proyek', 'stats'));
     }
 
     public function show($id, \App\Services\SupabaseStorageService $storageService)

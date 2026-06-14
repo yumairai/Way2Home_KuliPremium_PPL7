@@ -10,16 +10,19 @@ class ManageOrderController extends Controller
 {
     public function index()
     {
-        $orders = OrderMaterial::with(['details.material', 'customer.user'])
-            ->latest('tanggal_order')
-            ->get();
+        $ordersQuery = OrderMaterial::with(['details.material', 'customer.user'])
+            ->latest('tanggal_order');
+
+        $allOrders = $ordersQuery->get();
 
         $statusCounts = [
-            'paid'      => $orders->where('status_order', 'paid')->count(),
-            'persiapan' => $orders->where('status_order', 'persiapan')->count(),
-            'dikirim'   => $orders->where('status_order', 'dikirim')->count(),
-            'selesai'   => $orders->where('status_order', 'selesai')->count(),
+            'paid'      => $allOrders->where('status_order', 'paid')->count(),
+            'persiapan' => $allOrders->where('status_order', 'persiapan')->count(),
+            'dikirim'   => $allOrders->where('status_order', 'dikirim')->count(),
+            'selesai'   => $allOrders->where('status_order', 'selesai')->count(),
         ];
+
+        $orders = $ordersQuery->paginate(6);
 
         return view('admin.manajemen_order', compact('orders', 'statusCounts'));
     }

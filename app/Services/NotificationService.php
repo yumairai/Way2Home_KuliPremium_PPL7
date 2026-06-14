@@ -21,6 +21,18 @@ use Illuminate\Support\Facades\Mail;
  */
 class NotificationService
 {
+    /**
+     * Dapatkan instance mailer (gunakan log jika di local/tester).
+     */
+    private function getMailer(string $email)
+    {
+        if (app()->environment('local') || (auth()->check() && auth()->user()->is_tester)) {
+            return Mail::mailer('log')->to($email);
+        }
+
+        return Mail::to($email);
+    }
+
     // ─────────────────────────────────────────────
     // 1. NOTIFIKASI STATUS PROYEK (oleh Admin)
     // ─────────────────────────────────────────────
@@ -39,7 +51,7 @@ class NotificationService
         }
 
         try {
-            Mail::to($email)->send(new ProyekStatusMail($proyek, $statusBaru, $catatan));
+            $this->getMailer($email)->send(new ProyekStatusMail($proyek, $statusBaru, $catatan));
         } catch (\Throwable $e) {
             Log::error('[NotificationService] Gagal kirim ProyekStatusMail', [
                 'proyek_id' => $proyek->id,
@@ -71,7 +83,7 @@ class NotificationService
         }
 
         try {
-            Mail::to($email)->send(
+            $this->getMailer($email)->send(
                 new ProgressPembangunanMail($proyek, $milestoneAktif, $persentase, $isSelesai)
             );
         } catch (\Throwable $e) {
@@ -104,7 +116,7 @@ class NotificationService
         }
 
         try {
-            Mail::to($email)->send(new AktivitasProyekMail($proyek, $judul, $deskripsi));
+            $this->getMailer($email)->send(new AktivitasProyekMail($proyek, $judul, $deskripsi));
         } catch (\Throwable $e) {
             Log::error('[NotificationService] Gagal kirim AktivitasProyekMail', [
                 'proyek_id' => $proyek->id,
@@ -135,7 +147,7 @@ class NotificationService
         }
 
         try {
-            Mail::to($email)->send(new PenawaranRenovasiMail($requestRenovasi, $penawaran, $tipe));
+            $this->getMailer($email)->send(new PenawaranRenovasiMail($requestRenovasi, $penawaran, $tipe));
         } catch (\Throwable $e) {
             Log::error('[NotificationService] Gagal kirim PenawaranRenovasiMail', [
                 'request_renovasi_id' => $requestRenovasi->id,
@@ -163,7 +175,7 @@ class NotificationService
         }
 
         try {
-            Mail::to($email)->send(new RenovasiSelesaiMail($requestRenovasi));
+            $this->getMailer($email)->send(new RenovasiSelesaiMail($requestRenovasi));
         } catch (\Throwable $e) {
             Log::error('[NotificationService] Gagal kirim RenovasiSelesaiMail', [
                 'request_renovasi_id' => $requestRenovasi->id,

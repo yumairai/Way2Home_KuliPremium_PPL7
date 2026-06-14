@@ -342,3 +342,40 @@
         flex-direction: column;
     }
 }
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pagination-button {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: none;
+    background: #f7f6ff;
+    color: var(--color-primary);
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+}
+
+.pagination-button:hover {
+    background: #dbe6ff;
+}
+
+.pagination-button-active {
+    background: var(--color-primary);
+    color: #ffffff;
+}
+
+.pagination-button-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+}

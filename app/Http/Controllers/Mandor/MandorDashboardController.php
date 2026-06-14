@@ -85,18 +85,18 @@ class MandorDashboardController extends Controller
          * 3. ACTIVITY HISTORY (FIX DI SINI)
          * =========================
          */
-        $activities = Cache::remember('mandor:activity_history:' . $mandor->id, now()->addMinutes(5), function () use ($mandor) {
+        $activityHistory = Cache::remember('mandor:activity_history:' . $mandor->id, now()->addMinutes(5), function () use ($mandor) {
             return MandorActivityHistory::where('mandor_id', $mandor->id)
                 ->latest()
                 ->take(10)
-                ->get();
-        });
-
-        $activityHistory = $activities->map(function ($act) {
-            return [
-                'title' => $act->description,
-                'timestamp' => $act->created_at->diffForHumans(),
-            ];
+                ->get()
+                ->map(function ($act) {
+                    return [
+                        'title' => $act->description,
+                        'timestamp' => $act->created_at->diffForHumans(),
+                    ];
+                })
+                ->all();
         });
 
         /**

@@ -13,7 +13,7 @@
 @section('stats')
     <div class="order-stat-card order-stat-primary">
         <p class="order-stat-label">Total Pesanan</p>
-        <p class="order-stat-value" id="stat-total">{{ $orders->count() }}</p>
+        <p class="order-stat-value" id="stat-total">{{ $orders->total() }}</p>
     </div>
     <div class="order-stat-card order-stat-prep">
         <p class="order-stat-label">Menunggu Pengiriman</p>
@@ -116,6 +116,43 @@
                 </div>
             @endforelse
         </div>
+
+        @if ($orders->total() > 6)
+            <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                <div class="pagination">
+                    {{-- Previous Page Link --}}
+                    @if ($orders->onFirstPage())
+                        <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                    @else
+                        <a href="{{ $orders->previousPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </a>
+                    @endif
+
+                    {{-- Pagination Elements --}}
+                    @foreach ($orders->getUrlRange(1, $orders->lastPage()) as $page => $url)
+                        @if ($page == $orders->currentPage())
+                            <button class="pagination-button pagination-button-active">{{ $page }}</button>
+                        @else
+                            <a href="{{ $url }}" class="pagination-button" style="text-decoration: none;">{{ $page }}</a>
+                        @endif
+                    @endforeach
+
+                    {{-- Next Page Link --}}
+                    @if ($orders->hasMorePages())
+                        <a href="{{ $orders->nextPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </a>
+                    @else
+                        <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
+        @endif
     </div>
 @endsection
 

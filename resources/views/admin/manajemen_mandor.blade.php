@@ -101,6 +101,43 @@
                     <p style="padding:1rem;color:gray;">Belum ada data mandor.</p>
                 @endforelse
             </div>
+
+            @if ($mandors->total() > 6)
+                <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                    <div class="pagination">
+                        {{-- Previous Page Link --}}
+                        @if ($mandors->onFirstPage())
+                            <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </button>
+                        @else
+                            <a href="{{ $mandors->previousPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                                <span class="material-symbols-outlined">chevron_left</span>
+                            </a>
+                        @endif
+
+                        {{-- Pagination Elements --}}
+                        @foreach ($mandors->getUrlRange(1, $mandors->lastPage()) as $page => $url)
+                            @if ($page == $mandors->currentPage())
+                                <button class="pagination-button pagination-button-active">{{ $page }}</button>
+                            @else
+                                <a href="{{ $url }}" class="pagination-button" style="text-decoration: none;">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        {{-- Next Page Link --}}
+                        @if ($mandors->hasMorePages())
+                            <a href="{{ $mandors->nextPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </a>
+                        @else
+                            <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                <span class="material-symbols-outlined">chevron_right</span>
+                            </a>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
