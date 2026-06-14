@@ -450,14 +450,19 @@ class HandleTesterWorkflow
             ]);
 
             $reqRenov = $negosiasi->requestRenovasi;
-            $mandorOwner = $reqRenov?->customer?->user;
+            //$mandorOwner = $reqRenov?->customer?->user;
 
-            if (! $this->isTesterUser($mandorOwner)) {
-                return; // Bukan tester customer, skip
-            }
+            //if (! $this->isTesterUser($mandorOwner)) {
+            //    return; // Bukan tester customer, skip
+            //}
 
             $pen = $negosiasi->penawaranRenovasi;
             if (! $pen) {
+                return;
+            }
+            $mandorUser = $pen->mandor?->user;
+
+            if (! $this->isTesterUser($mandorUser)) {
                 return;
             }
 

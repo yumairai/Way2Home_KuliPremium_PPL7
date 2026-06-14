@@ -24,7 +24,7 @@ class VerifikasiProyekController extends Controller
                         if (str_starts_with($dokumen->file_path, 'https://')) {
                             $dokumen->signed_url = $dokumen->file_path;
                         } elseif (str_starts_with($dokumen->file_path, 'public-assets/')) {
-                            $dokumen->signed_url = $storageService->getPublicUrl($dokumen->file_path);
+                            $dokumen->signed_url = $storageService->getSignedUrl($dokumen->file_path);
                         } else {
                             $dokumen->signed_url = $signedUrls[$dokumen->file_path] ?? null;
                         }

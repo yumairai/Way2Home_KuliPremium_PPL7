@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Mandor;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 use App\Models\Proyek;
 use App\Models\RequestRenovasi;
@@ -63,7 +64,9 @@ class MandorDashboardController extends Controller
          * 2. REQUEST RENOVASI
          * =========================
          */
-        $requests = RequestRenovasi::latest()->take(10)->get();
+        $requests = Cache::remember('mandor:renovation_requests', now()->addMinutes(2), function () {
+            return RequestRenovasi::latest()->take(10)->get();
+        });
 
         $requestCount = $requests->count();
 
@@ -82,10 +85,12 @@ class MandorDashboardController extends Controller
          * 3. ACTIVITY HISTORY (FIX DI SINI)
          * =========================
          */
-        $activities = MandorActivityHistory::where('mandor_id', $mandor->id)
-            ->latest()
-            ->take(10)
-            ->get();
+        $activities = Cache::remember('mandor:activity_history:' . $mandor->id, now()->addMinutes(5), function () use ($mandor) {
+            return MandorActivityHistory::where('mandor_id', $mandor->id)
+                ->latest()
+                ->take(10)
+                ->get();
+        });
 
         $activityHistory = $activities->map(function ($act) {
             return [
@@ -119,7 +124,9 @@ class MandorDashboardController extends Controller
          * 5. MATERIAL
          * =========================
          */
-        $materials = Material::all();
+        $materials = Cache::remember('mandor:material_catalog', now()->addHour(), function () {
+            return Material::select('id', 'nama', 'harga')->get();
+        });
 
         $materialCatalog = $materials->map(function ($mat) {
             return [
