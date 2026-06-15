@@ -51,8 +51,12 @@
                             class="dashboard-activity-item{{ $loop->index >= 4 ? ' dashboard-activity-item-hidden' : '' }}">
                             <div class="dashboard-activity-connector"></div>
                             <div class="dashboard-activity-content">
-                                <p class="dashboard-activity-title">{{ $activity['title'] }}</p>
-                                <span class="dashboard-activity-timestamp">{{ $activity['timestamp'] }}</span>
+                                <p class="dashboard-activity-title">
+                                    {{ data_get($activity, 'title') ?: (is_string($activity) ? $activity : '') }}
+                                </p>
+                                <span class="dashboard-activity-timestamp">
+                                    {{ data_get($activity, 'timestamp') }}
+                                </span>
                             </div>
                         </article>
                     @empty
@@ -118,6 +122,43 @@
                 </div>
             @endforelse
         </div>
+
+        @if ($renovationRequests->total() > 6)
+            <div class="pagination-container" style="margin-top: 2rem; display: flex; justify-content: flex-end; align-items: center; width: 100%;">
+                <div class="pagination">
+                    {{-- Previous Page Link --}}
+                    @if ($renovationRequests->onFirstPage())
+                        <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                    @else
+                        <a href="{{ $renovationRequests->previousPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </a>
+                    @endif
+
+                    {{-- Pagination Elements --}}
+                    @foreach ($renovationRequests->getUrlRange(1, $renovationRequests->lastPage()) as $page => $url)
+                        @if ($page == $renovationRequests->currentPage())
+                            <button class="pagination-button pagination-button-active">{{ $page }}</button>
+                        @else
+                            <a href="{{ $url }}" class="pagination-button" style="text-decoration: none;">{{ $page }}</a>
+                        @endif
+                    @endforeach
+
+                    {{-- Next Page Link --}}
+                    @if ($renovationRequests->hasMorePages())
+                        <a href="{{ $renovationRequests->nextPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </a>
+                    @else
+                        <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
+        @endif
     </section>
     <div class="dashboard-review-modal" id="dashboard-review-modal" aria-hidden="true" hidden>
         <div class="dashboard-review-backdrop" data-review-close></div>

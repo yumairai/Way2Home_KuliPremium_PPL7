@@ -19,21 +19,41 @@ const actionLabelMap = {
     selesai:   'Status Final',
 };
 
-function refreshStats() {
-    const cards  = Array.from(document.querySelectorAll('[data-order-card]'));
-    const counts = cards.reduce(
-        (acc, card) => {
-            const status = card.dataset.status;
-            acc[status] = (acc[status] || 0) + 1;
-            return acc;
-        },
-        { paid: 0, persiapan: 0, dikirim: 0, selesai: 0 }
-    );
+// Read server-provided baseline counts from data attributes.
+// These reflect the real totals across ALL pages, not just the current page.
+function getBaseline(el) {
+    return parseInt(el.dataset.baseline ?? el.textContent.trim(), 10) || 0;
+}
 
-    document.getElementById('stat-total').textContent   = cards.length;
-    document.getElementById('stat-paid').textContent    = counts.paid;
-    document.getElementById('stat-dikirim').textContent = counts.dikirim;
-    document.getElementById('stat-selesai').textContent = counts.selesai;
+function initBaselines() {
+    ['stat-total', 'stat-paid', 'stat-dikirim', 'stat-selesai'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.dataset.baseline === undefined) {
+            el.dataset.baseline = el.textContent.trim();
+        }
+    });
+}
+
+// Delta-based update: only adjust counts when a status changes on this page.
+function adjustStats(fromStatus, toStatus) {
+    const statIdMap = {
+        paid:      'stat-paid',
+        dikirim:   'stat-dikirim',
+        selesai:   'stat-selesai',
+        persiapan: null, // persiapan has no dedicated stat card
+    };
+
+    const fromId = statIdMap[fromStatus];
+    const toId   = statIdMap[toStatus];
+
+    if (fromId) {
+        const el = document.getElementById(fromId);
+        el.textContent = Math.max(0, parseInt(el.textContent, 10) - 1);
+    }
+    if (toId) {
+        const el = document.getElementById(toId);
+        el.textContent = parseInt(el.textContent, 10) + 1;
+    }
 }
 
 document.querySelectorAll('[data-order-card]').forEach((card) => {
@@ -79,9 +99,9 @@ document.querySelectorAll('[data-order-card]').forEach((card) => {
 
             if (!response.ok) throw new Error('Gagal');
 
+            adjustStats(current, next);
             card.dataset.status = next;
             applyStatusUi();
-            refreshStats();
 
         } catch (err) {
             console.error(err);
@@ -93,4 +113,4 @@ document.querySelectorAll('[data-order-card]').forEach((card) => {
     applyStatusUi();
 });
 
-refreshStats();
+initBaselines();

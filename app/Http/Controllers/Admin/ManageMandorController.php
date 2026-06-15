@@ -14,25 +14,26 @@ class ManageMandorController extends Controller
 {
     public function index()
     {
-        // Load mandor beserta user dan proyek aktifnya
-        $mandors = Mandor::with(['user', 'proyekAktif', 'renovasiAktif'])
+        // Load mandor query
+        $mandorsQuery = Mandor::with(['user', 'proyekAktif', 'renovasiAktif'])
             ->where('status', '!=', 'suspend')
-            ->where('is_ghost', false)
-            ->get();
+            ->where('is_ghost', false);
+
+        $allMandors = $mandorsQuery->get();
+
+        $stats = [
+            'total'     => $allMandors->count(),
+            'available' => $allMandors->where('status', 'aktif')->count(),
+            'busy'      => $allMandors->where('status', 'nonaktif')->count(),
+        ];
+
+        $mandors = $mandorsQuery->paginate(6);
 
         // Proyek yang belum ada mandornya
         $proyeksAvailable = Proyek::whereNull('mandor_id')
             ->where('status_proyek', 'Pengalokasian Mandor')
             ->with('detailBangun.desainRumah')
             ->get();
-
-        $stats = [
-            'total'    => $mandors->count(),
-            'available' => $mandors->where('status', 'aktif')->count(),
-            'busy'     => $mandors->where('status', 'nonaktif')->count(),
-            // Pakai status dari tabel mandors kamu: aktif/nonaktif
-            // Nanti bisa kita sesuaikan dengan logika "sedang bertugas"
-        ];
 
         return view('admin.manajemen_mandor', compact('mandors', 'proyeksAvailable', 'stats'));
     }

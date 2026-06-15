@@ -27,6 +27,13 @@ class MandorActivityHistory extends Model
         ];
     }
 
+    protected static function booted()
+    {
+        static::created(function ($activity) {
+            \Illuminate\Support\Facades\Cache::forget('mandor:activity_history:' . $activity->mandor_id);
+        });
+    }
+
     public function mandor()
     {
         return $this->belongsTo(Mandor::class, 'mandor_id');

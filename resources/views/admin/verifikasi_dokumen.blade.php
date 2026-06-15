@@ -12,19 +12,19 @@
 @section('stats')
     <div class="verifikasi-stat-card">
         <p class="verifikasi-stat-label">Total Pengajuan Verifikasi</p>
-        <p class="verifikasi-stat-value">3</p>
+        <p class="verifikasi-stat-value">{{ $stats['total'] }}</p>
     </div>
     <div class="verifikasi-stat-card waiting">
         <p class="verifikasi-stat-label">Pending</p>
-        <p class="verifikasi-stat-value">3</p>
+        <p class="verifikasi-stat-value">{{ $stats['pending'] }}</p>
     </div>
     <div class="verifikasi-stat-card verified">
         <p class="verifikasi-stat-label">Disetujui</p>
-        <p class="verifikasi-stat-value">0</p>
+        <p class="verifikasi-stat-value">{{ $stats['verified'] }}</p>
     </div>
     <div class="verifikasi-stat-card rejected">
         <p class="verifikasi-stat-label">Ditolak</p>
-        <p class="verifikasi-stat-value">0</p>
+        <p class="verifikasi-stat-value">{{ $stats['rejected'] }}</p>
     </div>
 @endsection
 @section('content')
@@ -106,18 +106,43 @@
             </table>
         </div>
         <div class="table-footer">
-            <span class="footer-text">Menampilkan 1-5 dari 42 pengajuan baru</span>
-            <div class="pagination">
-                <button class="pagination-button pagination-button-icon">
-                    <span class="material-symbols-outlined">chevron_left</span>
-                </button>
-                <button class="pagination-button pagination-button-active">1</button>
-                <button class="pagination-button">2</button>
-                <button class="pagination-button">3</button>
-                <button class="pagination-button pagination-button-icon">
-                    <span class="material-symbols-outlined">chevron_right</span>
-                </button>
-            </div>
+            <span class="footer-text">
+                Menampilkan {{ $proyek->firstItem() ?? 0 }}-{{ $proyek->lastItem() ?? 0 }} dari {{ $proyek->total() }} pengajuan baru
+            </span>
+            @if ($proyek->total() > 6)
+                <div class="pagination">
+                    {{-- Previous Page Link --}}
+                    @if ($proyek->onFirstPage())
+                        <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </button>
+                    @else
+                        <a href="{{ $proyek->previousPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                            <span class="material-symbols-outlined">chevron_left</span>
+                        </a>
+                    @endif
+
+                    {{-- Pagination Elements --}}
+                    @foreach ($proyek->getUrlRange(1, $proyek->lastPage()) as $page => $url)
+                        @if ($page == $proyek->currentPage())
+                            <button class="pagination-button pagination-button-active">{{ $page }}</button>
+                        @else
+                            <a href="{{ $url }}" class="pagination-button" style="text-decoration: none;">{{ $page }}</a>
+                        @endif
+                    @endforeach
+
+                    {{-- Next Page Link --}}
+                    @if ($proyek->hasMorePages())
+                        <a href="{{ $proyek->nextPageUrl() }}" class="pagination-button pagination-button-icon" style="text-decoration: none;">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </a>
+                    @else
+                        <button class="pagination-button pagination-button-icon" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">chevron_right</span>
+                        </button>
+                    @endif
+                </div>
+            @endif
         </div>
     </div>
     <!-- Modal Overlay -->

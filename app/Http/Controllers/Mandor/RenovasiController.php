@@ -16,6 +16,7 @@ use App\Services\RenovasiService;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use App\Services\SupabaseStorageService;
 
@@ -60,80 +61,85 @@ class RenovasiController extends Controller
                 });
             })
             ->latest()
-            ->get()
-            ->map(function (RequestRenovasi $request) use ($isMandorAvailable) {
-                $currentOffer = $request->penawaran->first();
-                $offerMaterials = $currentOffer?->materialRenovasi ?? collect();
-                $negotiationMessages = $currentOffer?->negosiasi?->values() ?? collect();
-                $hasCustomerNegotiation = $negotiationMessages->contains(fn($message) => $message->pengirim === 'customer');
+            ->paginate(6);
 
-                return [
-                    'id' => sprintf('REV-%03d', $request->id),
-                    'db_id' => $request->id,
-                    'applicant_name' => $request->customer?->user?->name ?? 'Customer',
-                    'budget' => $this->renovasiService->formatRupiah((int) $request->budget_estimasi),
-                    'phone' => $request->customer?->user?->phone_number ?? '-',
-                    'location' => $request->alamat,
-                    'description' => $request->deskripsi_renovasi,
-                    'photos' => $request->getFotoDetailUrls()
-                        ?: [asset('images/aset/user-dummy.jpg')],
-                    'existing_offer_cost' => $currentOffer ? (int) $currentOffer->estimasi_biaya : 0,
-                    'existing_offer_feedback' => $currentOffer?->analisis_dari_mandor,
-                    'existing_offer_status' => $currentOffer?->status_penawaran,
-                    'existing_offer_materials' => $offerMaterials->map(fn($item) => [
-                        'material_id' => (string) $item->material_id,
-                        'jumlah' => (int) $item->jumlah,
-                    ])->values(),
-                    'negotiation_messages' => $negotiationMessages->map(function ($message) {
-                        return [
-                            'pengirim' => $message->pengirim,
-                            'tipe' => $message->tipe,
-                            'pesan' => $message->pesan,
-                            'nominal_tawaran' => $message->nominal_tawaran
-                                ? $this->renovasiService->formatRupiah((int) $message->nominal_tawaran)
-                                : null,
-                            'waktu' => optional($message->created_at)->format('d M Y H:i'),
-                        ];
-                    })->values(),
-                    'has_customer_negotiation' => $hasCustomerNegotiation,
-                    'can_send_negotiation' => !$isMandorAvailable && $hasCustomerNegotiation,
-                    'can_take_renovation' => $isMandorAvailable && !$hasCustomerNegotiation && !$currentOffer,
-                ];
-            })
-            ->values();
+        $renovationRequests->through(function (RequestRenovasi $request) use ($isMandorAvailable) {
+            $currentOffer = $request->penawaran->first();
+            $offerMaterials = $currentOffer?->materialRenovasi ?? collect();
+            $negotiationMessages = $currentOffer?->negosiasi?->values() ?? collect();
+            $hasCustomerNegotiation = $negotiationMessages->contains(fn($message) => $message->pengirim === 'customer');
 
-        $requestMap = $renovationRequests->keyBy('id');
-        $materialCatalog = Material::query()
-            ->select(['id', 'nama_material', 'kategori', 'harga', 'satuan', 'stok', 'deskripsi', 'path_foto_material'])
-            ->orderBy('nama_material')
-            ->get()
-            ->map(fn(Material $item) => [
-                'id' => (string) $item->id,
-                'nama_material' => $item->nama_material,
-                'kategori' => $item->kategori,
-                'harga' => (int) $item->harga,
-                'satuan' => $item->satuan,
-                'stok' => $item->stok,
-                'deskripsi' => $item->deskripsi,
-                'path_foto_material' => $item->path_foto_material,
-            ])
-            ->values();
+            return [
+                'id' => sprintf('REV-%03d', $request->id),
+                'db_id' => $request->id,
+                'applicant_name' => $request->customer?->user?->name ?? 'Customer',
+                'budget' => $this->renovasiService->formatRupiah((int) $request->budget_estimasi),
+                'phone' => $request->customer?->user?->phone_number ?? '-',
+                'location' => $request->alamat,
+                'description' => $request->deskripsi_renovasi,
+                'photos' => $request->getFotoDetailUrls()
+                    ?: [asset('images/aset/user-dummy.jpg')],
+                'existing_offer_cost' => $currentOffer ? (int) $currentOffer->estimasi_biaya : 0,
+                'existing_offer_feedback' => $currentOffer?->analisis_dari_mandor,
+                'existing_offer_status' => $currentOffer?->status_penawaran,
+                'existing_offer_materials' => $offerMaterials->map(fn($item) => [
+                    'material_id' => (string) $item->material_id,
+                    'jumlah' => (int) $item->jumlah,
+                ])->values(),
+                'negotiation_messages' => $negotiationMessages->map(function ($message) {
+                    return [
+                        'pengirim' => $message->pengirim,
+                        'tipe' => $message->tipe,
+                        'pesan' => $message->pesan,
+                        'nominal_tawaran' => $message->nominal_tawaran
+                            ? $this->renovasiService->formatRupiah((int) $message->nominal_tawaran)
+                            : null,
+                        'waktu' => optional($message->created_at)->format('d M Y H:i'),
+                    ];
+                })->values(),
+                'has_customer_negotiation' => $hasCustomerNegotiation,
+                'can_send_negotiation' => !$isMandorAvailable && $hasCustomerNegotiation,
+                'can_take_renovation' => $isMandorAvailable && !$hasCustomerNegotiation && !$currentOffer,
+            ];
+        });
+
+        $requestMap = collect($renovationRequests->items())->keyBy('id');
+        $materialCatalog = Cache::remember('mandor:material_catalog_full', now()->addMinutes(10), function () {
+            return Material::query()
+                ->select(['id', 'nama_material', 'kategori', 'harga', 'satuan', 'stok', 'deskripsi', 'path_foto_material'])
+                ->orderBy('nama_material')
+                ->get()
+                ->map(fn(Material $item) => [
+                    'id' => (string) $item->id,
+                    'nama_material' => $item->nama_material,
+                    'kategori' => $item->kategori,
+                    'harga' => (int) $item->harga,
+                    'satuan' => $item->satuan,
+                    'stok' => $item->stok,
+                    'deskripsi' => $item->deskripsi,
+                    'path_foto_material' => $item->path_foto_material,
+                ])
+                ->values();
+        });
 
         $activeProjects = '-';
         $completedProjects = 0;
-        $requestCount = $renovationRequests->count();
+        $requestCount = $renovationRequests->total();
 
         // Ambil history aktivitas mandor
-        $activityHistory = MandorActivityHistory::where('mandor_id', $mandor->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function ($activity) {
-                return [
-                    'title' => $activity->description,
-                    'timestamp' => $activity->created_at->format('d M Y H:i'),
-                ];
-            });
+        $activityHistory = Cache::remember('mandor:activity_history:' . $mandor->id, now()->addMinutes(5), function () use ($mandor) {
+            return MandorActivityHistory::where('mandor_id', $mandor->id)
+                ->orderBy('created_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($activity) {
+                    return [
+                        'title' => $activity->description,
+                        'timestamp' => $activity->created_at->format('d M Y H:i'),
+                    ];
+                })
+                ->all();
+        });
         $mandor = $this->currentMandor();
 
         /**
@@ -255,18 +261,22 @@ class RenovasiController extends Controller
 
             MaterialRenovasi::where('penawaran_renovasi_id', $offer->id)->delete();
 
+            // Batch insert material renovasi untuk efisiensi
+            $materialBatch = [];
             foreach ($validated['materials'] as $materialInput) {
                 $material = Material::find($materialInput['material_id']);
-                if (!$material) {
-                    continue;
-                }
-
-                MaterialRenovasi::create([
+                if (!$material) continue;
+                $materialBatch[] = [
                     'penawaran_renovasi_id' => $offer->id,
-                    'material_id' => $material->id,
-                    'jumlah' => $materialInput['jumlah'],
-                    'satuan' => $material->satuan,
-                ]);
+                    'material_id'           => $material->id,
+                    'jumlah'                => $materialInput['jumlah'],
+                    'satuan'                => $material->satuan,
+                    'created_at'            => now(),
+                    'updated_at'            => now(),
+                ];
+            }
+            if (!empty($materialBatch)) {
+                MaterialRenovasi::insert($materialBatch);
             }
 
             NegosiasiRenovasi::create([
@@ -340,18 +350,22 @@ class RenovasiController extends Controller
 
             MaterialRenovasi::where('penawaran_renovasi_id', $offer->id)->delete();
 
+            // Batch insert material renovasi untuk efisiensi
+            $materialBatch = [];
             foreach ($validated['materials'] as $materialInput) {
                 $material = Material::find($materialInput['material_id']);
-                if (!$material) {
-                    continue;
-                }
-
-                MaterialRenovasi::create([
+                if (!$material) continue;
+                $materialBatch[] = [
                     'penawaran_renovasi_id' => $offer->id,
-                    'material_id' => $material->id,
-                    'jumlah' => $materialInput['jumlah'],
-                    'satuan' => $material->satuan,
-                ]);
+                    'material_id'           => $material->id,
+                    'jumlah'                => $materialInput['jumlah'],
+                    'satuan'                => $material->satuan,
+                    'created_at'            => now(),
+                    'updated_at'            => now(),
+                ];
+            }
+            if (!empty($materialBatch)) {
+                MaterialRenovasi::insert($materialBatch);
             }
 
             NegosiasiRenovasi::create([
